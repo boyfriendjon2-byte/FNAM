@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Maifer's Factory: Final Fix</title>
+    <title>Maifer's Factory: Persistent Edition</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
@@ -57,7 +57,7 @@
         #view-front { position: absolute; inset: 0; transition: transform 0.1s; display: block; }
         #office-bg { position: absolute; inset: 0; left: -10vw; width: 120vw; height: 100%; transition: transform 0.1s; }
         
-        #hallway { position: absolute; top: 15%; left: 50%; transform: translateX(-50%); width: 300px; height: 600px; background: #000; border: 20px solid #111; box-shadow: inset 0 0 50px #000; z-index: 5; }
+        #hallway { position: absolute; top: 15%; left: 50%; transform: translateX(-50%); width: 300px; height: 600px; background: #000; border: 20px solid #111; box-shadow: inset 0 0 50px #000; z-index: 5; overflow: hidden; }
         #window-frame { position: absolute; top: 20%; right: 15%; width: 250px; height: 300px; background: #111; border: 8px solid #333; overflow: hidden; z-index: 6; }
         #curtain { width: 100%; height: 100%; background: #222; border-bottom: 10px solid #555; transition: transform 0.3s; cursor: pointer; position: relative; z-index: 2; }
         #richard-eyes { position: absolute; top: 40%; left: 25%; width: 50%; display: none; justify-content: space-between; z-index: 1; }
@@ -79,7 +79,16 @@
 
         /* ENEMIGOS */
         .enemy-sprite { position: absolute; display: none; z-index: 25; bottom: -50px; height: 90vh; pointer-events: none; filter: drop-shadow(0 0 30px #000); }
-        #vis-jomar { left: 50%; transform: translateX(-50%); height: 80vh; bottom: 0; }
+        
+        /* CORRECCIÓN DE JOMAR (Para que salga en el medio y no arriba) */
+        #vis-jomar { 
+            left: 50%; transform: translateX(-50%); 
+            top: 10%; /* Empieza un poco bajado */
+            height: 80%; /* Altura relativa al pasillo */
+            width: auto;
+            bottom: auto; /* Anular bottom */
+        } 
+        
         #vis-isaac { left: 5%; }
         #vis-maifer { right: 5%; }
 
@@ -117,10 +126,8 @@
         .cam-btn.active { background: #0f0; color: #000; }
 
         /* PANTALLAS FINAL */
-        /* IMPORTANTE: Game Over tiene z-index 9900 para estar encima del jumpscare (9000) */
         #screen-jumpscare { background: #000; z-index: 9000; }
         #jump-img { width: 100%; height: 100%; object-fit: cover; animation: shake 0.5s infinite; }
-        
         #screen-gameover { z-index: 9900; background: #000; color: var(--primary-red); display: none; }
         #screen-win { z-index: 9900; background: #000; color: #0f0; }
 
@@ -139,7 +146,7 @@
 
     <!-- INTRO -->
     <div id="screen-intro" class="screen active">
-        <h1>SISTEMA DE SEGURIDAD V.10</h1>
+        <h1>SISTEMA DE SEGURIDAD V.11</h1>
         <p class="blink-text">[ CLICK PARA INICIAR ]</p>
     </div>
 
@@ -169,13 +176,13 @@
         <button style="margin-top:20px;" onclick="UI.close('modal-lang')">CANCEL</button>
     </div>
 
-    <!-- DATOS (HISTORIA RELLENA) -->
+    <!-- DATOS -->
     <div id="modal-data" class="modal-overlay">
         <div class="modal-box">
             <h2 data-t="data_title">DATOS</h2>
             <div style="text-align: left; margin-bottom: 20px; font-size: 0.9rem; line-height: 1.5;">
-                <p data-t="story_1">Michael Boyko compró esta vieja fábrica con la esperanza de modernizarla. Sin embargo, los antiguos animatrónicos (prototipos desechados) se reactivaron misteriosamente por la noche.</p>
-                <p data-t="story_2">Tú eres el guardia nocturno contratado. Tu trabajo es simple: vigilar que nada salga de la fábrica y sobrevivir hasta las 8 AM. Recuerda mantener el generador cargado o te quedarás a oscuras.</p>
+                <p data-t="story_1">Michael Boyko compró esta vieja fábrica con la esperanza de modernizarla. Sin embargo, los antiguos animatrónicos se reactivaron por la noche.</p>
+                <p data-t="story_2">Vigila hasta las 8 AM. Mantén el generador cargado y vigila las cámaras.</p>
             </div>
             <hr style="border-color: #333;">
             <ul style="text-align: left; list-style: none; padding: 0;">
@@ -231,7 +238,6 @@
                 <div id="vis-maifer" class="enemy-sprite"><img src="./maifer.png"></div>
                 <div id="desk">
                     <div id="phone-prop">
-                        <!-- El botón ahora se crea y destruye dinámicamente o se oculta -->
                         <button id="mute-btn" data-t="mute_call">MUTE CALL (X)</button>
                     </div>
                     <button class="btn-monitor-toggle" id="btn-monitor" style="margin-bottom: 50px;">[ CAM ]</button>
@@ -243,7 +249,6 @@
         <div id="view-back">
             <h2 data-t="gen_label" style="color: #fff; margin-bottom: 20px;">GENERADOR</h2>
             <div id="generator-box">
-                <!-- Solo click mouse -->
                 <div id="crank" onclick="Game.crankGenerator()"></div>
                 <div id="power-bar-container"><div id="power-fill"></div></div>
                 <div id="power-label">POWER: 100%</div>
@@ -267,13 +272,11 @@
                 <div style="position: absolute; top:10px; left:10px; color:#fff; font-family:'VT323'; font-size:2rem;">CAM <span id="cam-num">01</span></div>
                 <div id="cam-content"></div>
             </div>
-            
             <div id="mini-map">
                 <div class="map-room" id="room-6">C6</div><div class="map-room" id="room-5">C5</div><div class="map-room" id="room-4">C4</div>
                 <div class="map-room" id="room-3">C3</div><div class="map-room" id="room-2">C2</div><div class="map-room" id="room-1">C1</div>
                 <div id="player-pos" data-t="you_label">TU</div>
             </div>
-
             <div id="cam-buttons">
                 <button class="cam-btn active" data-cam="1">01</button><button class="cam-btn" data-cam="2">02</button><button class="cam-btn" data-cam="3">03</button>
                 <button class="cam-btn" data-cam="4">04</button><button class="cam-btn" data-cam="5">05</button><button class="cam-btn" data-cam="6">06</button>
@@ -289,8 +292,7 @@
     
     <div id="screen-gameover" class="screen">
         <h1 style="font-size: 5rem; color: #f00;" data-t="died_msg">YOU DIED</h1>
-        <button onclick="location.reload()" style="margin-top: 30px;" data-t="retry">RETRY</button>
-        <button onclick="location.reload()" style="margin-top: 10px;" data-t="menu">MENU</button>
+        <button onclick="location.reload()" style="margin-top: 30px;" data-t="menu">MENU</button>
     </div>
     
     <div id="screen-win" class="screen">
@@ -299,6 +301,33 @@
     </div>
 
     <script>
+        // --- 1. CONFIG & SETTINGS MANAGEMENT ---
+        const CONFIG = {
+            img: { jomar: './jomar.png', isaac: './isaac.png', maifer: './maifer.png' },
+            keys: { flash: 'KeyL', mask: 'KeyM', hide: 'KeyS', amb: 'KeyR', turn: 'KeyC', mute: 'KeyX' }
+        };
+
+        const Settings = {
+            load: function() {
+                const savedKeys = localStorage.getItem('maifer_keys');
+                if(savedKeys) CONFIG.keys = JSON.parse(savedKeys);
+                
+                const savedVol = localStorage.getItem('maifer_vol');
+                if(savedVol) AudioSys.volume = parseFloat(savedVol);
+                document.getElementById('vol-slider').value = AudioSys.volume * 100;
+
+                // Update UI text for keys
+                for(let k in CONFIG.keys) {
+                    let el = document.getElementById('key-'+k);
+                    if(el) el.innerText = CONFIG.keys[k].replace('Key','').toUpperCase();
+                }
+            },
+            save: function() {
+                localStorage.setItem('maifer_keys', JSON.stringify(CONFIG.keys));
+                localStorage.setItem('maifer_vol', AudioSys.volume);
+            }
+        };
+
         const AudioSys = {
             ctx: null,
             files: {
@@ -322,12 +351,13 @@
             mutePhone: function() {
                 if(this.phoneNode) { this.phoneNode.pause(); this.phoneNode.currentTime=0; }
                 document.getElementById('mute-btn').style.display='none';
+            },
+            updateVolume: function(v) {
+                this.volume = v;
+                if(this.bgNode) this.bgNode.volume = v * 0.5;
+                if(this.phoneNode) this.phoneNode.volume = v;
+                Settings.save();
             }
-        };
-
-        const CONFIG = {
-            img: { jomar: './jomar.png', isaac: './isaac.png', maifer: './maifer.png' },
-            keys: { flash: 'KeyL', mask: 'KeyM', hide: 'KeyS', amb: 'KeyR', turn: 'KeyC', mute: 'KeyX' }
         };
 
         const TEXTS = {
@@ -368,6 +398,7 @@
             ai: { jomar: { pos: 6, patience: 0 }, isaac: { pos: 6, patience: 0 }, maifer: { pos: 6, patience: 0 } },
 
             init: function() {
+                Settings.load();
                 document.getElementById('screen-intro').addEventListener('click', () => { AudioSys.init(); AudioSys.ctx.resume(); UI.open('screen-menu'); document.getElementById('screen-intro').style.display='none'; AudioSys.playBg('bg_menu'); });
                 document.getElementById('btn-play').addEventListener('click', Game.start);
                 document.getElementById('btn-data').addEventListener('click', () => UI.open('modal-data'));
@@ -377,7 +408,10 @@
                 document.getElementById('curtain').addEventListener('click', Game.fixWindow);
                 document.getElementById('mute-btn').addEventListener('click', AudioSys.mutePhone);
                 window.addEventListener('keydown', Input.onDown); window.addEventListener('keyup', Input.onUp); window.addEventListener('mousemove', Input.onMove);
-                document.getElementById('vol-slider').addEventListener('input', (e) => AudioSys.volume = e.target.value/100);
+                
+                // VOLUME LISTENER FIX
+                document.getElementById('vol-slider').addEventListener('input', (e) => AudioSys.updateVolume(e.target.value/100));
+                
                 ['flash','mask','hide','amb','turn','mute'].forEach(k => { document.getElementById('key-'+k).addEventListener('click', (e) => Input.bind(k, e.target)); });
                 document.querySelectorAll('.cam-btn').forEach(b => b.addEventListener('click', (e)=>Monitor.switch(e.target.dataset.cam)));
                 
@@ -390,31 +424,27 @@
 
             start: function() {
                 Game.active = true; Game.hour = 0; Game.power = 100; Game.blackout = false; Game.view = 'front';
-                // Reset AI
                 ['jomar','isaac','maifer'].forEach(n => { Game.ai[n].pos = 6; Game.ai[n].patience = 0; });
                 document.querySelectorAll('.enemy-sprite').forEach(el => el.style.display = 'none');
                 
-                // DIFFICULTY CURVE
+                // === PROGRESSION BALANCE ===
+                // Difficulty ramps up
                 Game.diff = 1 + (Game.night * 2); 
                 
                 UI.open('screen-game'); document.getElementById('screen-menu').style.display='none';
                 AudioSys.playBg('bg_game'); AudioSys.playPhone(Game.night);
 
                 Game.loopMain = setInterval(Game.update, 1000);
-                // 1 GAME HOUR = 20 REAL SECONDS
                 Game.loopTime = setInterval(Game.updateTime, 20000); 
                 Game.loopPower = setInterval(Game.updatePower, 500);
                 
-                // Update Initial Clock
                 document.getElementById('hud-clock').innerText = "12 AM";
             },
 
             updateTime: function() {
                 if(!Game.active) return;
-                Game.hour++; 
-                let display = Game.hour === 0 ? 12 : Game.hour;
+                Game.hour++; let display = Game.hour === 0 ? 12 : Game.hour;
                 document.getElementById('hud-clock').innerText = display + " AM";
-                
                 if(Game.hour === 8) Game.win();
             },
 
@@ -423,18 +453,17 @@
                 clearInterval(Game.loopMain); clearInterval(Game.loopTime); clearInterval(Game.loopPower);
                 UI.open('screen-win'); AudioSys.play('win');
                 localStorage.setItem('maifer_night', Game.night + 1);
-                
-                // RETURN TO MENU AFTER 5 SECONDS
-                setTimeout(() => {
-                    location.reload(); 
-                }, 5000);
+                setTimeout(() => { location.reload(); }, 5000);
             },
 
             updatePower: function() {
                 if(!Game.active) return;
-                Game.power -= 0.15; // Slow drain
-                if(Game.state.amb) Game.power -= 0.3;
-                if(Game.state.light) Game.power -= 0.6;
+                // BASE DRAIN INCREASES WITH NIGHT
+                let drain = 0.1 + (Game.night * 0.03); 
+                if(Game.state.amb) drain += 0.2;
+                if(Game.state.light) drain += 0.4;
+                Game.power -= drain;
+
                 if(Game.power <= 0) { Game.power = 0; if(!Game.blackout) { Game.blackout = true; document.getElementById('layer-darkness').style.opacity = 1; Game.state.light=false; setTimeout(() => Game.jumpscare('jomar'), 5000); } }
                 document.getElementById('power-fill').style.width = Game.power + "%";
             },
@@ -448,7 +477,11 @@
 
             update: function() {
                 if(!Game.active || Game.blackout) return;
-                Game.windowPct += (Game.diff / 6); 
+                
+                // CURTAIN RISES FASTER EACH NIGHT
+                let curtainSpeed = 0.3 + (Game.night * 0.1);
+                Game.windowPct += curtainSpeed; 
+
                 document.getElementById('richard-eyes').style.display = (Game.windowPct > 60) ? 'flex' : 'none';
                 document.getElementById('curtain').style.transform = `translateY(-${Game.windowPct}%)`;
                 if(Game.windowPct >= 100) Game.jumpscare('richard');
@@ -497,9 +530,8 @@
                 const img = document.getElementById('jump-img'); img.src = CONFIG.img[name] || CONFIG.img.jomar;
                 if(name === 'maifer') AudioSys.play('maifer_kill'); else if(name === 'isaac') AudioSys.play('isaac_kill'); else AudioSys.play('jump_gen');
                 
-                // CIERRA JUMPSCARE Y ABRE GAME OVER A LOS 3 SEGUNDOS
                 setTimeout(() => {
-                    UI.close('screen-jumpscare'); // FIX CRUCIAL
+                    UI.close('screen-jumpscare');
                     UI.open('screen-gameover');
                 }, 3000);
             },
@@ -564,7 +596,7 @@
             },
             bind: function(act, el) {
                 el.innerText = "..."; el.classList.add('listening');
-                const h = (e) => { e.preventDefault(); CONFIG.keys[act] = e.code; el.innerText = e.key.toUpperCase(); el.classList.remove('listening'); window.removeEventListener('keydown', h); };
+                const h = (e) => { e.preventDefault(); CONFIG.keys[act] = e.code; el.innerText = e.key.toUpperCase(); el.classList.remove('listening'); Settings.save(); window.removeEventListener('keydown', h); };
                 window.addEventListener('keydown', h);
             }
         };
