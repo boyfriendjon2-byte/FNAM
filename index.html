@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maifer's Factory: Final Fix</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Nosifer&display=swap');
+
+        :root {
+            --primary-red: #ff0000;
+            --dark-red: #500000;
+            --text-color: #cccccc;
+        }
+
+        * { box-sizing: border-box; }
+
+        body { 
+            margin: 0; background-color: #050505; color: var(--text-color); 
+            font-family: 'Special Elite', cursive; overflow: hidden; user-select: none; 
+            height: 100vh; width: 100vw;
+        }
+
+        /* --- TEXTURAS --- */
+        .texture-wall {
+            background-color: #1a1a1a;
+            background-image: repeating-linear-gradient(90deg, transparent 0, transparent 40px, #111 40px, #111 42px), linear-gradient(#222, #000);
+        }
+
+        /* --- PANTALLAS --- */
+        .screen { position: fixed; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; background: #000; z-index: 10; }
+        .screen.active { display: flex; }
+
+        #screen-intro { z-index: 5000; cursor: pointer; }
+        .blink-text { animation: blink 1s infinite; color: var(--primary-red); }
+
+        /* MENÚ */
+        #screen-menu { background: radial-gradient(circle at center, #200, #000); z-index: 4000; }
+        h1.title { font-size: 5rem; color: var(--primary-red); text-shadow: 4px 4px 0 #000; margin: 0; font-family: 'Nosifer', cursive; }
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 40px; }
+        button {
+            background: #111; border: 2px solid var(--dark-red); color: #888; padding: 15px 30px; 
+            font-family: 'Special Elite', cursive; font-size: 1.2rem; cursor: pointer; text-transform: uppercase; transition: 0.2s;
+        }
+        button:hover { background: var(--dark-red); color: #fff; box-shadow: 0 0 15px var(--primary-red); transform: scale(1.05); }
+        .btn-play { grid-column: span 2; font-size: 2rem; color: var(--primary-red); border-color: var(--primary-red); }
+
+        /* SELECCIÓN DE IDIOMA */
+        #modal-lang { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 6000; display: none; align-items: center; justify-content: center; flex-direction: column; }
+        .lang-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 20px; }
+        .lang-btn { width: 150px; height: 100px; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; }
+
+        /* OFICINA */
+        #screen-game { width: 100vw; height: 100vh; position: relative; overflow: hidden; }
+        #view-front { position: absolute; inset: 0; transition: transform 0.1s; display: block; }
+        #office-bg { position: absolute; inset: 0; left: -10vw; width: 120vw; height: 100%; transition: transform 0.1s; }
+        
+        #hallway { position: absolute; top: 15%; left: 50%; transform: translateX(-50%); width: 300px; height: 600px; background: #000; border: 20px solid #111; box-shadow: inset 0 0 50px #000; z-index: 5; }
+        #window-frame { position: absolute; top: 20%; right: 15%; width: 250px; height: 300px; background: #111; border: 8px solid #333; overflow: hidden; z-index: 6; }
+        #curtain { width: 100%; height: 100%; background: #222; border-bottom: 10px solid #555; transition: transform 0.3s; cursor: pointer; position: relative; z-index: 2; }
+        #richard-eyes { position: absolute; top: 40%; left: 25%; width: 50%; display: none; justify-content: space-between; z-index: 1; }
+        .eye { width: 15px; height: 15px; background: #0f0; border-radius: 50%; box-shadow: 0 0 15px #0f0; }
+
+        /* GENERADOR (ATRÁS) */
+        #view-back { position: absolute; inset: 0; background: #111; z-index: 60; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        #generator-box { width: 300px; height: 400px; background: #222; border: 5px solid #444; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 0 50px #000; }
+        #crank { width: 20px; height: 150px; background: #888; border-radius: 10px; cursor: pointer; transform-origin: top center; transition: transform 0.1s; margin-bottom: 50px; border: 2px solid #fff; }
+        #crank::after { content: ''; position: absolute; bottom: 0; left: -15px; width: 50px; height: 50px; background: var(--primary-red); border-radius: 50%; }
+        #power-bar-container { width: 80%; height: 30px; background: #000; border: 2px solid #555; margin-top: 20px; }
+        #power-fill { width: 100%; height: 100%; background: linear-gradient(90deg, #f00, #ff0, #0f0); transition: width 0.2s; }
+
+        /* MESA */
+        #desk { position: absolute; bottom: 0; width: 100%; height: 30%; background: #2d1b15; border-top: 15px solid #1a0f0b; z-index: 35; display: flex; justify-content: center; align-items: flex-end; }
+        #phone-prop { position: absolute; left: 10%; bottom: 50px; width: 100px; height: 60px; background: #111; border-radius: 10px 10px 0 0; box-shadow: 5px 5px 10px #000; border: 2px solid #333; }
+        #mute-btn { position: absolute; top: -50px; left: 0; width: 120px; padding: 5px; background: rgba(255,0,0,0.8); color: #fff; font-size: 0.8rem; display: none; cursor: pointer; border: 1px solid red; z-index: 200; }
+        .btn-monitor-toggle { background: #111; color: #0f0; border: 2px solid #333; padding: 10px 40px; margin-bottom: 30px; font-family: 'VT323'; font-size: 1.8rem; cursor: pointer; z-index: 36; }
+
+        /* ENEMIGOS */
+        .enemy-sprite { position: absolute; display: none; z-index: 25; bottom: -50px; height: 90vh; pointer-events: none; filter: drop-shadow(0 0 30px #000); }
+        #vis-jomar { left: 50%; transform: translateX(-50%); height: 80vh; bottom: 0; }
+        #vis-isaac { left: 5%; }
+        #vis-maifer { right: 5%; }
+
+        /* CAPAS LUZ / MÁSCARA */
+        #layer-darkness { position: absolute; inset: 0; background: #000; opacity: 0; transition: opacity 2s; z-index: 90; pointer-events: none; }
+        
+        #layer-ambient { position: absolute; inset: 0; background: rgba(0,0,0,0.98); z-index: 40; pointer-events: none; transition: 0.3s; }
+        .lights-on { background: rgba(0,0,0,0.3) !important; } 
+
+        #layer-flashlight { position: absolute; inset: 0; z-index: 45; display: none; pointer-events: none; background: radial-gradient(circle, rgba(255,255,200,0.3) 10%, transparent 40%); mix-blend-mode: overlay; }
+        #layer-mask { position: fixed; inset: 0; z-index: 100; display: none; pointer-events: none; background: radial-gradient(circle, transparent 30%, #000 90%); border: 80px solid #000; }
+        #layer-hiding { position: fixed; inset: 0; z-index: 110; display: none; background: #000; align-items: center; justify-content: center; border-top: 150px solid #2d1b15; flex-direction: column; }
+
+        /* UI */
+        #hud-clock { position: fixed; top: 20px; right: 30px; font-family: 'VT323'; font-size: 3.5rem; color: #fff; z-index: 200; }
+        #turn-hint { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); color: #fff; font-size: 1rem; z-index: 150; pointer-events: none; text-shadow: 0 0 5px #000; }
+
+        /* MONITOR */
+        #monitor-system { position: fixed; inset: 0; background: #000; z-index: 200; display: none; padding: 20px; }
+        #cam-viewport { width: 100%; height: 75%; background: #111; border: 4px solid #333; position: relative; }
+        #cam-content { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+        .static { position: absolute; inset: 0; background: url('https://media.giphy.com/media/oEI9uBYSzLpBK/giphy.gif'); opacity: 0.1; mix-blend-mode: screen; pointer-events: none; }
+        #mini-map { position: absolute; bottom: 20px; right: 20px; width: 220px; height: 160px; border: 2px solid #333; background: #050505; color: #0f0; font-family: 'VT323'; }
+        .map-room { position: absolute; border: 1px solid #004400; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; }
+        .map-room.active { background: #0f0; color: #000; }
+        #room-1 { bottom: 10px; left: 10px; width: 40px; height: 40px; } 
+        #room-2 { bottom: 60px; right: 10px; width: 50px; height: 80px; } 
+        #room-3 { bottom: 60px; left: 10px; width: 50px; height: 80px; } 
+        #room-4 { top: 10px; right: 10px; width: 60px; height: 40px; } 
+        #room-5 { top: 10px; left: 10px; width: 60px; height: 40px; } 
+        #room-6 { top: 10px; left: 80px; width: 40px; height: 40px; }
+        #player-pos { position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%); color: #fff; }
+        #cam-buttons { position: absolute; bottom: 20px; right: 260px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
+        .cam-btn { width: 60px; height: 40px; background: #001; color: #0f0; border: 1px solid #0f0; font-family: 'VT323'; }
+        .cam-btn.active { background: #0f0; color: #000; }
+
+        /* PANTALLAS FINAL */
+        /* IMPORTANTE: Game Over tiene z-index 9900 para estar encima del jumpscare (9000) */
+        #screen-jumpscare { background: #000; z-index: 9000; }
+        #jump-img { width: 100%; height: 100%; object-fit: cover; animation: shake 0.5s infinite; }
+        
+        #screen-gameover { z-index: 9900; background: #000; color: var(--primary-red); display: none; }
+        #screen-win { z-index: 9900; background: #000; color: #0f0; }
+
+        @keyframes blink { 50% { opacity: 0; } }
+        @keyframes shake { 0% { transform: translate(0,0) rotate(0deg) scale(1.2); } 25% { transform: translate(10px,-10px) rotate(5deg) scale(1.3); } 75% { transform: translate(-10px,10px) rotate(-5deg) scale(1.2); } }
+
+        /* AJUSTES */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 5000; display: none; align-items: center; justify-content: center; }
+        .modal-box { background: #111; border: 2px solid var(--primary-red); width: 600px; max-height: 90vh; overflow-y: auto; padding: 20px; text-align: center; }
+        .setting-row { display: flex; justify-content: space-between; background: #222; margin: 5px 0; padding: 10px; }
+        .key-box { background: #444; color: #fff; padding: 5px 15px; border: 1px solid #666; cursor: pointer; }
+        .key-box.listening { background: red; animation: blink 0.2s infinite; }
+    </style>
+</head>
+<body>
+
+    <!-- INTRO -->
+    <div id="screen-intro" class="screen active">
+        <h1>SISTEMA DE SEGURIDAD V.10</h1>
+        <p class="blink-text">[ CLICK PARA INICIAR ]</p>
+    </div>
+
+    <!-- MENÚ -->
+    <div id="screen-menu" class="screen">
+        <h1 class="title">MAIFER'S<br>FACTORY</h1>
+        <p id="night-display" style="color: #666; font-size: 1.5rem;">NOCHE 1</p>
+        <div class="menu-grid">
+            <button class="btn-play" id="btn-play" data-t="play">JUGAR</button>
+            <button id="btn-data" data-t="data">DATOS</button>
+            <button id="btn-settings" data-t="settings">AJUSTES</button>
+            <button id="btn-lang" onclick="UI.open('modal-lang')">TRADUCIR</button>
+        </div>
+    </div>
+
+    <!-- IDIOMA -->
+    <div id="modal-lang">
+        <h2 style="color: #fff;">SELECT LANGUAGE</h2>
+        <div class="lang-grid">
+            <button class="lang-btn" onclick="UI.setLang('es')">ESPAÑOL</button>
+            <button class="lang-btn" onclick="UI.setLang('en')">ENGLISH</button>
+            <button class="lang-btn" onclick="UI.setLang('zh')">中文</button>
+            <button class="lang-btn" onclick="UI.setLang('ja')">日本語</button>
+            <button class="lang-btn" onclick="UI.setLang('ru')">РУССКИЙ</button>
+            <button class="lang-btn" onclick="UI.setLang('pt')">PORTUGUÊS</button>
+        </div>
+        <button style="margin-top:20px;" onclick="UI.close('modal-lang')">CANCEL</button>
+    </div>
+
+    <!-- DATOS (HISTORIA RELLENA) -->
+    <div id="modal-data" class="modal-overlay">
+        <div class="modal-box">
+            <h2 data-t="data_title">DATOS</h2>
+            <div style="text-align: left; margin-bottom: 20px; font-size: 0.9rem; line-height: 1.5;">
+                <p data-t="story_1">Michael Boyko compró esta vieja fábrica con la esperanza de modernizarla. Sin embargo, los antiguos animatrónicos (prototipos desechados) se reactivaron misteriosamente por la noche.</p>
+                <p data-t="story_2">Tú eres el guardia nocturno contratado. Tu trabajo es simple: vigilar que nada salga de la fábrica y sobrevivir hasta las 8 AM. Recuerda mantener el generador cargado o te quedarás a oscuras.</p>
+            </div>
+            <hr style="border-color: #333;">
+            <ul style="text-align: left; list-style: none; padding: 0;">
+                <li style="margin-bottom:10px;"><strong style="color:gold;">JOMAR:</strong> <span data-t="desc_jomar">MEDIO. Usa Linterna (L).</span></li>
+                <li style="margin-bottom:10px;"><strong style="color:blue;">ISAAC:</strong> <span data-t="desc_isaac">IZQUIERDA. Máscara (M).</span></li>
+                <li style="margin-bottom:10px;"><strong style="color:red;">MAIFER:</strong> <span data-t="desc_maifer">DERECHA. Escóndete (S).</span></li>
+            </ul>
+            <button onclick="UI.close('modal-data')" style="width:100%;" data-t="back">VOLVER</button>
+        </div>
+    </div>
+
+    <!-- AJUSTES -->
+    <div id="modal-settings" class="modal-overlay">
+        <div class="modal-box">
+            <h2 data-t="settings">AJUSTES</h2>
+            <h3 data-t="diff_title">DIFICULTAD</h3>
+            <div id="diff-controls" style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
+                <button onclick="Game.setDiff(3)">EASY</button>
+                <button onclick="Game.setDiff(5)">NORMAL</button>
+                <button onclick="Game.setDiff(10)">HARD</button>
+            </div>
+            <p id="diff-locked-msg" style="color: #f00; display: none;">LOCKED UNTIL NIGHT 8</p>
+
+            <h3 data-t="vol_title">VOLUMEN</h3>
+            <input type="range" min="0" max="100" value="100" id="vol-slider" style="width: 80%;">
+
+            <h3 data-t="keys_title">CONTROLES</h3>
+            <div class="setting-row"><span data-t="key_flash">Linterna</span> <div id="key-flash" class="key-box">L</div></div>
+            <div class="setting-row"><span data-t="key_mask">Máscara</span> <div id="key-mask" class="key-box">M</div></div>
+            <div class="setting-row"><span data-t="key_hide">Mesa</span> <div id="key-hide" class="key-box">S</div></div>
+            <div class="setting-row"><span data-t="key_amb">Ambiente</span> <div id="key-amb" class="key-box">R</div></div>
+            <div class="setting-row"><span data-t="key_turn">Girar</span> <div id="key-turn" class="key-box">C</div></div>
+            <div class="setting-row"><span data-t="key_mute">Silenciar</span> <div id="key-mute" class="key-box">X</div></div>
+            
+            <button onclick="UI.close('modal-settings')" style="width:100%; margin-top: 20px;" data-t="back">VOLVER</button>
+        </div>
+    </div>
+
+    <!-- JUEGO -->
+    <div id="screen-game" class="screen">
+        <div id="layer-darkness"></div>
+        <div id="hud-clock">12 AM</div>
+
+        <!-- Vista Frontal -->
+        <div id="view-front">
+            <div id="office-bg" class="texture-wall">
+                <div id="hallway"><div id="vis-jomar" class="enemy-sprite"><img src="./jomar.png"></div></div>
+                <div id="window-frame">
+                    <div id="richard-eyes"><div class="eye"></div><div class="eye"></div></div>
+                    <div id="curtain"></div>
+                </div>
+                <div id="vis-isaac" class="enemy-sprite"><img src="./isaac.png"></div>
+                <div id="vis-maifer" class="enemy-sprite"><img src="./maifer.png"></div>
+                <div id="desk">
+                    <div id="phone-prop">
+                        <!-- El botón ahora se crea y destruye dinámicamente o se oculta -->
+                        <button id="mute-btn" data-t="mute_call">MUTE CALL (X)</button>
+                    </div>
+                    <button class="btn-monitor-toggle" id="btn-monitor" style="margin-bottom: 50px;">[ CAM ]</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vista Trasera (Generador) -->
+        <div id="view-back">
+            <h2 data-t="gen_label" style="color: #fff; margin-bottom: 20px;">GENERADOR</h2>
+            <div id="generator-box">
+                <!-- Solo click mouse -->
+                <div id="crank" onclick="Game.crankGenerator()"></div>
+                <div id="power-bar-container"><div id="power-fill"></div></div>
+                <div id="power-label">POWER: 100%</div>
+            </div>
+            <p style="color: #666; margin-top: 20px;" data-t="gen_hint">CLICK LEVER TO CHARGE</p>
+        </div>
+
+        <div id="layer-ambient"></div>
+        <div id="layer-flashlight"></div>
+        <div id="layer-mask"></div>
+        <div id="layer-hiding">
+            <h2 style="color: #444;" data-t="hiding_msg">ESCONDIDO</h2>
+        </div>
+        <div id="turn-hint" data-t="turn_hint">[C] TO TURN AROUND</div>
+
+        <!-- Monitor -->
+        <div id="monitor-system">
+            <h3 style="color: #0f0; margin: 0; font-family: 'VT323';">SYSTEM LINK...</h3>
+            <div id="cam-viewport">
+                <div class="static"></div>
+                <div style="position: absolute; top:10px; left:10px; color:#fff; font-family:'VT323'; font-size:2rem;">CAM <span id="cam-num">01</span></div>
+                <div id="cam-content"></div>
+            </div>
+            
+            <div id="mini-map">
+                <div class="map-room" id="room-6">C6</div><div class="map-room" id="room-5">C5</div><div class="map-room" id="room-4">C4</div>
+                <div class="map-room" id="room-3">C3</div><div class="map-room" id="room-2">C2</div><div class="map-room" id="room-1">C1</div>
+                <div id="player-pos" data-t="you_label">TU</div>
+            </div>
+
+            <div id="cam-buttons">
+                <button class="cam-btn active" data-cam="1">01</button><button class="cam-btn" data-cam="2">02</button><button class="cam-btn" data-cam="3">03</button>
+                <button class="cam-btn" data-cam="4">04</button><button class="cam-btn" data-cam="5">05</button><button class="cam-btn" data-cam="6">06</button>
+            </div>
+            <button id="btn-close-monitor" style="position: absolute; bottom: 20px; left: 20px; width: auto;">BAJAR (ESPACIO)</button>
+        </div>
+    </div>
+
+    <!-- PANTALLAS FINALES -->
+    <div id="screen-jumpscare" class="screen">
+        <img id="jump-img" src="">
+    </div>
+    
+    <div id="screen-gameover" class="screen">
+        <h1 style="font-size: 5rem; color: #f00;" data-t="died_msg">YOU DIED</h1>
+        <button onclick="location.reload()" style="margin-top: 30px;" data-t="retry">RETRY</button>
+        <button onclick="location.reload()" style="margin-top: 10px;" data-t="menu">MENU</button>
+    </div>
+    
+    <div id="screen-win" class="screen">
+        <h1 style="font-size: 5rem;" data-t="win_msg">8:00 AM</h1>
+        <p style="font-size: 2rem;">SHIFT COMPLETE</p>
+    </div>
+
+    <script>
+        const AudioSys = {
+            ctx: null,
+            files: {
+                bg_menu: 'start_song.mp3', bg_game: 'abandoned_factory.mp3', win: 'digital_alarm_clock.mp3',
+                phone1: 'phone_girl.mp3', phone2: 'phone_girl2.mp3',
+                mask: 'mask_breathing.mp3', hide: 'moving_to_hide_under.mp3', flash: 'turn_on_the_flashlig.mp3', light: 'turn_on_the_light.mp3', leave: 'entity_go_away.mp3',
+                win_close: 'closing_the_curtain.mp3', open_mon: 'opening_the_monitor.mp3', change_cam: 'changing_camera.mp3',
+                maifer_appear: 'maifer_aparece.mp3', maifer_kill: 'maifer_mata.mp3', isaac_appear: 'isaac_aparece.mp3', isaac_kill: 'isaac_jumpscare.mp3', jump_gen: 'jumpscare_#1.mp3'
+            },
+            volume: 1.0, bgNode: null, phoneNode: null,
+            init: function() { window.AudioContext = window.AudioContext || window.webkitAudioContext; this.ctx = new AudioContext(); },
+            play: function(key) { if(!this.ctx) return; const a = new Audio(this.files[key]); a.volume=this.volume; a.play().catch(e=>{}); return a; },
+            playBg: function(key) { if(this.bgNode){this.bgNode.pause();} this.bgNode=new Audio(this.files[key]); this.bgNode.loop=true; this.bgNode.volume=this.volume*0.5; this.bgNode.play(); },
+            playPhone: function(n) {
+                if(this.phoneNode) this.phoneNode.pause();
+                const f = n===1 ? this.files.phone1 : this.files.phone2;
+                this.phoneNode = new Audio(f); this.phoneNode.volume = this.volume; this.phoneNode.play();
+                document.getElementById('mute-btn').style.display='block';
+                this.phoneNode.onended = () => document.getElementById('mute-btn').style.display='none';
+            },
+            mutePhone: function() {
+                if(this.phoneNode) { this.phoneNode.pause(); this.phoneNode.currentTime=0; }
+                document.getElementById('mute-btn').style.display='none';
+            }
+        };
+
+        const CONFIG = {
+            img: { jomar: './jomar.png', isaac: './isaac.png', maifer: './maifer.png' },
+            keys: { flash: 'KeyL', mask: 'KeyM', hide: 'KeyS', amb: 'KeyR', turn: 'KeyC', mute: 'KeyX' }
+        };
+
+        const TEXTS = {
+            es: { play: "JUGAR", data: "DATOS", settings: "AJUSTES", back: "VOLVER",
+                data_title: "ARCHIVO DE FÁBRICA", story_1: "Michael Boyko compró esta fábrica. Los animatrónicos se activaron.", story_2: "Vigila hasta las 8 AM.",
+                desc_jomar: "Medio: Linterna (L).", desc_isaac: "Izq: Máscara (M).", desc_maifer: "Der: Mesa (S).",
+                key_flash: "Linterna", key_mask: "Máscara", key_hide: "Mesa", key_amb: "Luz", key_turn: "Girar", key_mute: "Silenciar",
+                gen_label: "GENERADOR", gen_hint: "CLICK EN PALANCA PARA CARGAR", mute_call: "SILENCIAR (X)", hiding_msg: "ESCONDIDO", turn_hint: "[C] PARA GIRAR",
+                died_msg: "HAS MUERTO", retry: "REINTENTAR", menu: "MENÚ", win_msg: "8:00 AM", you_label: "TU"
+            },
+            en: { play: "PLAY", data: "DATA", settings: "SETTINGS", back: "BACK",
+                data_title: "FACTORY ARCHIVE", story_1: "Michael Boyko bought this factory. Animatronics activated.", story_2: "Survive until 8 AM.",
+                desc_jomar: "Mid: Flashlight (L).", desc_isaac: "Left: Mask (M).", desc_maifer: "Right: Table (S).",
+                key_flash: "Light", key_mask: "Mask", key_hide: "Table", key_amb: "Ambient", key_turn: "Turn", key_mute: "Mute",
+                gen_label: "GENERATOR", gen_hint: "CLICK LEVER TO CHARGE", mute_call: "MUTE CALL (X)", hiding_msg: "HIDING", turn_hint: "[C] TO TURN",
+                died_msg: "YOU DIED", retry: "RETRY", menu: "MENU", win_msg: "8:00 AM", you_label: "YOU"
+            },
+            zh: { play: "玩", data: "数据", settings: "设置", back: "返回", key_turn: "转", gen_label: "发电机", mute_call: "静音 (X)", you_label: "你", died_msg: "你死了", menu: "菜单" },
+            ja: { play: "遊ぶ", data: "データ", settings: "設定", back: "戻る", key_turn: "回す", gen_label: "発電機", mute_call: "ミュート (X)", you_label: "あなた", died_msg: "あなたは死んだ", menu: "メニュー" },
+            ru: { play: "ИГРАТЬ", data: "ДАННЫЕ", settings: "НАСТРОЙКИ", back: "НАЗАД", key_turn: "ПОВЕРНУТЬ", gen_label: "ГЕНЕРАТОР", mute_call: "ОТКЛ (X)", you_label: "ВЫ", died_msg: "ТЫ УМЕР", menu: "МЕНЮ" },
+            pt: { play: "JOGAR", data: "DADOS", settings: "AJUSTES", back: "VOLTAR", key_turn: "GIRAR", gen_label: "GERADOR", mute_call: "MUDO (X)", you_label: "VOCÊ", died_msg: "VOCÊ MORREU", menu: "MENU" }
+        };
+
+        const UI = {
+            lang: 'es',
+            setLang: function(l) { this.lang = l; this.close('modal-lang'); this.updateTexts(); },
+            updateTexts: function() {
+                const t = TEXTS[this.lang] || TEXTS['en'];
+                document.querySelectorAll('[data-t]').forEach(el => { const k = el.getAttribute('data-t'); if(t[k]) el.innerText = t[k]; });
+            },
+            open: (id) => document.getElementById(id).style.display = 'flex',
+            close: (id) => document.getElementById(id).style.display = 'none'
+        };
+
+        const Game = {
+            active: false, night: 1, hour: 0, diff: 3, power: 100, blackout: false, view: 'front', windowPct: 0,
+            state: { mask: false, hide: false, light: false, amb: false, monitor: false },
+            ai: { jomar: { pos: 6, patience: 0 }, isaac: { pos: 6, patience: 0 }, maifer: { pos: 6, patience: 0 } },
+
+            init: function() {
+                document.getElementById('screen-intro').addEventListener('click', () => { AudioSys.init(); AudioSys.ctx.resume(); UI.open('screen-menu'); document.getElementById('screen-intro').style.display='none'; AudioSys.playBg('bg_menu'); });
+                document.getElementById('btn-play').addEventListener('click', Game.start);
+                document.getElementById('btn-data').addEventListener('click', () => UI.open('modal-data'));
+                document.getElementById('btn-settings').addEventListener('click', () => UI.open('modal-settings'));
+                document.getElementById('btn-monitor').addEventListener('click', Monitor.toggle);
+                document.getElementById('btn-close-monitor').addEventListener('click', Monitor.toggle);
+                document.getElementById('curtain').addEventListener('click', Game.fixWindow);
+                document.getElementById('mute-btn').addEventListener('click', AudioSys.mutePhone);
+                window.addEventListener('keydown', Input.onDown); window.addEventListener('keyup', Input.onUp); window.addEventListener('mousemove', Input.onMove);
+                document.getElementById('vol-slider').addEventListener('input', (e) => AudioSys.volume = e.target.value/100);
+                ['flash','mask','hide','amb','turn','mute'].forEach(k => { document.getElementById('key-'+k).addEventListener('click', (e) => Input.bind(k, e.target)); });
+                document.querySelectorAll('.cam-btn').forEach(b => b.addEventListener('click', (e)=>Monitor.switch(e.target.dataset.cam)));
+                
+                const n = localStorage.getItem('maifer_night');
+                if(n) { Game.night = parseInt(n); document.getElementById('night-display').innerText = "NOCHE " + n; }
+                if(Game.night > 1) { document.getElementById('diff-controls').style.display = 'none'; document.getElementById('diff-locked-msg').style.display = 'block'; }
+            },
+
+            setDiff: (v) => { Game.diff = v; alert("Dificultad: " + v); },
+
+            start: function() {
+                Game.active = true; Game.hour = 0; Game.power = 100; Game.blackout = false; Game.view = 'front';
+                // Reset AI
+                ['jomar','isaac','maifer'].forEach(n => { Game.ai[n].pos = 6; Game.ai[n].patience = 0; });
+                document.querySelectorAll('.enemy-sprite').forEach(el => el.style.display = 'none');
+                
+                // DIFFICULTY CURVE
+                Game.diff = 1 + (Game.night * 2); 
+                
+                UI.open('screen-game'); document.getElementById('screen-menu').style.display='none';
+                AudioSys.playBg('bg_game'); AudioSys.playPhone(Game.night);
+
+                Game.loopMain = setInterval(Game.update, 1000);
+                // 1 GAME HOUR = 20 REAL SECONDS
+                Game.loopTime = setInterval(Game.updateTime, 20000); 
+                Game.loopPower = setInterval(Game.updatePower, 500);
+                
+                // Update Initial Clock
+                document.getElementById('hud-clock').innerText = "12 AM";
+            },
+
+            updateTime: function() {
+                if(!Game.active) return;
+                Game.hour++; 
+                let display = Game.hour === 0 ? 12 : Game.hour;
+                document.getElementById('hud-clock').innerText = display + " AM";
+                
+                if(Game.hour === 8) Game.win();
+            },
+
+            win: function() {
+                Game.active = false;
+                clearInterval(Game.loopMain); clearInterval(Game.loopTime); clearInterval(Game.loopPower);
+                UI.open('screen-win'); AudioSys.play('win');
+                localStorage.setItem('maifer_night', Game.night + 1);
+                
+                // RETURN TO MENU AFTER 5 SECONDS
+                setTimeout(() => {
+                    location.reload(); 
+                }, 5000);
+            },
+
+            updatePower: function() {
+                if(!Game.active) return;
+                Game.power -= 0.15; // Slow drain
+                if(Game.state.amb) Game.power -= 0.3;
+                if(Game.state.light) Game.power -= 0.6;
+                if(Game.power <= 0) { Game.power = 0; if(!Game.blackout) { Game.blackout = true; document.getElementById('layer-darkness').style.opacity = 1; Game.state.light=false; setTimeout(() => Game.jumpscare('jomar'), 5000); } }
+                document.getElementById('power-fill').style.width = Game.power + "%";
+            },
+
+            crankGenerator: function() {
+                if(Game.power < 100 && !Game.blackout) {
+                    Game.power += 5; if(Game.power > 100) Game.power = 100;
+                    document.getElementById('crank').style.transform = `rotate(${Math.random()*360}deg)`;
+                }
+            },
+
+            update: function() {
+                if(!Game.active || Game.blackout) return;
+                Game.windowPct += (Game.diff / 6); 
+                document.getElementById('richard-eyes').style.display = (Game.windowPct > 60) ? 'flex' : 'none';
+                document.getElementById('curtain').style.transform = `translateY(-${Game.windowPct}%)`;
+                if(Game.windowPct >= 100) Game.jumpscare('richard');
+
+                ['jomar', 'isaac', 'maifer'].forEach(name => {
+                    const en = Game.ai[name];
+                    if(en.pos === 0) Game.checkDefense(name, en);
+                    else {
+                        if(Math.random() * 20 < Game.diff) {
+                            en.pos--; if(en.pos < 0) en.pos = 0;
+                            if(en.pos === 0) {
+                                document.getElementById('vis-'+name).style.display = 'block';
+                                AudioSys.play(name === 'isaac' ? 'isaac_appear' : 'maifer_appear');
+                            }
+                        }
+                    }
+                });
+                Monitor.render();
+            },
+
+            checkDefense: function(name, en) {
+                let safe = false;
+                if(name === 'jomar' && Game.state.light && Game.view === 'front') safe = true;
+                if(name === 'isaac' && Game.state.mask) safe = true;
+                if(name === 'maifer' && Game.state.hide) safe = true;
+
+                if(safe) {
+                    en.patience++;
+                    if(en.patience > 2) {
+                        en.pos = 6; en.patience = 0;
+                        document.getElementById('vis-'+name).style.display = 'none';
+                        AudioSys.play('leave');
+                    }
+                } else {
+                    en.patience++;
+                    if(en.patience > 5) Game.jumpscare(name);
+                }
+            },
+
+            fixWindow: function() {
+                if(Game.windowPct > 0) { AudioSys.play('win_close'); Game.windowPct -= 20; if(Game.windowPct < 0) Game.windowPct = 0; document.getElementById('curtain').style.transform = `translateY(-${Game.windowPct}%)`; }
+            },
+
+            jumpscare: function(name) {
+                Game.active = false; UI.open('screen-jumpscare');
+                const img = document.getElementById('jump-img'); img.src = CONFIG.img[name] || CONFIG.img.jomar;
+                if(name === 'maifer') AudioSys.play('maifer_kill'); else if(name === 'isaac') AudioSys.play('isaac_kill'); else AudioSys.play('jump_gen');
+                
+                // CIERRA JUMPSCARE Y ABRE GAME OVER A LOS 3 SEGUNDOS
+                setTimeout(() => {
+                    UI.close('screen-jumpscare'); // FIX CRUCIAL
+                    UI.open('screen-gameover');
+                }, 3000);
+            },
+
+            turnAround: function() {
+                if(Game.state.monitor || Game.state.hide) return;
+                Game.view = Game.view === 'front' ? 'back' : 'front';
+                document.getElementById('view-front').style.display = Game.view === 'front' ? 'block' : 'none';
+                document.getElementById('view-back').style.display = Game.view === 'back' ? 'flex' : 'none';
+            }
+        };
+
+        const Monitor = {
+            cam: 1,
+            toggle: function() {
+                if(Game.state.mask || Game.state.hide || Game.view === 'back') return;
+                Game.state.monitor = !Game.state.monitor;
+                document.getElementById('monitor-system').style.display = Game.state.monitor ? 'block' : 'none';
+                AudioSys.play('open_mon'); if(Game.state.monitor) Monitor.render();
+            },
+            switch: function(n) {
+                Monitor.cam = parseInt(n); AudioSys.play('change_cam');
+                document.getElementById('cam-num').innerText = "0" + n;
+                document.querySelectorAll('.cam-btn').forEach(b=>b.classList.toggle('active', b.dataset.cam==n));
+                document.querySelectorAll('.map-room').forEach(r=>r.classList.remove('active'));
+                document.getElementById('room-'+n).classList.add('active');
+                Monitor.render();
+            },
+            render: function() {
+                if(!Game.state.monitor) return;
+                const v = document.getElementById('cam-content'); v.innerHTML = '';
+                ['jomar', 'isaac', 'maifer'].forEach(name => {
+                    if(Game.ai[name].pos === Monitor.cam) {
+                        const img = document.createElement('img'); img.src = CONFIG.img[name]; img.style.height = '80%'; img.style.filter = 'grayscale(1) sepia(0.5)'; v.appendChild(img);
+                    }
+                });
+            }
+        };
+
+        const Input = {
+            onDown: function(e) {
+                if(!Game.active || Game.blackout) return;
+                const k = e.code;
+                if(k === CONFIG.keys.mute) AudioSys.mutePhone();
+                if(k === 'Space') { e.preventDefault(); Monitor.toggle(); return; }
+                if(k === CONFIG.keys.turn) { Game.turnAround(); return; }
+                
+                if(Game.view === 'front') {
+                    if(k === CONFIG.keys.flash) { Game.state.light = true; document.getElementById('layer-flashlight').style.display='block'; AudioSys.play('flash'); }
+                    if(k === CONFIG.keys.amb) { Game.state.amb = !Game.state.amb; document.getElementById('layer-ambient').classList.toggle('lights-on'); AudioSys.play('light'); }
+                    if(k === CONFIG.keys.mask && !Game.state.monitor) { Game.state.mask = !Game.state.mask; document.getElementById('layer-mask').style.display = Game.state.mask?'block':'none'; if(Game.state.mask) AudioSys.play('mask'); }
+                    if(k === CONFIG.keys.hide && !Game.state.monitor) { Game.state.hide = !Game.state.hide; document.getElementById('layer-hiding').style.display = Game.state.hide?'flex':'none'; if(Game.state.hide) AudioSys.play('hide'); }
+                }
+            },
+            onUp: function(e) {
+                if(e.code === CONFIG.keys.flash) { Game.state.light = false; document.getElementById('layer-flashlight').style.display='none'; }
+            },
+            onMove: function(e) {
+                if(!Game.active || Game.state.monitor || Game.state.hide || Game.view === 'back') return;
+                let p = (e.clientX / window.innerWidth) - 0.5;
+                document.getElementById('office-bg').style.transform = `translateX(${p * -5}vw)`;
+            },
+            bind: function(act, el) {
+                el.innerText = "..."; el.classList.add('listening');
+                const h = (e) => { e.preventDefault(); CONFIG.keys[act] = e.code; el.innerText = e.key.toUpperCase(); el.classList.remove('listening'); window.removeEventListener('keydown', h); };
+                window.addEventListener('keydown', h);
+            }
+        };
+
+        window.onload = Game.init;
+    </script>
+</body>
+</html>
