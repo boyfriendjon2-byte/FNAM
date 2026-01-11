@@ -3,113 +3,400 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Maifer's Factory: The 8 Nights</title>
+    <title>Maifer's Factory: The 8 Nights (v7.0 Texture Update)</title>
     <style>
         /* ==========================================================================
-           ESTILOS
+           FUENTES E IMPORTACIONES
            ========================================================================== */
         @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Nosifer&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC&display=swap');
 
-        :root { --primary: #ff0000; --bg-dark: #050505; }
-        * { box-sizing: border-box; user-select: none; touch-action: none; cursor: crosshair; }
-        body { margin: 0; background: var(--bg-dark); color: #ccc; font-family: 'Share Tech Mono', monospace; overflow: hidden; height: 100vh; }
-
-        /* PANTALLAS */
-        .screen { position: fixed; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; background: #000; z-index: 10; }
-        .screen.active { display: flex; }
-
-        /* MENU */
-        #screen-menu { background: radial-gradient(circle at center, #1a0505, #000); }
-        .title-text { font-family: 'Nosifer'; font-size: 3.5rem; color: var(--primary); text-shadow: 2px 2px 0 #fff; text-align: center; animation: glitch 3s infinite; }
-        .menu-btn {
-            background: rgba(0,0,0,0.8); border: 2px solid #444; color: #aaa;
-            padding: 10px 20px; font-family: 'VT323'; font-size: 1.5rem; margin: 5px;
-            cursor: pointer; text-transform: uppercase; transition: 0.2s; width: 340px; position: relative;
+        /* ==========================================================================
+           VARIABLES Y RESET
+           ========================================================================== */
+        :root { 
+            --primary: #ff0000; 
+            --secondary: #00ff00;
+            --bg-dark: #050505; 
+            --hud-bg: rgba(0, 10, 0, 0.85);
+            --hud-border: #446644;
+            --metal-gradient: linear-gradient(135deg, #111 0%, #333 40%, #555 50%, #333 60%, #111 100%);
+            --wood-gradient: linear-gradient(to bottom, #2d1a12, #1a0f0a);
         }
-        .menu-btn:hover:not(.locked) { border-color: var(--primary); color: #fff; background: #220000; }
-        .menu-btn.locked { opacity: 0.5; cursor: not-allowed; }
-        .icon-lock { position: absolute; right: 10px; }
-        #lang-btn { position: absolute; top: 20px; left: 20px; width: auto; min-width: 80px; font-family: 'VT323'; font-size: 1.2rem; z-index: 200; }
 
-        /* ESTRELLAS */
-        #star-row { display: flex; gap: 5px; margin-bottom: 20px; height: 30px; }
-        .star { font-size: 2rem; color: #111; }
-        .star.earned { color: gold; text-shadow: 0 0 10px gold; }
+        * { 
+            box-sizing: border-box; 
+            user-select: none; 
+            touch-action: none; 
+            cursor: crosshair; 
+        }
 
-        /* MODALES */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 6000; display: none; align-items: center; justify-content: center; }
-        .modal-box { background: #0b0b0b; border: 2px solid var(--primary); width: 800px; max-width: 90%; max-height: 90vh; overflow-y: auto; padding: 20px; color: #fff; }
-        .lore-text { font-family: 'Share Tech Mono'; white-space: pre-wrap; text-align: left; line-height: 1.4; color: #0f0; font-size: 0.9rem; }
-        .lore-header { color: var(--primary); font-family: 'Nosifer'; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
+        body { 
+            margin: 0; 
+            background: var(--bg-dark); 
+            color: #ccc; 
+            font-family: 'Share Tech Mono', monospace; 
+            overflow: hidden; 
+            height: 100vh; 
+        }
 
-        /* JUEGO */
-        #view-office { position: absolute; inset: 0; background: #111 url('https://www.transparenttextures.com/patterns/dark-concrete.png'); }
-        #hallway { position: absolute; top: 15%; left: 50%; transform: translateX(-50%); width: 300px; height: 600px; background: #000; border: 30px solid #0d0d0d; overflow: hidden; }
-        #window-frame { position: absolute; top: 20%; right: 10%; width: 220px; height: 300px; background: #050505; border: 8px solid #222; overflow: hidden; }
+        /* ==========================================================================
+           SISTEMA DE PANTALLAS
+           ========================================================================== */
+        .screen { 
+            position: fixed; 
+            inset: 0; 
+            display: none; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            background: #000; 
+            z-index: 10; 
+        }
+
+        .screen.active { 
+            display: flex; 
+        }
+
+        /* ==========================================================================
+           MENU PRINCIPAL (SCANLINES)
+           ========================================================================== */
+        #screen-menu { 
+            background: #000 url('https://www.transparenttextures.com/patterns/dark-matter.png');
+            position: relative;
+            overflow: hidden;
+        }
+
+        #screen-menu::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        .title-text { 
+            font-family: 'Nosifer'; 
+            font-size: 4.5rem; 
+            color: var(--primary); 
+            text-shadow: 4px 4px 0 #500; 
+            text-align: center; 
+            animation: glitch 4s infinite; 
+            margin-bottom: 40px; 
+            z-index: 5;
+            letter-spacing: 5px;
+        }
+
+        .menu-btn {
+            background: rgba(10, 0, 0, 0.9); 
+            border: 2px solid #600; 
+            color: #aaa;
+            padding: 12px 25px; 
+            font-family: 'VT323'; 
+            font-size: 1.8rem; 
+            margin: 8px;
+            cursor: pointer; 
+            text-transform: uppercase; 
+            transition: 0.3s; 
+            width: 400px; 
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        .menu-btn:hover:not(.locked) { 
+            border-color: var(--primary); 
+            color: #fff; 
+            background: #400; 
+            transform: scale(1.05);
+            box-shadow: 0 0 20px var(--primary);
+        }
+
+        .menu-btn.locked { 
+            opacity: 0.4; 
+            cursor: not-allowed; 
+            border-color: #333;
+        }
+
+        .icon-lock { position: absolute; right: 15px; }
+
+        #lang-btn { 
+            position: absolute; top: 30px; left: 30px; 
+            width: auto; min-width: 100px; 
+            font-family: 'VT323'; font-size: 1.4rem; 
+            z-index: 200; border-color: #444;
+        }
+
+        #star-row { display: flex; gap: 10px; margin-bottom: 30px; height: 40px; z-index: 5; }
+        .star { font-size: 2.5rem; color: #222; }
+        .star.earned { color: gold; text-shadow: 0 0 15px gold; }
+
+        /* ==========================================================================
+           MODALES (LORE / UPDATES / SETTINGS)
+           ========================================================================== */
+        .modal-overlay { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 6000; 
+            display: none; align-items: center; justify-content: center; 
+        }
+        
+        /* MEJORA VISUAL MODAL */
+        .modal-box { 
+            background: linear-gradient(135deg, #0d0d0d, #050505); 
+            border: 2px solid var(--primary); 
+            width: 800px; max-width: 90%; max-height: 90vh; 
+            overflow-y: auto; padding: 30px; color: #fff; 
+            box-shadow: 0 0 50px rgba(255,0,0,0.1), inset 0 0 20px rgba(0,0,0,0.8);
+            border-radius: 5px;
+        }
+        
+        .lore-text { font-family: 'Share Tech Mono'; white-space: pre-wrap; text-align: left; line-height: 1.6; color: #0f0; font-size: 1rem; }
+        .lore-header { color: var(--primary); font-family: 'Nosifer'; border-bottom: 2px solid #333; padding-bottom: 15px; margin-bottom: 25px; text-align: center; }
+        .update-list { text-align: left; font-family: 'VT323'; color: #ccc; padding-left: 20px; }
+        .update-list li { margin-bottom: 8px; font-size: 1.3rem; list-style-type: square; }
+        .teaser-text { color: red; font-family: 'Nosifer'; text-align: center; margin-top: 40px; animation: glitch 2s infinite; font-size: 1.5rem; }
+
+        /* SETTINGS ROWS */
+        .setting-section {
+            border: 1px solid #333;
+            background: rgba(255,255,255,0.02);
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .setting-header {
+            color: #aaa; font-family: 'Nosifer'; font-size: 1.2rem; margin-bottom: 10px; border-bottom: 1px solid #333;
+        }
+        .setting-row { margin: 15px 0; display: flex; align-items: center; justify-content: space-between; width: 100%; font-family: 'VT323'; font-size: 1.4rem; }
+        input[type=range] { width: 150px; cursor: pointer; accent-color: var(--primary); }
+        input[type=checkbox] { transform: scale(1.5); cursor: pointer; accent-color: var(--primary); }
+
+        /* ==========================================================================
+           JUEGO / OFICINA (TEXTURAS MEJORADAS)
+           ========================================================================== */
+        #view-office { 
+            position: absolute; inset: 0; 
+            /* Textura de Pared Sucia */
+            background-color: #111;
+            background-image: 
+                radial-gradient(circle at center, transparent 30%, #000 130%), /* Viñeta */
+                url('https://www.transparenttextures.com/patterns/dark-concrete.png'),
+                url('https://www.transparenttextures.com/patterns/wall-4-light.png');
+            background-blend-mode: multiply;
+            overflow: hidden; 
+        }
+        
+        #layer-flicker { position: fixed; inset: 0; background: #000; opacity: 0; pointer-events: none; z-index: 80; }
+        
+        #hallway { 
+            position: absolute; top: 15%; left: 50%; transform: translateX(-50%); width: 320px; height: 620px; 
+            background: #000; 
+            /* Textura Metálica */
+            border: 30px solid #1a1a1a;
+            border-image: linear-gradient(to right, #111, #333, #555, #222) 1;
+            box-shadow: inset 0 0 50px #000, 0 0 20px #000;
+            overflow: hidden; 
+        }
+
+        #window-frame { 
+            position: absolute; top: 20%; right: 8%; width: 240px; height: 320px; 
+            background: #050505; 
+            /* Marco Metálico */
+            border: 10px solid #222; 
+            border-right: 10px solid #444;
+            border-bottom: 10px solid #111;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.8);
+            overflow: hidden; z-index: 5; 
+        }
+        
         #curtain { 
-            width: 100%; height: 100%; background: repeating-linear-gradient(180deg, #151515, #151515 20px, #222 20px, #222 22px); 
-            transition: transform 0.3s ease-in-out; transform: translateY(-85%); position: relative; z-index: 5; border-bottom: 10px solid #444;
+            width: 100%; height: 100%; 
+            /* Tela Texturizada */
+            background: repeating-linear-gradient(180deg, #151515, #151515 20px, #202020 20px, #202020 22px); 
+            transition: transform 0.2s ease-in-out; transform: translateY(-85%); 
+            position: relative; z-index: 10; 
+            border-bottom: 15px solid #333; 
+            cursor: pointer;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.8);
         }
         #curtain.closed { transform: translateY(0%); }
-        #richard-eyes { position: absolute; top: 40%; left: 25%; width: 50%; display: flex; justify-content: space-between; z-index: 2; opacity: 0; transition: opacity 0.5s; }
+
+        #richard-eyes { 
+            position: absolute; top: 35%; left: 50%; transform: translateX(-50%); width: 160px; height: 160px; 
+            background: #000; box-shadow: 0 0 30px #000; display: flex; justify-content: space-between; align-items: center; 
+            padding: 40px; z-index: 6; opacity: 0; transition: opacity 0.1s; 
+        }
         .eye { width: 20px; height: 20px; background: #00ff00; border-radius: 50%; box-shadow: 0 0 15px #00ff00; }
 
-        /* GEN PANEL */
-        #gen-panel { position: absolute; bottom: 220px; left: 20px; width: 150px; height: 200px; background: #222; border: 4px solid #444; z-index: 40; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        #gen-fan { width: 80px; height: 80px; border-radius: 50%; border: 5px dashed #555; animation: spin 4s linear infinite; margin-bottom: 20px; }
+        /* VENTILACION */
+        #vent-system {
+            position: absolute; top: 30%; left: 0; width: 160px; height: 210px; 
+            background: #0a0a0a; 
+            border: 8px solid #222; border-left: none;
+            box-shadow: 5px 5px 15px #000;
+            z-index: 35; display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+        }
+        #vent-grill { 
+            width: 100%; height: 100%; 
+            background: repeating-linear-gradient(45deg, rgba(20,20,20,0.9), rgba(20,20,20,0.9) 10px, transparent 10px, transparent 18px); 
+            position: relative; z-index: 4; pointer-events: none; 
+            border: 2px solid #111; 
+        }
+        #vent-door {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #2a2a2a; transform: translateY(-100%);
+            transition: transform 0.2s; border-bottom: 5px solid #444; z-index: 5;
+            background-image: repeating-linear-gradient(0deg, transparent, transparent 10px, rgba(0,0,0,0.2) 10px, rgba(0,0,0,0.2) 20px);
+        }
+        #vent-door.closed { transform: translateY(0); }
+        #vent-img { position: absolute; top: 20px; left: 20px; width: 100px; height: 100px; z-index: 1; display: none; filter: brightness(0.5); object-fit: contain; }
+        #vent-btn { width: 100%; height: 40px; background: #600; color: #fff; border: none; font-family: 'VT323'; cursor: pointer; z-index: 6; border-top: 4px solid #800; font-size: 1.1rem; }
+        #vent-btn.active { background: #006600; border-top: 4px solid #008800; }
+
+        /* BOTON MUTE */
+        #btn-mute { 
+            position: absolute; top: 120px; left: 20px; background: #222; color: #fff; border: 1px solid #555; 
+            font-family: 'VT323'; cursor: pointer; z-index: 160; padding: 5px 10px; opacity: 0.8; font-size: 1.2rem;
+        }
+        #btn-mute:hover { opacity: 1; background: #500; border-color: #f00; }
+
+        /* GENERADOR */
+        #gen-panel { 
+            position: absolute; bottom: 230px; left: 190px; width: 140px; height: 190px; 
+            background: #1a1a1a; 
+            border: 6px solid #333; 
+            box-shadow: 5px 5px 10px #000;
+            z-index: 40; display: flex; flex-direction: column; align-items: center; justify-content: center; 
+        }
+        #gen-fan { width: 80px; height: 80px; border-radius: 50%; border: 5px dashed #555; animation: spin 4s linear infinite; margin-bottom: 20px; background: #000; }
         #gen-btn { width: 40px; height: 40px; background: radial-gradient(circle, #ff5555, #990000); border: 2px solid #fff; border-radius: 50%; cursor: pointer; position: absolute; box-shadow: 0 0 10px red; }
 
-        /* HUD */
-        #hud-time { position: fixed; top: 20px; right: 20px; font-size: 3rem; font-family: 'VT323'; color: #fff; z-index: 150; }
-        #hud-night { position: fixed; top: 20px; right: 150px; font-size: 1.5rem; font-family: 'VT323'; color: #aaa; z-index: 150; }
-        #hud-power { position: fixed; bottom: 20px; left: 20px; font-size: 1.5rem; font-family: 'VT323'; color: #fff; z-index: 150; }
-        #hud-toxic { position: fixed; top: 20px; left: 20px; width: 150px; height: 10px; border: 1px solid #0f0; z-index: 150; display: none; }
-        #toxic-bar { height: 100%; background: #0f0; width: 0%; }
+        /* ==========================================================================
+           HUD MEJORADO
+           ========================================================================== */
+        .hud-container {
+            position: fixed;
+            background: var(--hud-bg);
+            border: 2px solid var(--hud-border);
+            padding: 10px 20px;
+            color: #fff;
+            font-family: 'VT323';
+            z-index: 150;
+            box-shadow: 0 0 15px rgba(0,255,0,0.1);
+            border-radius: 4px;
+            backdrop-filter: blur(2px);
+        }
 
-        /* LAYERS */
+        #hud-time-box { top: 20px; right: 20px; text-align: right; }
+        #hud-time { font-size: 3.5rem; line-height: 0.9; color: #eeffee; text-shadow: 0 0 10px #0f0; }
+        #hud-night { font-size: 1.5rem; color: #aaccaa; }
+
+        #hud-power-box { bottom: 20px; left: 20px; width: 220px; }
+        #hud-power-text { font-size: 1.8rem; margin-bottom: 5px; color: #eeffee; }
+        #hud-usage { display: flex; gap: 5px; align-items: center; font-size: 1.2rem; color: #aaccaa; }
+        .usage-block { width: 25px; height: 10px; background: #222; border: 1px solid #444; }
+        .usage-block.active { background: #0f0; box-shadow: 0 0 5px #0f0; border-color: #0f0; }
+        .usage-block.high { background: #ff0000; box-shadow: 0 0 5px #ff0000; border-color: #ff0000; }
+
+        #hud-toxic { 
+            position: fixed; top: 20px; left: 20px; width: 200px; height: 15px; 
+            border: 2px solid #004400; background: #001100; z-index: 150; display: none; 
+        }
+        #toxic-bar { height: 100%; background: #0f0; width: 0%; box-shadow: 0 0 10px #0f0; }
+
+        /* ==========================================================================
+           CAPAS & ASSETS
+           ========================================================================== */
         #layer-mask { position: fixed; inset: 0; z-index: 100; display: none; pointer-events: none; background: radial-gradient(circle at center, transparent 30%, rgba(0,20,0,0.8) 60%, #000 95%); box-shadow: inset 0 0 100px #000; }
         #layer-flashlight { position: fixed; inset: 0; background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.3) 0%, transparent 60%); z-index: 50; display: none; mix-blend-mode: overlay; pointer-events: none; }
-        #layer-under-desk { position: fixed; inset: 0; background: #000; z-index: 90; display: none; align-items: flex-end; justify-content: center; border-top: 150px solid #1a0f0b; }
         
+        #layer-under-desk { 
+            position: fixed; inset: 0; z-index: 90; display: none; 
+            align-items: center; justify-content: center; 
+            background: radial-gradient(circle, transparent 20%, rgba(0,0,0,0.9) 60%, #000 95%);
+            animation: breathing 4s infinite ease-in-out;
+        }
+        #layer-under-desk h2 {
+            font-family: 'Share Tech Mono'; color: #444; background: #000; padding: 5px 10px; border: 1px solid #333; font-size: 1.2rem; margin-top: 300px;
+        }
+
+        @keyframes breathing { 0% { transform: scale(1); opacity: 0.95; } 50% { transform: scale(1.02); opacity: 1; } 100% { transform: scale(1); opacity: 0.95; } }
+
         .anim-img { position: absolute; pointer-events: none; display: none; z-index: 20; filter: brightness(0.6); }
         #vis-maifer { right: 5%; bottom: 0; height: 85vh; }
         #vis-isaac { left: 5%; bottom: 0; height: 90vh; }
         #vis-jomar { left: 50%; bottom: 0; transform: translateX(-50%); height: 80vh; z-index: 4; }
 
-        /* MONITOR */
-        #screen-monitor { position: fixed; inset: 0; background: #111; z-index: 200; display: none; flex-direction: column; padding: 20px; }
-        #cam-view { flex: 1; background: #000; border: 2px solid #333; position: relative; display: flex; align-items: center; justify-content: center; }
-        #cam-static { position: absolute; inset: 0; opacity: 0.15; background: url('https://media.giphy.com/media/oEI9uBYSzLpBK/giphy.gif'); pointer-events: none; }
-        #map-controls { height: 100px; display: flex; justify-content: center; gap: 10px; background: #050505; padding: 10px; margin-top: 10px; }
-        .cam-select { width: 60px; height: 40px; background: #002; color: #0f0; border: 1px solid #0f0; cursor: pointer; font-family: 'VT323'; margin-top: 20px; }
-        .cam-select.active { background: #0f0; color: #000; }
+        /* ==========================================================================
+           MONITOR & MAPA
+           ========================================================================== */
+        #screen-monitor { position: fixed; inset: 0; background: #111; z-index: 200; display: none; flex-direction: column; padding: 10px; }
+        #cam-view { flex: 2; background: #000; border: 4px solid #333; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 10px; }
+        #cam-static { position: absolute; inset: 0; opacity: 0.15; background: url('https://media.giphy.com/media/oEI9uBYSzLpBK/giphy.gif'); pointer-events: none; z-index: 5; }
+        #cam-content { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 2; flex-direction: column; }
+        .cam-spot { font-family: 'Share Tech Mono'; color: #fff; font-size: 1.5rem; border: 2px solid #fff; background: rgba(0,0,0,0.5); padding: 10px; margin: 10px; width: auto; text-align: center; }
+        .cam-spot.active-anim { color: #f00; border-color: #f00; background: rgba(50,0,0,0.5); animation: glitch 1s infinite; }
 
-        /* MESA */
-        #desk { position: absolute; bottom: 0; width: 100%; height: 180px; background: linear-gradient(#251812, #000); z-index: 30; display: flex; justify-content: center; align-items: flex-end; border-top: 5px solid #422; }
+        #map-layout { height: 250px; background: #051505; border: 2px solid #0f0; position: relative; margin-top: 10px; box-shadow: inset 0 0 20px #002200; }
+        .map-room { position: absolute; border: 2px solid #004400; background: rgba(0, 50, 0, 0.3); }
+        #room-06 { top: 10px; left: 35%; width: 30%; height: 60px; }
+        #room-04 { top: 80px; left: 10%; width: 35%; height: 80px; }
+        #room-05 { top: 80px; right: 10%; width: 35%; height: 80px; }
+        #room-02 { top: 170px; left: 20%; width: 25%; height: 70px; }
+        #room-03 { top: 170px; right: 20%; width: 25%; height: 70px; }
+        #room-you { bottom: 0px; left: 45%; width: 10%; height: 20px; border-bottom: none; background: #200; color:#f00; font-size: 0.8rem; text-align: center; }
+
+        .cam-btn { position: absolute; width: 40px; height: 30px; background: #002200; border: 1px solid #0f0; color: #0f0; font-family: 'VT323'; font-size: 1rem; cursor: pointer; z-index: 10; }
+        .cam-btn:hover { background: #004400; }
+        .cam-btn.active { background: #0f0; color: #000; animation: blink 1s infinite; }
+        #btn-c6 { top: 25px; left: 48%; }
+        #btn-c4 { top: 105px; left: 20%; }
+        #btn-c5 { top: 105px; right: 20%; }
+        #btn-c2 { top: 190px; left: 30%; }
+        #btn-c3 { top: 190px; right: 30%; }
+        #btn-c1 { bottom: 25px; left: 48%; }
+        #btn-close-mon { position: absolute; bottom: 10px; right: 10px; background: #f00; color: #fff; border: 2px solid #fff; padding: 5px 10px; font-family: 'VT323'; cursor: pointer; }
+
+        /* MESA (TEXTURA MADERA/METAL) */
+        #desk { 
+            position: absolute; bottom: 0; width: 100%; height: 180px; 
+            /* Textura mejorada */
+            background: linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0.9)),
+                        url('https://www.transparenttextures.com/patterns/wood-pattern.png'),
+                        #2d2d2d;
+            z-index: 30; display: flex; justify-content: center; align-items: flex-end; 
+            border-top: 8px solid #111; 
+            box-shadow: inset 0 20px 30px rgba(0,0,0,0.8);
+        }
         .monitor-btn { width: 400px; background: #111; color: #0f0; border: 2px solid #0f0; border-bottom: 0; font-family: 'VT323'; font-size: 2rem; cursor: pointer; }
         .monitor-btn:hover { background: #002200; height: 60px; }
 
-        /* MINIJUEGO */
+        /* EXTRAS */
         #screen-minigame { background: #000; }
-        #mg-canvas { background: #111; border: 2px solid #444; box-shadow: 0 0 20px #222; max-width: 100%; }
+        #mg-canvas { background: #111; border: 2px solid #444; box-shadow: 0 0 20px #222; max-width: 100%; cursor: default; }
         #mg-info { color: #fff; font-family: 'VT323'; font-size: 1.5rem; margin-bottom: 10px; text-align: center; }
         #mg-controls-hint { color: #888; margin-top: 10px; font-size: 0.9rem; }
 
-        /* JUMPSCARE & GAME OVER */
         #screen-jumpscare { z-index: 9600; background: #000; }
         #jump-img { width: 100%; height: 100%; object-fit: cover; animation: shake 0.2s infinite; }
-        #screen-gameover { z-index: 9500; background: #000; flex-direction: row; gap: 30px; }
-        #death-card { width: 300px; border: 2px solid #500; background: #100; padding: 10px; text-align: center; }
-        
-        .setting-row { margin: 15px 0; display: flex; align-items: center; justify-content: space-between; width: 100%; }
-        input[type=range] { width: 150px; cursor: pointer; }
 
+        #screen-gameover { 
+            z-index: 9500; background: #050000; 
+            flex-direction: row; gap: 50px; 
+            background-image: url('https://media.giphy.com/media/oEI9uBYSzLpBK/giphy.gif'); 
+            background-blend-mode: overlay; background-size: cover;
+        }
+        #death-card { width: 400px; border: 4px solid #500; background: #100; padding: 20px; text-align: center; box-shadow: 0 0 50px #500; transform: rotate(-2deg); }
+        #death-card h1 { font-size: 3rem; margin: 0 0 20px 0; text-shadow: 2px 2px #000; animation: glitch 1s infinite; }
+        #death-img { border: 2px solid #300; filter: contrast(1.2) sepia(0.5); }
+        
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
         @keyframes glitch { 0% { transform: translate(0); } 20% { transform: translate(-2px, 2px); } 40% { transform: translate(-2px, -2px); } 60% { transform: translate(2px, 2px); } 80% { transform: translate(2px, -2px); } 100% { transform: translate(0); } }
         @keyframes shake { 0% { transform: translate(5px, 5px); } 25% { transform: translate(-5px, -5px); } 50% { transform: translate(5px, -5px); } 75% { transform: translate(-5px, 5px); } }
+        @keyframes flickerAnim { 0% { opacity: 0; } 10% { opacity: 0.95; background:#000; } 20% { opacity: 0.1; } 30% { opacity: 0.95; background:#000; } 40% { opacity: 0; } 50% { opacity: 0.8; } 100% { opacity: 0; } }
+        .flickering { animation: flickerAnim 0.8s linear; }
     </style>
 </head>
 <body>
@@ -117,6 +404,7 @@
 <div id="audio-container">
     <audio id="bgm-menu" src="start_song.mp3" loop></audio>
     <audio id="bgm-game" src="abandoned_factory.mp3" loop></audio>
+    <audio id="bgm-minigame" src="mini_juego.mp3" loop></audio>
     <audio id="sfx-win" src="digital_alarm_clock.mp3"></audio>
     <audio id="sfx-monitor" src="opening_the_monitor.mp3"></audio>
     <audio id="sfx-cam" src="changing_camera.mp3"></audio>
@@ -127,16 +415,15 @@
     <audio id="sfx-flash" src="turn_on_the_flashlig.mp3"></audio>
     <audio id="voice-1" src="phone_girl.mp3"></audio>
     <audio id="voice-2" src="phone_girl2.mp3"></audio>
-    <audio id="sfx-maifer" src="maifer_aparece.mp3"></audio>
-    <audio id="sfx-isaac" src="isaac_aparece.mp3"></audio>
-    <audio id="sfx-jomar" src="jomar_aparece.mp3"></audio>
-    
-    <!-- JUMPSCARES RENOMBRADOS -->
+    <audio id="sfx-maifer" src="maifer_aparece.mp3" loop></audio>
+    <audio id="sfx-isaac" src="isaac_aparece.mp3" loop></audio>
+    <audio id="sfx-jomar" src="jomar_aparece.mp3" loop></audio>
     <audio id="jump-richard" src="richard_jumpscare.mp3"></audio>
     <audio id="jump-jomar" src="jomar_jumpscare.mp3"></audio>
     <audio id="jump-isaac" src="isaac_jumpscare.mp3"></audio>
     <audio id="jump-maifer" src="maifer_mata.mp3"></audio>
-    <audio id="sfx-gen" src="turn_on_the_light.mp3"></audio> 
+    <audio id="sfx-gen" src="turn_on_the_light.mp3"></audio>
+    <audio id="sfx-gameover" src="game_over.mp3"></audio>
 </div>
 
 <div id="screen-menu" class="screen active">
@@ -148,43 +435,106 @@
         <button id="btn-custom" class="menu-btn locked" onclick="Game.initCustom()" disabled>CUSTOM NIGHT <span class="icon-lock">🔒</span></button>
         <button id="btn-new" class="menu-btn" onclick="Game.newGame()">NUEVA PARTIDA</button>
         <button id="btn-lore" class="menu-btn" onclick="UI.openLore()">DATOS / LORE</button>
-        <button id="btn-settings" class="menu-btn" onclick="UI.openSettings()">AJUSTES / CONTROLES</button>
+        <button id="btn-updates" class="menu-btn" onclick="UI.openUpdates()">UPDATES</button>
+        <button id="btn-settings" class="menu-btn" onclick="UI.openSettings()">AJUSTES</button>
     </div>
-    <p style="position: absolute; bottom: 10px; font-size: 0.8rem; color: #444;">v4.0 - Lore Update</p>
+    <p style="position: absolute; bottom: 10px; font-size: 0.8rem; color: #444;">v7.0 - Texture & Settings Update</p>
 </div>
 
 <div id="modal-lore" class="modal-overlay">
     <div class="modal-box">
         <h2 id="lore-title" class="lore-header">MAIFER'S FACTORY — LORE OFICIAL</h2>
-        <div id="lore-content" class="lore-text">...</div>
+        <div id="lore-content" class="lore-text"></div>
         <button id="btn-close-lore" class="menu-btn" onclick="UI.closeModals()" style="width: 100%; margin-top:20px;">CERRAR</button>
+    </div>
+</div>
+
+<div id="modal-updates" class="modal-overlay">
+    <div class="modal-box">
+        <h2 class="lore-header">UPDATES LOG</h2>
+        <ul id="update-list" class="update-list"></ul>
+        <h2 id="teaser-text" class="teaser-text"></h2>
+        <button id="btn-close-upd" class="menu-btn" onclick="UI.closeModals()" style="width: 100%; margin-top:20px;">CERRAR</button>
     </div>
 </div>
 
 <div id="modal-settings" class="modal-overlay">
     <div class="modal-box" style="height: auto;">
         <h2 id="st-title">AJUSTES</h2>
-        <div class="setting-row">
-            <span id="st-vol">VOLUMEN</span>
-            <input type="range" min="0" max="100" value="100" oninput="AudioSys.setVolume(this.value)">
+        
+        <div class="setting-section">
+            <div class="setting-header">AUDIO</div>
+            <div class="setting-row">
+                <span id="st-vol">VOLUMEN</span>
+                <input type="range" min="0" max="100" value="100" oninput="AudioSys.setVolume(this.value)">
+            </div>
         </div>
-        <h3 id="st-ctrl">CONTROLES</h3>
-        <p><span id="lbl-mask">MÁSCARA:</span> <b id="bind-mask">SPACE</b> <button onclick="Input.rebind('mask')" class="menu-btn" style="width:auto; font-size:1rem;">EDIT</button></p>
-        <p><span id="lbl-flash">LINTERNA:</span> <b id="bind-flash">F</b> <button onclick="Input.rebind('flash')" class="menu-btn" style="width:auto; font-size:1rem;">EDIT</button></p>
-        <p><span id="lbl-hide">ESCONDERSE:</span> <b id="bind-hide">CTRL</b> <button onclick="Input.rebind('hide')" class="menu-btn" style="width:auto; font-size:1rem;">EDIT</button></p>
-        <p><span id="lbl-curtain">CORTINA:</span> <b id="bind-curtain">S</b> <button onclick="Input.rebind('curtain')" class="menu-btn" style="width:auto; font-size:1rem;">EDIT</button></p>
-        <p><span id="lbl-mon">MONITOR:</span> <b id="bind-monitor">TAB</b> <button onclick="Input.rebind('monitor')" class="menu-btn" style="width:auto; font-size:1rem;">EDIT</button></p>
+
+        <div class="setting-section">
+            <div class="setting-header">GRÁFICOS Y SISTEMA</div>
+            <div class="setting-row">
+                <span>FULLSCREEN</span>
+                <button class="menu-btn" style="width: auto; font-size: 1rem;" onclick="Config.toggleFullscreen()">TOGGLE</button>
+            </div>
+            <div class="setting-row">
+                <span>FX GLITCH</span>
+                <input type="checkbox" id="chk-glitch" checked onchange="Config.toggleGlitch()">
+            </div>
+            <div class="setting-row">
+                <span>SENSIBILIDAD</span>
+                <input type="range" min="1" max="10" value="5">
+            </div>
+            <div class="setting-row">
+                <span style="color: red;">BORRAR DATOS</span>
+                <button class="menu-btn" style="width: auto; font-size: 1rem; border-color: red; color: red;" onclick="Game.newGame()">RESET</button>
+            </div>
+        </div>
+
+        <div class="setting-section">
+            <div class="setting-header">CONTROLES</div>
+            <p><span id="lbl-mask">MÁSCARA:</span> <b id="bind-mask">SPACE</b> <button onclick="Input.rebind('mask')" class="menu-btn" style="width:auto; font-size:1rem;">EDIT</button></p>
+            <p><span id="lbl-flash">LINTERNA:</span> <b id="bind-flash">F</b> <button onclick="Input.rebind('flash')" class="menu-btn" style="width:auto; font-size:1rem;">EDIT</button></p>
+            <p><span id="lbl-hide">ESCONDERSE:</span> <b id="bind-hide">CTRL</b> <button onclick="Input.rebind('hide')" class="menu-btn" style="width:auto; font-size:1rem;">EDIT</button></p>
+            <p><span id="lbl-curtain">CORTINA:</span> <b id="bind-curtain">S</b> <button onclick="Input.rebind('curtain')" class="menu-btn" style="width:auto; font-size:1rem;">EDIT</button></p>
+            <p><span id="lbl-mon">MONITOR:</span> <b id="bind-monitor">TAB</b> <button onclick="Input.rebind('monitor')" class="menu-btn" style="width:auto; font-size:1rem;">EDIT</button></p>
+        </div>
+
         <button id="btn-save-st" class="menu-btn" onclick="UI.closeModals()">GUARDAR Y CERRAR</button>
     </div>
 </div>
 
 <div id="screen-game" class="screen">
-    <div id="hud-time">12 AM</div>
-    <div id="hud-night"><span id="lbl-night">NOCHE</span> <span id="game-night-num">1</span></div>
-    <div id="hud-power"><span id="lbl-pwr">PWR</span>: <span id="pwr-val">100</span>%</div>
+    <!-- HUD MEJORADO -->
+    <div id="hud-time-box" class="hud-container">
+        <div id="hud-time">12 AM</div>
+        <div id="hud-night"><span id="lbl-night">NOCHE</span> <span id="game-night-num">1</span></div>
+    </div>
+
+    <div id="hud-power-box" class="hud-container">
+        <div id="hud-power-text"><span id="lbl-pwr">PWR</span>: <span id="pwr-val">100</span>%</div>
+        <div id="hud-usage">
+            USAGE: 
+            <div id="use-1" class="usage-block"></div>
+            <div id="use-2" class="usage-block"></div>
+            <div id="use-3" class="usage-block"></div>
+            <div id="use-4" class="usage-block"></div>
+        </div>
+    </div>
+
     <div id="hud-toxic"><div id="toxic-bar"></div></div>
+    
+    <button id="btn-mute" onclick="Mechanics.muteCall()">MUTE CALL 📞</button>
 
     <div id="view-office">
+        <div id="layer-flicker"></div>
+        
+        <div id="vent-system">
+            <img id="vent-img" src="">
+            <div id="vent-grill"></div>
+            <div id="vent-door"></div>
+            <button id="vent-btn" onclick="Mechanics.toggleVent()">CLOSE VENT</button>
+        </div>
+
         <div id="hallway"><img id="vis-jomar" class="anim-img" src="jomar.png"></div>
         <div id="window-frame">
             <div id="richard-eyes"><div class="eye"></div><div class="eye"></div></div>
@@ -205,19 +555,34 @@
 
     <div id="layer-mask"></div>
     <div id="layer-flashlight"></div>
-    <div id="layer-under-desk"><h2 id="lbl-under">DEBAJO DE LA MESA</h2></div>
+    
+    <div id="layer-under-desk">
+        <h2 id="lbl-under">DEBAJO DE LA MESA</h2>
+    </div>
 
     <div id="screen-monitor">
-        <div style="color:#fff;"><span id="lbl-sys">SYSTEM</span>: CAM <span id="cam-id">01</span></div>
+        <div style="color:#fff; display:flex; justify-content:space-between; width:100%;">
+            <span><span id="lbl-sys">SYSTEM</span>: CAM <span id="cam-id">06</span></span>
+            <span style="color:red;" id="rec-dot">● REC</span>
+        </div>
         <div id="cam-view">
             <div id="cam-static"></div>
-            <h1 style="color:#333;">NO SIGNAL</h1>
+            <div id="cam-content"><h1 style="color:#333;">NO SIGNAL</h1></div>
         </div>
-        <div id="map-controls">
-            <button class="cam-select" onclick="Monitor.setCam(1)">01</button>
-            <button class="cam-select" onclick="Monitor.setCam(2)">02</button>
-            <button class="cam-select" onclick="Monitor.setCam(3)">03</button>
-            <button class="cam-select" onclick="Mechanics.toggleMonitor()">X</button>
+        <div id="map-layout">
+            <div id="room-06" class="map-room"></div>
+            <div id="room-04" class="map-room"></div>
+            <div id="room-05" class="map-room"></div>
+            <div id="room-02" class="map-room"></div>
+            <div id="room-03" class="map-room"></div>
+            <div id="room-you" class="map-room">YOU</div>
+            <button id="btn-c6" class="cam-btn active" onclick="Monitor.setCam(6)">06</button>
+            <button id="btn-c4" class="cam-btn" onclick="Monitor.setCam(4)">04</button>
+            <button id="btn-c5" class="cam-btn" onclick="Monitor.setCam(5)">05</button>
+            <button id="btn-c2" class="cam-btn" onclick="Monitor.setCam(2)">02</button>
+            <button id="btn-c3" class="cam-btn" onclick="Monitor.setCam(3)">03</button>
+            <button id="btn-c1" class="cam-btn" onclick="Monitor.setCam(1)">01</button>
+            <button id="btn-close-mon" onclick="Mechanics.toggleMonitor()">CLOSE X</button>
         </div>
     </div>
 </div>
@@ -239,7 +604,7 @@
         <img id="death-img" src="screen_death.png" style="width:100%; border:1px solid #333;">
         <p id="death-reason" style="color:#fff;">...</p>
     </div>
-    <button id="btn-menu-go" class="menu-btn" onclick="location.reload()">MENÚ</button>
+    <button id="btn-menu-go" class="menu-btn" onclick="location.reload()">REINTENTAR / MENU</button>
 </div>
 
 <div id="screen-jumpscare" class="screen">
@@ -247,89 +612,98 @@
 </div>
 
 <script>
-/* ==========================================================================
-   IDIOMAS Y DATA
-   ========================================================================== */
 const LORE_ES = `📖 MAIFER’S FACTORY — LORE OFICIAL
+Maifer’s Factory es una antigua fábrica industrial dedicada al desarrollo de robots de vigilancia. El lugar pertenece a Michael Boyko, conocido como Mr. Boyko.
+Durante años, la fábrica funcionó con normalidad, pero con el tiempo la mayoría de los empleados abandonaron el lugar.
+Ante la falta de personal, Mr. Boyko comenzó a publicar anuncios buscando guardias. El trabajo: vigilar la fábrica, controlar cámaras y el generador hasta las 8:00 AM.
 
-Maifer’s Factory es una antigua fábrica industrial dedicada al desarrollo de robots de vigilancia y asistencia mecánica. El lugar pertenece a Michael Boyko, conocido únicamente como Mr. Boyko, un empresario reservado que rara vez aparece en público.
+👤 EL PROTAGONISTA: Aceptas el trabajo por necesidad. Solo una advertencia: "No interfieras con los animatrónicos."
 
-Durante años, la fábrica funcionó con normalidad, pero con el tiempo la mayoría de los empleados abandonaron el lugar. Los turnos nocturnos fueron los primeros en desaparecer. Desde entonces, la fábrica opera casi exclusivamente con robots.
+🤖 LOS ROBOTS:
+- MAIFER: Agresivo, prototipo original.
+- ISAAC: Detecta rostros, usa la máscara.
+- JOMAR: Odia la luz, usa la linterna.
+- RICHARD: Unidad de contención, cierra la cortina.
 
-Ante la falta de personal, Mr. Boyko comenzó a publicar anuncios buscando guardias nocturnos. El trabajo parecía simple: vigilar la fábrica durante la noche, controlar las cámaras, administrar la energía del generador y evitar que los robots sufran daños hasta las 8:00 AM.
-El salario es alto. Las condiciones, vagas. El contrato, inquietantemente corto.
-
-👤 EL PROTAGONISTA
-Aceptas el trabajo por necesidad. No te explican por qué el puesto se renueva tan seguido. No te dicen qué ocurrió con los anteriores guardias. Solo una advertencia: "No interfieras con los animatrónicos. Sigue los protocolos."
-
-☎️ LA CHICA DEL TELÉFONO
-Cada noche recibes una llamada de una mujer que trabaja —o trabajó— en la fábrica. Nunca dice su nombre. Su tono cambia con el paso de las noches: Al principio intenta tranquilizarte. Luego se queja de los animatrónicos. Más adelante parece cansada, frustrada… casi resignada.
-
-🤖 LOS ROBOTS
-🟡 MAIFER (El Prototipo): Agresivo. Maifer fue el primer robot que Mr. Boyko decidió no desactivar jamás.
-🎭 ISAAC (Experimental): Detecta rostros. La máscara lo engaña. Sin ella, Isaac actúa como si el guardia fuera una amenaza.
-🔦 JOMAR (Oscuridad): Odia la luz. Permanece cerca, esperando que la luz falle.
-🟥 RICHARD (Contención): Unidad de contención. Solo puede ser detenido bajando la cortina a tiempo.
-
-⚡ EL GENERADOR
-La fábrica funciona con un sistema de energía limitado. El generador debe recargarse manualmente. Si la energía se agota, los protocolos de seguridad fallan.
-
-🧠 MR. BOYKO
-Para él, la noche no era un turno. Era una evaluación. Sobrevivir hasta las 8:00 AM no significa que ganaste. Significa que fuiste tolerado.`;
+🧠 MR. BOYKO: Para él, sobrevivir no es ganar. Es ser tolerado.`;
 
 const LORE_EN = `📖 MAIFER’S FACTORY — OFFICIAL LORE
+Maifer’s Factory is an old industrial facility dedicated to surveillance robots, owned by the elusive Michael Boyko.
+Most employees left years ago. Now, only robots remain.
+Mr. Boyko seeks night guards. The job: Watch the factory, manage power, survive until 8:00 AM.
 
-Maifer’s Factory is an old industrial facility dedicated to the development of surveillance robots. The place belongs to Michael Boyko, a reserved businessman who rarely appears in public.
+👤 THE PROTAGONIST: You need the money. Only one rule: "Do not interfere with the animatronics."
 
-For years, the factory operated normally, but over time most employees left. Night shifts were the first to disappear. Since then, the factory operates almost exclusively with robots.
+🤖 THE ROBOTS:
+- MAIFER: Aggressive prototype.
+- ISAAC: Facial recognition, use the mask.
+- JOMAR: Hates light, use the flashlight.
+- RICHARD: Containment unit, close the curtain.
 
-Facing a staff shortage, Mr. Boyko began posting ads for night guards. The job seemed simple: watch the factory, check cameras, manage generator power, and prevent robot damage until 8:00 AM.
-The salary is high. The conditions, vague. The contract, disturbingly short.
-
-👤 THE PROTAGONIST
-You accept the job out of necessity. They don't explain why the position opens up so often. Only one warning: "Do not interfere with the animatronics. Follow protocols."
-
-☎️ THE PHONE GIRL
-Every night you receive a call from a woman who works—or worked—at the factory. She never says her name. Her tone changes: At first reassuring, then complaining, finally resigned.
-
-🤖 THE ROBOTS
-🟡 MAIFER (Prototype): Aggressive. The first robot Mr. Boyko decided never to deactivate.
-🎭 ISAAC (Experimental): Detects faces. The mask fools him.
-🔦 JOMAR (Darkness): Hates light. Waits for the flashlight to fail.
-🟥 RICHARD (Containment): Only stopped by the curtain.
-
-⚡ THE GENERATOR
-Power is limited. If it runs out, security protocols fail.
-
-🧠 MR. BOYKO
-To him, the night wasn't a shift. It was an evaluation. Surviving until 8:00 AM doesn't mean you won. It means you were tolerated.`;
+🧠 MR. BOYKO: Survival isn't winning. It's being tolerated.`;
 
 const LORE_CN = `📖 MAIFER’S FACTORY — 官方传说
+Maifer工厂是属于神秘商人Michael Boyko的旧工业设施。
+大多数员工几年前就离开了。现在只剩下机器人。
+Boyko先生寻找夜间警卫。工作：监视工厂，管理电力，活到早上8:00。
 
-Maifer工厂是一家致力于开发监控机器人的老式工业设施。这个地方属于迈克尔·博伊科（Michael Boyko），这是一位很少在公众面前露面的神秘商人。
+👤 主角：你需要钱。只有一条规则：“不要干扰机器人。”
 
-多年来，工厂运转正常，但随着时间的推移，大多数员工离开了。夜班是最先消失的。从那时起，工厂几乎完全由机器人操作。
+🤖 机器人：
+- MAIFER：具有攻击性的原型。
+- ISAAC：面部识别，使用面具。
+- JOMAR：讨厌光，使用手电筒。
+- RICHARD：遏制单元，拉上窗帘。
 
-由于缺乏人手，博伊科先生开始发布寻找夜间警卫的广告。工作看起来很简单：监视工厂，控制摄像机，管理发电机能量，并在早上8:00之前防止机器人受损。
-薪水很高。条件含糊。合同令人不安地短。
+🧠 BOYKO先生：生存不是胜利。是被容忍。`;
 
-👤 主角
-你因为需要接受了这份工作。他们没有解释为什么这个职位经常换人。只有一个警告：“不要干扰电子机器人。遵守协议。”
+const UPDATES_ES = [
+    "✅ TEXTURAS HD MEJORADAS (V7.0)",
+    "✅ AJUSTES: FULLSCREEN & GLITCH",
+    "✅ 6 Cámaras + Mini Mapa Visual",
+    "✅ Game Over Music Added",
+    "✅ Menú Principal Mejorado (Scanlines)",
+    "✅ Richard visible en ventana",
+    "✅ Ventilación funcional con PNG",
+    "✅ Parpadeo de luces intenso",
+    "✅ Noche 8 difícil",
+    "✅ Toxicidad dinámica",
+    "✅ Botón Mute Call",
+    "✅ UI Mejorada (HUD profesional)",
+    "✅ Efecto visual 'Debajo de la mesa'"
+];
 
-☎️ 电话女孩
-每天晚上你都会接到一个在工厂工作过的女人的电话。她从不说名字。语气随时间变化：起初令人放心，后来抱怨，最后几乎放弃。
+const UPDATES_EN = [
+    "✅ HD TEXTURES (V7.0)",
+    "✅ SETTINGS: FULLSCREEN & GLITCH",
+    "✅ 6 Cameras + Visual Map",
+    "✅ Game Over Music Added",
+    "✅ Enhanced Main Menu",
+    "✅ Richard visible in window",
+    "✅ Working Vent with PNG",
+    "✅ Intense light flicker",
+    "✅ Hard Night 8",
+    "✅ Dynamic Toxicity",
+    "✅ Mute Call Button",
+    "✅ Pro HUD UI",
+    "✅ Better 'Under Desk' visual"
+];
 
-🤖 机器人
-🟡 MAIFER（原型）：具有攻击性。
-🎭 ISAAC（实验性）：检测面部。面具可以欺骗他。
-🔦 JOMAR（黑暗）：讨厌光。等待手电筒失效。
-🟥 RICHARD（遏制）：只能通过及时拉下窗帘来阻止。
-
-⚡ 发电机
-如果能量耗尽，安全协议将失效。
-
-🧠 博伊科先生
-对他来说，夜晚不是轮班。这是一个评估。活到早上8:00并不意味着你赢了。这意味着你被容忍了。`;
+const UPDATES_CN = [
+    "✅ 高清纹理 (V7.0)",
+    "✅ 设置：全屏和故障",
+    "✅ 6个摄像头 + 视觉地图",
+    "✅ 游戏结束音乐",
+    "✅ 增强主菜单",
+    "✅ Richard可见",
+    "✅ 通风口PNG",
+    "✅ 强光闪烁",
+    "✅ 困难第8夜",
+    "✅ 动态毒性",
+    "✅ 静音按钮",
+    "✅ 专业HUD界面",
+    "✅ 更好的“桌下”视觉效果"
+];
 
 const TEXTS = {
     ES: {
@@ -339,20 +713,13 @@ const TEXTS = {
         btn_close: "CERRAR", btn_save: "GUARDAR Y CERRAR", lore_txt: LORE_ES,
         lbl_mask: "MÁSCARA", lbl_flash: "LINTERNA", lbl_hide: "ESCONDERSE", lbl_curtain: "CORTINA", lbl_mon: "MONITOR",
         lbl_sys: "SISTEMA", lbl_pwr: "PODER",
-        d_maifer: "Maifer te vio fuera de la mesa.", d_isaac: "Isaac vio tu cara.", d_jomar: "Jomar odia la luz.",
-        d_richard: "Richard entró por la ventana.", d_power: "Sin energía.", d_air: "Te asfixiaste con la máscara.",
-        // LORE MINIJUEGOS
-        lf_1: "N1: Maifer no olvida. El miedo es registro.",
-        lf_2: "N2: Isaac sabe quién eres. No olvida rostros.",
-        lf_3: "N3: Sistema controlado por M. Boyko. La energía decide quién sobrevive.",
-        lf_4: "N4: Otros guardias cruzaron antes. La fábrica recuerda nombres borrados.",
-        lf_5: "N5: Jomar responde al miedo. Algo más lo guía.",
-        lf_6: "N6: Richard no busca daño. Solo corrige errores.",
-        lf_7: "N7: No eres el primero en sobrevivir. Algunos desaparecieron después.",
-        lf_8: "N8: Sobrevivir no significa ganar. La fábrica elige quién continúa.",
-        mg_1: "N1: ESQUIVAR (AGÁCHATE)", mg_2: "N2: RECOGE LA MÁSCARA", mg_3: "N3: CARGA GENERADOR",
-        mg_4: "N4: EVITA LAS SOMBRAS", mg_5: "N5: APUNTA LINTERNA", mg_6: "N6: SECUENCIA CORTINA",
-        mg_7: "N7: BUSCA LA LLAVE", mg_8: "N8: SOBREVIVE A TODO"
+        d_maifer: "Maifer te atrapó.", d_isaac: "Isaac no fue engañado.", d_jomar: "La oscuridad te consumió.",
+        d_richard: "Richard rompió la ventana.", d_power: "Apagón total.", d_air: "Falta de aire.", d_vent: "Algo salió de la ventilación.",
+        lf_1: "N1: Registro encontrado.", lf_2: "N2: Rostro detectado.",
+        mg_1: "N1: ESQUIVAR OBSTÁCULOS", mg_2: "N2: BUSCA LA MÁSCARA", mg_3: "N3: CARGA LA BATERÍA",
+        mg_4: "N4: EVITA LOS ROJOS (MOUSE)", mg_5: "N5: MANTÉN EL CENTRO (ESPACIO)", mg_6: "N6: REACCIONA RÁPIDO (CLICK)",
+        mg_7: "N7: ENCUENTRA LA SALIDA (ARROWS)", mg_8: "N8: SOBREVIVE 30 SEGUNDOS",
+        teaser: "FIVE NIGHTS AT MAIFER'S 2 IS COMING", upd_list: UPDATES_ES, mute: "SILENCIAR 📞", upd_btn: "ACTUALIZACIONES"
     },
     EN: {
         play: "PLAY (NIGHT", new: "NEW GAME", lore: "DATA / LORE", st: "SETTINGS",
@@ -361,19 +728,13 @@ const TEXTS = {
         btn_close: "CLOSE", btn_save: "SAVE & CLOSE", lore_txt: LORE_EN,
         lbl_mask: "MASK", lbl_flash: "FLASHLIGHT", lbl_hide: "HIDE", lbl_curtain: "CURTAIN", lbl_mon: "MONITOR",
         lbl_sys: "SYSTEM", lbl_pwr: "POWER",
-        d_maifer: "Maifer saw you outside.", d_isaac: "Isaac saw your face.", d_jomar: "Jomar hates light.",
-        d_richard: "Richard entered.", d_power: "No power.", d_air: "Asphyxiation.",
-        lf_1: "N1: Maifer does not forget. Fear is a record.",
-        lf_2: "N2: Isaac knows who you are. He never forgets a face.",
-        lf_3: "N3: System controlled by M. Boyko. Power decides survival.",
-        lf_4: "N4: Others crossed before. The factory remembers deleted names.",
-        lf_5: "N5: Jomar responds to fear. Something else guides him.",
-        lf_6: "N6: Richard seeks no harm. He only corrects errors.",
-        lf_7: "N7: You are not the first. Some disappeared later.",
-        lf_8: "N8: Survival is not winning. The factory chooses who remains.",
-        mg_1: "N1: DODGE (DUCK)", mg_2: "N2: GET THE MASK", mg_3: "N3: CHARGE GEN",
-        mg_4: "N4: AVOID SHADOWS", mg_5: "N5: POINT FLASHLIGHT", mg_6: "N6: CURTAIN SEQ",
-        mg_7: "N7: FIND KEY", mg_8: "N8: SURVIVE ALL"
+        d_maifer: "Maifer caught you.", d_isaac: "Isaac wasn't fooled.", d_jomar: "Darkness took you.",
+        d_richard: "Richard broke in.", d_power: "Blackout.", d_air: "No air.", d_vent: "Ventilation breach.",
+        lf_1: "N1: Record found.", lf_2: "N2: Face detected.",
+        mg_1: "N1: DODGE", mg_2: "N2: FIND MASK", mg_3: "N3: CHARGE BATTERY",
+        mg_4: "N4: AVOID RED (MOUSE)", mg_5: "N5: KEEP CENTER (SPACE)", mg_6: "N6: REACT FAST (CLICK)",
+        mg_7: "N7: FIND EXIT (ARROWS)", mg_8: "N8: SURVIVE 30 SECONDS",
+        teaser: "FIVE NIGHTS AT MAIFER'S 2 IS COMING", upd_list: UPDATES_EN, mute: "MUTE CALL 📞", upd_btn: "UPDATES"
     },
     CN: {
         play: "开始游戏 (夜", new: "新游戏", lore: "数据 / 传说", st: "设置",
@@ -382,19 +743,13 @@ const TEXTS = {
         btn_close: "关闭", btn_save: "保存并关闭", lore_txt: LORE_CN,
         lbl_mask: "面具", lbl_flash: "手电筒", lbl_hide: "隐藏", lbl_curtain: "窗帘", lbl_mon: "监视器",
         lbl_sys: "系统", lbl_pwr: "功率",
-        d_maifer: "Maifer看到了你。", d_isaac: "Isaac看到了你的脸。", d_jomar: "Jomar讨厌光。",
-        d_richard: "Richard进来了。", d_power: "停电。", d_air: "窒息。",
-        lf_1: "N1: Maifer不会忘记。恐惧是记录。",
-        lf_2: "N2: Isaac知道你是谁。他从不忘记一张脸。",
-        lf_3: "N3: 系统由M. Boyko控制。能量决定生存。",
-        lf_4: "N4: 其他人以前穿过。工厂记得删除的名字。",
-        lf_5: "N5: Jomar对恐惧有反应。别的东西在引导他。",
-        lf_6: "N6: Richard不寻求伤害。他只纠正错误。",
-        lf_7: "N7: 你不是第一个。有些人后来失踪了。",
-        lf_8: "N8: 生存不是胜利。工厂选择谁留下。",
-        mg_1: "N1: 躲避 (蹲下)", mg_2: "N2: 拿面具", mg_3: "N3: 充电发电机",
-        mg_4: "N4: 避开阴影", mg_5: "N5: 指向手电筒", mg_6: "N6: 窗帘序列",
-        mg_7: "N7: 找钥匙", mg_8: "N8: 全部生存"
+        d_maifer: "Maifer抓住了你。", d_isaac: "Isaac看到了你的脸。", d_jomar: "黑暗吞噬了你。",
+        d_richard: "Richard闯入。", d_power: "停电。", d_air: "窒息。", d_vent: "通风口。",
+        lf_1: "N1: 记录。", lf_2: "N2: 脸。",
+        mg_1: "N1: 躲避", mg_2: "N2: 找面具", mg_3: "N3: 充电",
+        mg_4: "N4: 避开红色 (鼠标)", mg_5: "N5: 保持中心 (空格)", mg_6: "N6: 快速反应 (点击)",
+        mg_7: "N7: 找出口 (箭头)", mg_8: "N8: 生存30秒",
+        teaser: "FIVE NIGHTS AT MAIFER'S 2 IS COMING", upd_list: UPDATES_CN, mute: "静音通话 📞", upd_btn: "更新"
     }
 };
 
@@ -409,67 +764,116 @@ const Lang = {
     apply: () => {
         const t = TEXTS[Lang.current];
         const n = document.getElementById('menu-night').innerText;
-        
         document.getElementById('lang-btn').innerText = Lang.current === 'CN' ? '中文' : (Lang.current === 'ES' ? 'ESPAÑOL' : 'ENGLISH');
         document.getElementById('btn-play').innerHTML = `${t.play} <span id="menu-night">${n}</span>)`;
         document.getElementById('btn-new').innerText = t.new;
         document.getElementById('btn-lore').innerText = t.lore;
+        document.getElementById('btn-updates').innerText = t.upd_btn;
         document.getElementById('btn-settings').innerText = t.st;
         document.getElementById('btn-custom').childNodes[0].nodeValue = t.custom + " "; 
-        
         document.getElementById('lore-content').innerText = t.lore_txt;
         document.getElementById('btn-close-lore').innerText = t.btn_close;
-        
+        document.getElementById('btn-close-upd').innerText = t.btn_close;
         document.getElementById('st-title').innerText = t.st_title;
         document.getElementById('st-vol').innerText = t.st_vol;
         document.getElementById('st-ctrl').innerText = t.st_ctrl;
         document.getElementById('btn-save-st').innerText = t.btn_save;
-
-        // AJUSTES LABELS
         document.getElementById('lbl-mask').innerText = t.lbl_mask;
         document.getElementById('lbl-flash').innerText = t.lbl_flash;
         document.getElementById('lbl-hide').innerText = t.lbl_hide;
         document.getElementById('lbl-curtain').innerText = t.lbl_curtain;
         document.getElementById('lbl-mon').innerText = t.lbl_mon;
-
-        // HUD / GAME
         document.getElementById('lbl-night').innerText = t.night;
         document.getElementById('lbl-pwr').innerText = t.lbl_pwr;
         document.getElementById('lbl-sys').innerText = t.lbl_sys;
         document.getElementById('btn-cam-sys').innerText = `[ ${t.lbl_sys} ]`;
         document.getElementById('lbl-under').innerText = t.under;
         document.getElementById('lbl-win').innerText = t.win;
+        document.getElementById('teaser-text').innerText = t.teaser;
+        document.getElementById('btn-mute').innerText = t.mute;
+        const ul = document.getElementById('update-list'); 
+        ul.innerHTML='';
+        t.upd_list.forEach(item => { 
+            let li = document.createElement('li'); 
+            li.innerText = item; 
+            ul.appendChild(li); 
+        });
     }
 };
 
-const SAVEDATA = JSON.parse(localStorage.getItem('mf_save_v4') || '{"night":1, "stars":{}, "binds":null}');
+let SAVEDATA = {night:1, stars:{}, binds:null};
+try { 
+    const loaded = localStorage.getItem('mf_save_v4'); 
+    if(loaded) SAVEDATA = JSON.parse(loaded); 
+} catch(e) { 
+    localStorage.removeItem('mf_save_v4'); 
+}
+
 const BINDINGS = SAVEDATA.binds || { mask: 'Space', flash: 'KeyF', hide: 'ControlLeft', curtain: 'KeyS', monitor: 'Tab' };
+
 const NIGHT_CONFIG = {
-    1: { maifer: 3, isaac: 0, jomar: 0, richard: 0, power: 100 },
-    2: { maifer: 4, isaac: 4, jomar: 0, richard: 0, power: 100 },
-    3: { maifer: 5, isaac: 5, jomar: 3, richard: 0, power: 95 },
-    4: { maifer: 8, isaac: 8, jomar: 5, richard: 4, power: 90 },
-    5: { maifer: 10, isaac: 10, jomar: 8, richard: 8, power: 85 },
-    6: { maifer: 15, isaac: 12, jomar: 12, richard: 12, power: 85 },
-    7: { maifer: 18, isaac: 15, jomar: 15, richard: 15, power: 80 },
-    8: { maifer: 20, isaac: 20, jomar: 20, richard: 20, power: 75 },
+    1: { maifer: 2, isaac: 0, jomar: 0, richard: 2, power: 100 },
+    2: { maifer: 4, isaac: 3, jomar: 2, richard: 4, power: 100 },
+    3: { maifer: 6, isaac: 5, jomar: 5, richard: 5, power: 100 }, 
+    4: { maifer: 8, isaac: 8, jomar: 7, richard: 7, power: 100 },
+    5: { maifer: 10, isaac: 10, jomar: 10, richard: 10, power: 100 },
+    6: { maifer: 12, isaac: 12, jomar: 12, richard: 12, power: 100 },
+    7: { maifer: 15, isaac: 15, jomar: 15, richard: 15, power: 100 },
+    8: { maifer: 20, isaac: 20, jomar: 20, richard: 20, power: 100 }, 
     9: { maifer: 20, isaac: 20, jomar: 20, richard: 20, power: 100 }
 };
 
 /* ==========================================================================
-   LOGICA DEL JUEGO
+   CONFIGURACION (NUEVO)
+   ========================================================================== */
+const Config = {
+    glitchEnabled: true,
+    toggleFullscreen: () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+            if (document.exitFullscreen) document.exitFullscreen();
+        }
+    },
+    toggleGlitch: () => {
+        Config.glitchEnabled = !Config.glitchEnabled;
+        document.querySelectorAll('.active-anim').forEach(el => {
+            el.style.animation = Config.glitchEnabled ? 'glitch 1s infinite' : 'none';
+        });
+        document.querySelectorAll('.title-text').forEach(el => {
+            el.style.animation = Config.glitchEnabled ? 'glitch 4s infinite' : 'none';
+        });
+    }
+};
+
+/* ==========================================================================
+   AUDIO
    ========================================================================== */
 const AudioSys = {
     volume: 1.0,
-    setVolume: (val) => {
-        AudioSys.volume = val / 100;
-        document.querySelectorAll('audio').forEach(a => a.volume = AudioSys.volume);
+    setVolume: (val) => { 
+        AudioSys.volume = val / 100; 
+        document.querySelectorAll('audio').forEach(a => a.volume = AudioSys.volume); 
     },
-    play: (id, loop=false) => {
+    play: (id, loop=false, forceVol=null) => {
         const s = document.getElementById(id);
-        if(s){ s.loop = loop; s.volume = AudioSys.volume; s.currentTime = 0; s.play().catch(()=>{}); }
+        if(s){ 
+            s.loop = loop; 
+            s.volume = forceVol !== null ? forceVol : AudioSys.volume; 
+            s.currentTime = 0; 
+            s.play().catch(()=>{}); 
+        }
     },
-    stopAll: () => document.querySelectorAll('audio').forEach(a => { a.pause(); a.currentTime=0; })
+    stop: (id) => { 
+        const s = document.getElementById(id); 
+        if(s) { s.pause(); s.currentTime = 0; } 
+    },
+    stopAll: () => document.querySelectorAll('audio').forEach(a => { a.pause(); a.currentTime=0; }),
+    stopLoops: () => { 
+        AudioSys.stop('sfx-maifer'); 
+        AudioSys.stop('sfx-isaac'); 
+        AudioSys.stop('sfx-jomar'); 
+    }
 };
 
 const Input = {
@@ -499,8 +903,9 @@ document.addEventListener('keydown', (e) => {
 });
 
 const Game = {
-    state: { night: 1, power: 100, time: 0, over: false, view: 'office', mask: false, hidden: false, curtain: false, flash: false, toxic: 0, inMinigame: false },
-    timers: {}, ai: {},
+    state: { night: 1, power: 100, time: 0, over: false, view: 'office', mask: false, hidden: false, curtain: false, flash: false, toxic: 0, vent: false, inMinigame: false },
+    timers: {}, 
+    ai: {},
 
     initMenu: () => {
         document.getElementById('menu-night').innerText = SAVEDATA.night;
@@ -510,114 +915,251 @@ const Game = {
         if(SAVEDATA.night > 7) row.innerHTML += '<span class="star earned">★</span>';
         if(SAVEDATA.night > 8) row.innerHTML += '<span class="star earned">★</span>';
         const cnBtn = document.getElementById('btn-custom');
-        if(SAVEDATA.night > 8) { cnBtn.disabled = false; cnBtn.classList.remove('locked'); cnBtn.querySelector('.icon-lock').style.display = 'none'; }
-        for(let k in BINDINGS) { const el = document.getElementById('bind-'+k); if(el) el.innerText = BINDINGS[k]; }
+        if(SAVEDATA.night > 8) { 
+            cnBtn.disabled = false; 
+            cnBtn.classList.remove('locked'); 
+            cnBtn.querySelector('.icon-lock').style.display = 'none'; 
+        }
+        for(let k in BINDINGS) { 
+            const el = document.getElementById('bind-'+k); 
+            if(el) el.innerText = BINDINGS[k]; 
+        }
         Lang.apply();
         AudioSys.play('bgm-menu', true);
     },
-    newGame: () => { if(confirm("DELETE DATA?")) { localStorage.removeItem('mf_save_v4'); location.reload(); } },
-    initNight: () => { Game.startLevel(SAVEDATA.night > 8 ? 8 : SAVEDATA.night); },
+
+    newGame: () => { 
+        if(confirm("DELETE DATA?")) { 
+            localStorage.removeItem('mf_save_v4'); 
+            location.reload(); 
+        } 
+    },
+
+    initNight: () => { Game.startLevel(parseInt(SAVEDATA.night) > 8 ? 8 : parseInt(SAVEDATA.night)); },
     initCustom: () => { Game.startLevel(9); },
+
     startLevel: (n) => {
-        Game.state = { night: n, power: NIGHT_CONFIG[n].power, time: 0, over: false, view: 'office', mask: false, hidden: false, curtain: false, flash: false, toxic: 0, inMinigame: false };
-        Game.ai = { ...NIGHT_CONFIG[n], pos: { maifer:0, isaac:0, jomar:0, richard:0 } };
+        n = parseInt(n);
+        Game.state = { night: n, power: 100, time: 0, over: false, view: 'office', mask: false, hidden: false, curtain: false, flash: false, toxic: 0, vent: false, inMinigame: false };
+        Game.ai = { ...NIGHT_CONFIG[n], pos: { maifer:0, isaac:0, jomar:0, richard:0, vent:0 }, busy: false };
+        
         document.getElementById('game-night-num').innerText = n;
         UI.showScreen('screen-game');
         AudioSys.stopAll();
-        AudioSys.play('bgm-game', true);
-        if(n < 3) AudioSys.play(n===1 ? 'voice-1' : 'voice-2');
+        
+        setTimeout(() => {
+            AudioSys.play('bgm-game', true, 0.6); 
+            if(n < 3) AudioSys.play(n===1 ? 'voice-1' : 'voice-2', false, 1.0);
+            document.getElementById('btn-mute').style.display = 'block';
+        }, 500);
+
         document.getElementById('curtain').classList.remove('closed');
+        document.getElementById('vent-door').classList.remove('closed');
+        document.getElementById('vent-btn').classList.remove('active');
+        document.getElementById('vent-img').style.display = 'none';
         document.getElementById('layer-mask').style.display = 'none';
         document.getElementById('layer-flashlight').style.display = 'none';
         document.getElementById('layer-under-desk').style.display = 'none';
         document.getElementById('toxic-bar').style.width = '0%';
         document.querySelectorAll('.anim-img').forEach(i => i.style.display = 'none');
         document.getElementById('richard-eyes').style.opacity = 0;
+        
         Mechanics.moveGenButton();
         Game.timers.main = setInterval(Game.loop, 100);
-        Game.timers.ai = setInterval(Game.aiLoop, 2000);
+        Game.timers.ai = setInterval(Game.aiLoop, n === 8 ? 1000 : (n === 1 ? 2500 : 2000));
     },
+
     loop: () => {
         if(Game.state.over || Game.state.inMinigame) return;
+        
         Game.state.time += 0.12; 
-        let hour = 12 + Math.floor(Game.state.time / 12.5); if(hour > 12) hour -= 12;
+        let hour = 12 + Math.floor(Game.state.time / 12.5); 
+        if(hour > 12) hour -= 12;
         document.getElementById('hud-time').innerText = (hour === 0 ? 12 : hour) + " AM";
         if(Game.state.time >= 100) { Game.reach8AM(); return; }
         
         let drain = 0.04;
-        if(Game.state.mask) drain += 0.04;
-        if(Game.state.flash) drain += 0.08;
-        if(Game.state.view === 'monitor') drain += 0.12;
-        if(Game.state.curtain) drain += 0.1;
+        let usage = 1;
+        if(Game.state.night === 8) drain = 0.08; 
+        if(Game.state.mask) { drain += 0.04; usage++; }
+        if(Game.state.flash) { drain += 0.08; usage++; }
+        if(Game.state.view === 'monitor') { drain += 0.12; usage++; }
+        if(Game.state.curtain) { drain += 0.1; usage++; }
+        if(Game.state.vent) { drain += 0.08; usage++; }
+        
+        document.getElementById('use-1').className = 'usage-block ' + (usage >= 1 ? 'active' : '');
+        document.getElementById('use-2').className = 'usage-block ' + (usage >= 2 ? 'active' : '');
+        document.getElementById('use-3').className = 'usage-block ' + (usage >= 3 ? 'active' : '');
+        document.getElementById('use-4').className = 'usage-block ' + (usage >= 4 ? 'high' : '');
+
         Game.state.power -= drain;
         document.getElementById('pwr-val').innerText = Math.floor(Game.state.power);
         if(Game.state.power <= 0) { Game.die('power'); return; }
 
-        if(Game.state.mask) { Game.state.toxic += 0.3; document.getElementById('hud-toxic').style.display = 'block'; } 
-        else { Game.state.toxic = Math.max(0, Game.state.toxic - 0.2); if(Game.state.toxic <= 0) document.getElementById('hud-toxic').style.display = 'none'; }
+        if(Game.state.mask) { 
+            let toxicRate = 0.2 + (Game.state.night * 0.05);
+            Game.state.toxic += toxicRate; 
+            document.getElementById('hud-toxic').style.display = 'block'; 
+        } else { 
+            Game.state.toxic = Math.max(0, Game.state.toxic - 0.2); 
+            if(Game.state.toxic <= 0) document.getElementById('hud-toxic').style.display = 'none'; 
+        }
         document.getElementById('toxic-bar').style.width = Game.state.toxic + "%";
         if(Game.state.toxic >= 100) { Game.die('air'); return; }
-        if(Game.ai.pos.richard === 1) document.getElementById('richard-eyes').style.opacity = Game.state.curtain ? 0 : 1;
+        
+        if(Game.ai.pos.richard >= 1 && !Game.state.curtain) {
+            document.getElementById('richard-eyes').style.opacity = 1;
+        } else {
+             document.getElementById('richard-eyes').style.opacity = 0;
+        }
+        Monitor.update();
     },
+
     aiLoop: () => {
         if(Game.state.over) return;
         const rng = (lvl) => (Math.random() * 20) < lvl;
-        
-        if(rng(Game.ai.maifer)) {
+        if(Game.ai.busy && Game.state.night < 8) return;
+
+        let killTime = 3000;
+        if(Game.state.night >= 5) killTime = 2000;
+        if(Game.state.night === 8) killTime = 1500; 
+
+        // MAIFER
+        if(rng(Game.ai.maifer) && Game.ai.pos.maifer < 5) {
             Game.ai.pos.maifer++;
             if(Game.ai.pos.maifer === 5) {
-                AudioSys.play('sfx-maifer');
-                document.getElementById('vis-maifer').style.display = 'block';
+                Game.ai.busy = true; 
+                UI.flicker();
                 setTimeout(() => {
-                    if(!Game.state.hidden) Game.die('maifer');
-                    else { AudioSys.play('sfx-leave'); document.getElementById('vis-maifer').style.display = 'none'; Game.ai.pos.maifer = 0; }
-                }, 3000);
+                    AudioSys.play('sfx-maifer', true);
+                    document.getElementById('vis-maifer').style.display = 'block';
+                    setTimeout(() => {
+                        if(!Game.state.hidden) Game.die('maifer');
+                        else { 
+                            AudioSys.stopLoops(); AudioSys.play('sfx-leave', false, 1.0); 
+                            document.getElementById('vis-maifer').style.display = 'none'; 
+                            Game.ai.pos.maifer = 0; Game.ai.busy = false;
+                        }
+                    }, killTime);
+                }, 1000);
             }
         }
-        if(rng(Game.ai.isaac)) {
+        
+        // VENTILACION
+        if(Game.ai.pos.vent === 0) {
+             let chance = Game.state.night * 0.05; 
+             if(Math.random() < chance) { 
+                 Game.ai.pos.vent = 1; 
+                 let who = Math.random() > 0.5 ? 'maifer.png' : 'isaac.png';
+                 document.getElementById('vent-img').src = who;
+                 document.getElementById('vent-img').style.display = 'block';
+             }
+        } else if (Game.ai.pos.vent === 1) {
+             if(Game.state.vent) {
+                 AudioSys.play('sfx-leave', false, 1.0);
+                 Game.ai.pos.vent = 0;
+                 document.getElementById('vent-img').style.display = 'none';
+             } else {
+                 if(Math.random() > 0.6) Game.die('vent'); 
+             }
+        }
+
+        // ISAAC
+        if(rng(Game.ai.isaac) && Game.ai.pos.isaac < 5) {
             Game.ai.pos.isaac++;
             if(Game.ai.pos.isaac === 5) {
-                AudioSys.play('sfx-isaac');
-                document.getElementById('vis-isaac').style.display = 'block';
+                Game.ai.busy = true; 
+                UI.flicker();
                 setTimeout(() => {
-                    if(!Game.state.mask) Game.die('isaac');
-                    else { AudioSys.play('sfx-leave'); document.getElementById('vis-isaac').style.display = 'none'; Game.ai.pos.isaac = 0; }
-                }, 3500);
+                    AudioSys.play('sfx-isaac', true);
+                    document.getElementById('vis-isaac').style.display = 'block';
+                    setTimeout(() => {
+                        if(!Game.state.mask) Game.die('isaac');
+                        else { 
+                            AudioSys.stopLoops(); AudioSys.play('sfx-leave', false, 1.0); 
+                            document.getElementById('vis-isaac').style.display = 'none'; 
+                            Game.ai.pos.isaac = 0; Game.ai.busy = false;
+                        }
+                    }, killTime + 500); 
+                }, 1000);
             }
         }
+
+        // JOMAR
         if(rng(Game.ai.jomar)) {
-            if(Game.ai.pos.jomar === 0) { Game.ai.pos.jomar = 1; document.getElementById('vis-jomar').style.display = 'block'; AudioSys.play('sfx-jomar'); } 
-            else if(Math.random() > 0.7) Game.die('jomar');
+            if(Game.ai.pos.jomar === 0) { 
+                Game.ai.busy = true; 
+                UI.flicker();
+                Game.ai.pos.jomar = 1; 
+                setTimeout(() => {
+                    document.getElementById('vis-jomar').style.display = 'block'; 
+                    AudioSys.play('sfx-jomar', true); 
+                }, 500);
+            } else {
+                if(Math.random() > 0.8) Game.die('jomar'); 
+            }
         }
-        if(rng(Game.ai.richard)) {
-            if(Game.ai.pos.richard === 0) { Game.ai.pos.richard = 1; if(!Game.state.curtain) document.getElementById('richard-eyes').style.opacity = 1; }
-            else if (Game.ai.pos.richard === 1) {
-                if(Game.state.curtain) { if(Math.random() > 0.4) { AudioSys.play('sfx-leave'); Game.ai.pos.richard = 0; document.getElementById('richard-eyes').style.opacity = 0; } }
-                else { Game.ai.pos.richard++; if(Game.ai.pos.richard > 3) Game.die('richard'); }
+
+        // RICHARD
+        if(Game.ai.pos.richard === 0) {
+            if(rng(Game.ai.richard)) {
+                Game.ai.pos.richard = 1; 
+                if(Game.state.night === 8 && Math.random() > 0.5) Game.ai.pos.richard = 2; 
+            }
+        } else {
+            if(Game.state.curtain) {
+                AudioSys.play('sfx-leave', false, 1.0);
+                Game.ai.pos.richard = 0;
+            } else {
+                if(rng(Game.ai.richard + 5)) { 
+                    Game.ai.pos.richard++;
+                    if(Game.ai.pos.richard > 4) Game.die('richard'); 
+                }
             }
         }
     },
+
     die: (causeKey) => {
+        if(Game.state.over) return;
         Game.state.over = true;
-        clearInterval(Game.timers.main); clearInterval(Game.timers.ai); AudioSys.stopAll();
+        clearInterval(Game.timers.main); 
+        clearInterval(Game.timers.ai); 
+        AudioSys.stopAll();
+        
         const js = document.getElementById('screen-jumpscare');
         const img = document.getElementById('jump-img');
         js.style.display = 'flex';
+        
         let src="maifer.png", snd="jump-maifer";
-        if(causeKey === 'maifer') { src="maifer.png"; snd="jump-maifer"; }
+        if(causeKey === 'maifer' || causeKey === 'vent') { src="maifer.png"; snd="jump-maifer"; }
         if(causeKey === 'isaac') { src="isaac.png"; snd="jump-isaac"; }
         if(causeKey === 'jomar') { src="jomar.png"; snd="jump-jomar"; }
         if(causeKey === 'richard') { src="maifer.png"; snd="jump-richard"; } 
-        img.src = src; AudioSys.play(snd);
+        
+        img.src = src; 
+        AudioSys.play(snd);
+        
         setTimeout(() => {
-            js.style.display = 'none'; UI.showScreen('screen-gameover');
+            js.style.display = 'none'; 
+            UI.showScreen('screen-gameover');
             document.getElementById('death-reason').innerText = TEXTS[Lang.current]['d_'+causeKey] || "GAME OVER";
+            
+            // MUSICA GAME OVER
+            AudioSys.play('sfx-gameover', false, 1.0);
         }, 2000);
     },
+
     reach8AM: () => {
-        Game.state.over = true; clearInterval(Game.timers.main); clearInterval(Game.timers.ai); AudioSys.stopAll();
-        UI.showScreen('screen-8am'); AudioSys.play('sfx-win');
-        setTimeout(() => { if(Game.state.night < 9) MiniGames.start(Game.state.night); else location.reload(); }, 4000);
+        Game.state.over = true; 
+        clearInterval(Game.timers.main); 
+        clearInterval(Game.timers.ai); 
+        AudioSys.stopAll();
+        UI.showScreen('screen-8am'); 
+        AudioSys.play('sfx-win');
+        setTimeout(() => { 
+            if(Game.state.night < 9) MiniGames.start(Game.state.night); 
+            else location.reload(); 
+        }, 4000);
     }
 };
 
@@ -625,186 +1167,284 @@ const Mechanics = {
     canAct: (isTurningOff) => {
         if(isTurningOff) return true;
         let count = 0;
-        if(Game.state.mask) count++; if(Game.state.view === 'monitor') count++;
-        if(Game.state.flash) count++; if(Game.state.curtain) count++; if(Game.state.hidden) count++;
-        return count < 2; 
+        if(Game.state.mask) count++; 
+        if(Game.state.view === 'monitor') count++;
+        if(Game.state.flash) count++; 
+        if(Game.state.curtain) count++; 
+        if(Game.state.hidden) count++;
+        if(Game.state.vent) count++;
+        return count < 1; 
     },
-    toggleMonitor: () => { if(Game.state.over || Game.state.hidden) return; const m = document.getElementById('screen-monitor'); if(Game.state.view==='monitor') { m.style.display='none'; Game.state.view='office'; } else { if(!Mechanics.canAct(false)) return; m.style.display='flex'; Game.state.view='monitor'; AudioSys.play('sfx-monitor'); } },
-    toggleMask: () => { if(Game.state.view !== 'office') return; if(Game.state.mask) { Game.state.mask = false; document.getElementById('layer-mask').style.display = 'none'; AudioSys.stopAll(); } else { if(!Mechanics.canAct(false)) return; Game.state.mask = true; document.getElementById('layer-mask').style.display = 'block'; AudioSys.play('sfx-mask', true); } },
-    toggleFlashlight: () => { if(Game.state.view !== 'office') return; if(Game.state.flash) { Game.state.flash = false; document.getElementById('layer-flashlight').style.display = 'none'; } else { if(!Mechanics.canAct(false)) return; Game.state.flash = true; document.getElementById('layer-flashlight').style.display = 'block'; AudioSys.play('sfx-flash'); if(Game.ai.pos.jomar === 1) { Game.ai.pos.jomar = 0; document.getElementById('vis-jomar').style.display = 'none'; AudioSys.play('sfx-leave'); } } },
-    toggleCurtain: () => { if(Game.state.view !== 'office') return; if(Game.state.curtain) { Game.state.curtain = false; } else { if(!Mechanics.canAct(false)) return; Game.state.curtain = true; AudioSys.play('sfx-curtain'); } document.getElementById('curtain').classList.toggle('closed', Game.state.curtain); },
-    toggleHide: () => { if(Game.state.view !== 'office') return; if(Game.state.hidden) { Game.state.hidden = false; document.getElementById('layer-under-desk').style.display = 'none'; } else { if(!Mechanics.canAct(false)) return; Game.state.hidden = true; document.getElementById('layer-under-desk').style.display = 'flex'; AudioSys.play('sfx-hide'); } },
-    moveGenButton: () => { const btn = document.getElementById('gen-btn'); btn.style.left = Math.random()*90 + 'px'; btn.style.top = Math.random()*140 + 'px'; btn.style.display = 'block'; },
-    chargeGen: () => { if(Game.state.over) return; Game.state.power = Math.min(100, Game.state.power + 5); document.getElementById('pwr-val').innerText = Math.floor(Game.state.power); AudioSys.play('sfx-gen'); document.getElementById('gen-btn').style.display = 'none'; setTimeout(Mechanics.moveGenButton, 3000 + Math.random()*5000); }
+    toggleMonitor: () => { 
+        if(Game.state.over || Game.state.hidden) return; 
+        const m = document.getElementById('screen-monitor'); 
+        if(Game.state.view==='monitor') { 
+            m.style.display='none'; 
+            Game.state.view='office'; 
+        } 
+        else { 
+            if(!Mechanics.canAct(false)) return; 
+            m.style.display='flex'; 
+            Game.state.view='monitor'; 
+            AudioSys.play('sfx-monitor'); 
+        } 
+    },
+    toggleMask: () => { 
+        if(Game.state.view !== 'office') return; 
+        if(Game.state.mask) { 
+            Game.state.mask = false; 
+            document.getElementById('layer-mask').style.display = 'none'; 
+            AudioSys.stop('sfx-mask'); 
+        } 
+        else { 
+            if(!Mechanics.canAct(false)) return; 
+            Game.state.mask = true; 
+            document.getElementById('layer-mask').style.display = 'block'; 
+            AudioSys.play('sfx-mask', true); 
+        } 
+    },
+    toggleFlashlight: () => { 
+        if(Game.state.view !== 'office') return; 
+        if(Game.state.flash) { 
+            Game.state.flash = false; 
+            document.getElementById('layer-flashlight').style.display = 'none'; 
+        } 
+        else { 
+            if(!Mechanics.canAct(false)) return; 
+            Game.state.flash = true; 
+            document.getElementById('layer-flashlight').style.display = 'block'; 
+            AudioSys.play('sfx-flash'); 
+            if(Game.ai.pos.jomar === 1) { 
+                Game.ai.pos.jomar = 0; 
+                document.getElementById('vis-jomar').style.display = 'none'; 
+                AudioSys.stopLoops(); 
+                AudioSys.play('sfx-leave', false, 1.0); 
+                Game.ai.busy = false; 
+            } 
+        } 
+    },
+    toggleCurtain: () => { 
+        if(Game.state.view !== 'office') return; 
+        if(Game.state.curtain) { 
+            Game.state.curtain = false; 
+        } 
+        else { 
+            if(!Mechanics.canAct(false)) return; 
+            Game.state.curtain = true; 
+            AudioSys.play('sfx-curtain'); 
+        } 
+        document.getElementById('curtain').classList.toggle('closed', Game.state.curtain); 
+    },
+    toggleHide: () => { 
+        if(Game.state.view !== 'office') return; 
+        if(Game.state.hidden) { 
+            Game.state.hidden = false; 
+            document.getElementById('layer-under-desk').style.display = 'none'; 
+        } 
+        else { 
+            if(!Mechanics.canAct(false)) return; 
+            Game.state.hidden = true; 
+            document.getElementById('layer-under-desk').style.display = 'flex'; 
+            AudioSys.play('sfx-hide'); 
+        } 
+    },
+    toggleVent: () => {
+        if(Game.state.view !== 'office') return;
+        if(Game.state.vent) { 
+            Game.state.vent = false; 
+        } 
+        else { 
+            if(!Mechanics.canAct(false)) return; 
+            Game.state.vent = true; 
+            AudioSys.play('sfx-curtain'); 
+        }
+        document.getElementById('vent-door').classList.toggle('closed', Game.state.vent);
+        document.getElementById('vent-btn').classList.toggle('active', Game.state.vent);
+    },
+    muteCall: () => {
+        AudioSys.stop('voice-1'); 
+        AudioSys.stop('voice-2');
+        document.getElementById('btn-mute').style.display = 'none';
+    },
+    moveGenButton: () => { 
+        const btn = document.getElementById('gen-btn'); 
+        btn.style.left = Math.random()*90 + 'px'; 
+        btn.style.top = Math.random()*140 + 'px'; 
+        btn.style.display = 'block'; 
+    },
+    chargeGen: () => { 
+        if(Game.state.over) return; 
+        Game.state.power = Math.min(100, Game.state.power + 5); 
+        document.getElementById('pwr-val').innerText = Math.floor(Game.state.power); 
+        AudioSys.play('sfx-gen'); 
+        document.getElementById('gen-btn').style.display = 'none'; 
+        setTimeout(Mechanics.moveGenButton, 3000 + Math.random()*5000); 
+    }
 };
 
-const Monitor = { setCam: (id) => { document.getElementById('cam-id').innerText = "0"+id; document.querySelectorAll('.cam-select').forEach(b => b.classList.remove('active')); event.target.classList.add('active'); AudioSys.play('sfx-cam'); } };
+const Monitor = {
+    current: 6, 
+    setCam: (id) => { 
+        Monitor.current = id; 
+        document.getElementById('cam-id').innerText = "0"+id; 
+        document.querySelectorAll('.cam-btn').forEach(b => b.classList.remove('active')); 
+        document.getElementById('btn-c'+id).classList.add('active');
+        AudioSys.play('sfx-cam'); 
+        Monitor.update(); 
+    },
+    update: () => {
+        if(Game.state.view !== 'monitor') return;
+        const div = document.getElementById('cam-content'); 
+        div.innerHTML = '';
+        const c = Monitor.current; 
+        const p = Game.ai.pos;
+        let html = '';
 
-/* ==========================================================================
-   MINIJUEGOS 1-8
-   ========================================================================== */
+        if(c===6) {
+            if(p.maifer === 0) html += '<div class="cam-spot">MAIFER (IDLE)</div>';
+            if(p.isaac === 0) html += '<div class="cam-spot">ISAAC (IDLE)</div>';
+        }
+        if(c===5 && p.maifer === 1) html += '<div class="cam-spot active-anim">MAIFER DETECTED</div>';
+        if(c===4 && p.isaac === 1) html += '<div class="cam-spot active-anim">ISAAC DETECTED</div>';
+        if(c===3) {
+            if(p.maifer === 2) html += '<div class="cam-spot active-anim">MAIFER DETECTED</div>';
+            if(p.isaac === 2) html += '<div class="cam-spot active-anim">ISAAC DETECTED</div>';
+        }
+        if(c===2) {
+            if(p.maifer === 3) html += '<div class="cam-spot active-anim">MAIFER DETECTED</div>';
+            if(p.isaac === 4) html += '<div class="cam-spot active-anim">ISAAC (NEAR)</div>';
+        }
+        if(c===1) {
+            if(p.maifer === 4) html += '<div class="cam-spot active-anim">MAIFER (NEAR)</div>';
+            if(p.isaac === 3) html += '<div class="cam-spot active-anim">ISAAC DETECTED</div>';
+        }
+
+        if(html === '') html = '<h1 style="color:#333;">NO SIGNAL</h1>';
+        div.innerHTML = html;
+    }
+};
+
+const UI = {
+    modalOpen: false,
+    showScreen: (id) => { 
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
+        document.getElementById(id).classList.add('active'); 
+    },
+    openLore: () => { 
+        document.getElementById('modal-lore').style.display = 'flex'; 
+        UI.modalOpen = true; 
+    },
+    openUpdates: () => { 
+        document.getElementById('modal-updates').style.display = 'flex'; 
+        UI.modalOpen = true; 
+    },
+    openSettings: () => { 
+        document.getElementById('modal-settings').style.display = 'flex'; 
+        UI.modalOpen = true; 
+    },
+    closeModals: () => { 
+        document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); 
+        UI.modalOpen = false; 
+    },
+    flicker: () => { 
+        if(!Config.glitchEnabled) return;
+        const el = document.getElementById('layer-flicker'); 
+        el.classList.remove('flickering'); 
+        void el.offsetWidth; 
+        el.classList.add('flickering'); 
+    }
+};
+
 const MiniGames = {
     active: false, night: 0, ctx: null, 
     player: {}, enemies: [], target: {}, state: {}, frame: 0,
-    
     start: (n) => {
         Game.state.inMinigame = true; MiniGames.night = n; MiniGames.active = true; MiniGames.frame = 0;
-        UI.showScreen('screen-minigame');
+        UI.showScreen('screen-minigame'); AudioSys.play('bgm-minigame', true);
         const c = document.getElementById('mg-canvas'); MiniGames.ctx = c.getContext('2d');
         const t = TEXTS[Lang.current];
         document.getElementById('mg-info').innerText = t['mg_'+n] || "MINIGAME";
-        document.getElementById('mg-controls-hint').innerText = "Arrows/Mouse/Space";
+        document.getElementById('mg-controls-hint').innerText = "Use Mouse / Arrows / Space / Click";
         MiniGames.initLogic(n);
         requestAnimationFrame(MiniGames.loop);
-        document.onkeydown = MiniGames.handleInput; c.onmousedown = MiniGames.handleClick;
+        document.onkeydown = MiniGames.handleInput; c.onmousedown = MiniGames.handleClick; c.onmousemove = MiniGames.handleMove;
     },
     initLogic: (n) => {
-        const w=600, h=400;
-        MiniGames.enemies = [];
-        if(n===1) { // Under desk - Side scroller dodge
-            MiniGames.player = {x:50, y:300, w:30, h:30, duck:false};
-            MiniGames.enemies = [{x:600, y:280, w:40, h:60, spd:4}];
-        } else if(n===2) { // Mask Maze
-            MiniGames.player = {x:20, y:20, w:20, h:20};
-            MiniGames.target = {x:550, y:350, w:30, h:30, active:true}; // Mask
-            MiniGames.enemies = [{x:100,y:0,h:300,dir:1},{x:300,y:100,h:300,dir:-1},{x:500,y:0,h:300,dir:1}];
-        } else if(n===3) { // Gen Click
-            MiniGames.state = {score:0};
-            MiniGames.spawnClickTarget();
-        } else if(n===4) { // Shadows dodge
-            MiniGames.player = {x:50, y:200, w:20, h:20};
-            MiniGames.enemies = []; // Spawns in loop
-        } else if(n===5) { // Flashlight
-            MiniGames.player = {x:300, y:350, w:0, h:0}; // static view
-            MiniGames.enemies = [{x:300, y:0, r:20, spd:1}]; // Jomar approaches
-        } else if(n===6) { // Curtain Sequence
-            MiniGames.state = {seq:[1,2,3,4], cur:0, timer:500};
-        } else if(n===7) { // Key find dodge
-            MiniGames.player = {x:300, y:200, w:20, h:20};
-            MiniGames.target = {x:Math.random()*500, y:Math.random()*300, w:20, h:20};
-            MiniGames.enemies = [];
-        } else if(n===8) { // Survival
-             MiniGames.player = {x:300, y:200, w:20, h:20};
-             MiniGames.state = {timer: 1000};
-        }
+        const w=600, h=400; MiniGames.enemies = []; MiniGames.player = {x:300, y:200, w:20, h:20, duck:false};
+        if(n===1) { MiniGames.player = {x:50, y:300, w:30, h:30, duck:false}; MiniGames.enemies = [{x:600, y:280, w:40, h:60, spd:4}]; } 
+        else if(n===2) { MiniGames.player = {x:20, y:20, w:20, h:20}; MiniGames.target = {x:550, y:350, w:30, h:30, active:true}; MiniGames.enemies = [{x:100,y:0,h:300,dir:1},{x:300,y:100,h:300,dir:-1},{x:500,y:0,h:300,dir:1}]; } 
+        else if(n===3) { MiniGames.state = {score:0}; MiniGames.spawnClickTarget(); } 
+        else if(n===4) { MiniGames.enemies = []; MiniGames.player = {x:300, y:300, w:10, h:10}; } 
+        else if(n===5) { MiniGames.state = {pos: 200, vel: 0, target: 200}; } 
+        else if(n===6) { MiniGames.state = {timer: Math.random()*200 + 100, color: 'red', waiting: true}; } 
+        else if(n===7) { MiniGames.player = {x:20, y:20, w:20, h:20}; MiniGames.target = {x:560, y:360, w:20, h:20}; MiniGames.enemies = [{x:100,y:50,w:20,h:350}, {x:250,y:0,w:20,h:350}, {x:400,y:50,w:20,h:350}]; } 
+        else if(n===8) { MiniGames.player = {x:300, y:200, w:20, h:20}; MiniGames.state = {timer: 1800}; }
     },
-    spawnClickTarget: () => { MiniGames.enemies.push({x:Math.random()*560+20, y:Math.random()*360+20, r:15, life:80}); },
+    spawnClickTarget: () => { MiniGames.enemies.push({x:Math.random()*560+20, y:Math.random()*360+20, r:20, life:60}); },
     loop: () => {
         if(!MiniGames.active) return;
-        const ctx = MiniGames.ctx; ctx.fillStyle = '#111'; ctx.fillRect(0,0,600,400);
-        MiniGames.frame++;
-        const n = MiniGames.night;
+        const ctx = MiniGames.ctx; const w=600, h=400;
+        ctx.fillStyle = '#111'; ctx.fillRect(0,0,w,h);
+        MiniGames.frame++; const n = MiniGames.night;
 
         if(n===1) {
-            ctx.fillStyle = MiniGames.player.duck ? '#050' : '#0f0';
-            ctx.fillRect(MiniGames.player.x, MiniGames.player.duck?320:300, 30, MiniGames.player.duck?15:30);
+            ctx.fillStyle = MiniGames.player.duck ? '#050' : '#0f0'; ctx.fillRect(MiniGames.player.x, MiniGames.player.duck?320:300, 30, MiniGames.player.duck?15:30);
             MiniGames.enemies.forEach(e => {
                 e.x -= e.spd; ctx.fillStyle = '#f00'; ctx.fillRect(e.x, e.y, e.w, e.h);
                 if(e.x < -50) { e.x = 650; e.spd = 4+Math.random()*3; }
-                // Colision: Si toca y no esta agachado
                 if(MiniGames.col(MiniGames.player, e) && !MiniGames.player.duck) MiniGames.lose();
             });
-            if(MiniGames.frame > 1000) MiniGames.win();
-        }
-        else if(n===2) {
-            ctx.fillStyle = '#0f0'; ctx.fillRect(MiniGames.player.x, MiniGames.player.y, 20, 20);
-            ctx.fillStyle = '#00f'; ctx.fillRect(MiniGames.target.x, MiniGames.target.y, 30, 30);
-            MiniGames.enemies.forEach(e => {
-                ctx.fillStyle = '#500'; ctx.fillRect(e.x, e.y, 20, e.h);
-                if(MiniGames.col(MiniGames.player, {x:e.x,y:e.y,w:20,h:e.h})) MiniGames.lose();
-            });
+            if(MiniGames.frame > 900) MiniGames.win();
+        } else if(n===2) {
+            ctx.fillStyle = '#0f0'; ctx.fillRect(MiniGames.player.x, MiniGames.player.y, 20, 20); ctx.fillStyle = '#00f'; ctx.fillRect(MiniGames.target.x, MiniGames.target.y, 30, 30);
+            MiniGames.enemies.forEach(e => { ctx.fillStyle = '#555'; ctx.fillRect(e.x, e.y, 20, e.h); if(MiniGames.col(MiniGames.player, {x:e.x,y:e.y,w:20,h:e.h})) MiniGames.lose(); });
             if(MiniGames.col(MiniGames.player, MiniGames.target)) MiniGames.win();
-        }
-        else if(n===3) {
-            ctx.fillStyle = '#fff'; ctx.fillText("Power: "+MiniGames.state.score+"/10", 20, 30);
-            MiniGames.enemies.forEach((e,i) => {
-                e.life--; ctx.fillStyle='#0f0'; ctx.beginPath(); ctx.arc(e.x,e.y,e.r,0,6.28); ctx.fill();
-                if(e.life<=0) { MiniGames.enemies.splice(i,1); MiniGames.spawnClickTarget(); }
-            });
+        } else if(n===3) {
+            ctx.fillStyle = '#fff'; ctx.fillText("CLICK GREEN ORBS: "+MiniGames.state.score+"/10", 20, 30);
+            MiniGames.enemies.forEach((e,i) => { e.life--; ctx.fillStyle='#0f0'; ctx.beginPath(); ctx.arc(e.x,e.y,e.r,0,6.28); ctx.fill(); if(e.life<=0) { MiniGames.enemies.splice(i,1); MiniGames.spawnClickTarget(); } });
             if(MiniGames.state.score >= 10) MiniGames.win();
-        }
-        else if(n===4) { // Shadows
-            ctx.fillStyle = '#0f0'; ctx.fillRect(MiniGames.player.x, MiniGames.player.y, 20, 20);
-            if(MiniGames.frame % 30 === 0) MiniGames.enemies.push({x:600, y:Math.random()*380, w:40, h:40, spd:5});
-            MiniGames.enemies.forEach((e,i) => {
-                e.x-=e.spd; ctx.fillStyle='rgba(100,0,0,0.5)'; ctx.fillRect(e.x,e.y,e.w,e.h);
-                if(MiniGames.col(MiniGames.player, e)) MiniGames.lose();
-            });
-            if(MiniGames.frame > 1200) MiniGames.win();
-        }
-        else if(n===5) { // Flashlight
-            ctx.fillStyle = '#0f0'; ctx.fillText("PRESS F / CLICK", 250, 350);
-            const e = MiniGames.enemies[0];
-            e.y += e.spd; 
-            ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(300, e.y, e.r, 0, 6.28); ctx.fill();
-            if(e.y > 350) MiniGames.lose();
+        } else if(n===4) {
+            ctx.fillStyle = '#0f0'; ctx.beginPath(); ctx.arc(MiniGames.player.x, MiniGames.player.y, 10, 0, 6.28); ctx.fill();
+            if(MiniGames.frame % 10 === 0) { MiniGames.enemies.push({x:Math.random()*w, y:-20, w:20, h:20, vy:3+Math.random()*2}); }
+            MiniGames.enemies.forEach(e => { e.y += e.vy; ctx.fillStyle='red'; ctx.fillRect(e.x, e.y, e.w, e.h); if(Math.abs(e.x - MiniGames.player.x) < 15 && Math.abs(e.y - MiniGames.player.y) < 15) MiniGames.lose(); });
             if(MiniGames.frame > 1000) MiniGames.win();
-        }
-        else if(n===6) { // Curtain
-            ctx.fillStyle = '#fff'; ctx.fillText("WAIT...", 280, 200);
-            MiniGames.state.timer--;
-            ctx.fillStyle = 'red'; ctx.fillRect(0,0, 600, (500-MiniGames.state.timer)/2);
-            if(MiniGames.state.timer <= 0) MiniGames.lose();
-            // Win condition is abstract via input
-            if(MiniGames.state.cur >= 4) MiniGames.win();
-        }
-        else if(n===7 || n===8) { // Survival / Key
+        } else if(n===5) {
+            ctx.fillStyle = '#fff'; ctx.fillText("KEEP IN CENTER (SPACE)", 200, 50);
+            MiniGames.state.vel += (Math.random()-0.5) * 2; MiniGames.state.pos += MiniGames.state.vel;
+            ctx.fillStyle = '#333'; ctx.fillRect(100, 200, 400, 20); ctx.fillStyle = '#0f0'; ctx.fillRect(MiniGames.state.pos, 190, 40, 40);
+            if(MiniGames.state.pos < 100 || MiniGames.state.pos > 460) MiniGames.lose();
+            if(MiniGames.frame > 800) MiniGames.win();
+        } else if(n===6) {
+            if(MiniGames.state.waiting) { MiniGames.state.timer--; ctx.fillStyle = 'red'; ctx.fillRect(200,100,200,200); if(MiniGames.state.timer <= 0) { MiniGames.state.waiting = false; MiniGames.state.color = 'green'; MiniGames.state.timer = 60; } } 
+            else { ctx.fillStyle = 'green'; ctx.fillRect(200,100,200,200); MiniGames.state.timer--; if(MiniGames.state.timer <= 0) MiniGames.lose(); }
+        } else if(n===7) {
+            ctx.fillStyle = '#0f0'; ctx.fillRect(MiniGames.player.x, MiniGames.player.y, 20, 20); ctx.fillStyle = 'gold'; ctx.fillRect(MiniGames.target.x, MiniGames.target.y, 20, 20);
+            MiniGames.enemies.forEach(e => { ctx.fillStyle = '#555'; ctx.fillRect(e.x, e.y, e.w, e.h); if(MiniGames.col(MiniGames.player, e)) MiniGames.player = {x:20, y:20, w:20, h:20}; });
+            if(MiniGames.col(MiniGames.player, MiniGames.target)) MiniGames.win();
+        } else if(n===8) {
              ctx.fillStyle = '#0f0'; ctx.fillRect(MiniGames.player.x, MiniGames.player.y, 20, 20);
-             if(n===7) { ctx.fillStyle='gold'; ctx.fillRect(MiniGames.target.x, MiniGames.target.y, 20, 20); }
-             if(MiniGames.frame % 20 === 0) MiniGames.enemies.push({x:Math.random()*600, y:0, w:10, h:10, vy:3});
-             MiniGames.enemies.forEach(e => {
-                 e.y+=e.vy; ctx.fillStyle='#f00'; ctx.fillRect(e.x,e.y,e.w,e.h);
-                 if(MiniGames.col(MiniGames.player,e)) MiniGames.lose();
-             });
-             if(n===7 && MiniGames.col(MiniGames.player, MiniGames.target)) MiniGames.win();
-             if(n===8 && MiniGames.frame > 1500) MiniGames.win();
+             if(MiniGames.frame % 5 === 0) { let side = Math.floor(Math.random()*4); let e = {w:10,h:10}; if(side===0) { e.x=Math.random()*600; e.y=0; e.vx=(Math.random()-0.5)*2; e.vy=3; } if(side===1) { e.x=Math.random()*600; e.y=400; e.vx=(Math.random()-0.5)*2; e.vy=-3; } if(side===2) { e.x=0; e.y=Math.random()*400; e.vx=3; e.vy=(Math.random()-0.5)*2; } if(side===3) { e.x=600; e.y=Math.random()*400; e.vx=-3; e.vy=(Math.random()-0.5)*2; } MiniGames.enemies.push(e); }
+             MiniGames.enemies.forEach(e => { e.x+=e.vx; e.y+=e.vy; ctx.fillStyle='red'; ctx.fillRect(e.x,e.y,e.w,e.h); if(MiniGames.col(MiniGames.player,e)) MiniGames.lose(); });
+             if(MiniGames.frame > 1200) MiniGames.win();
         }
-
         requestAnimationFrame(MiniGames.loop);
     },
     col: (r1,r2) => (r1.x < r2.x+r2.w && r1.x+r1.w > r2.x && r1.y < r2.y+r2.h && r1.y+r1.h > r2.y),
     handleInput: (e) => {
         if(!MiniGames.active) return;
         const k=e.code, p=MiniGames.player;
-        if(MiniGames.night===1) {
-            if(k==='ArrowLeft') p.x-=20; if(k==='ArrowRight') p.x+=20;
-            if(k==='ArrowDown') p.duck=true; if(k==='ArrowUp') p.duck=false;
-        } else if(MiniGames.night===5) {
-            if(k==='KeyF' || k==='Space') MiniGames.enemies[0].y -= 20; // Flash pushes back
-        } else if(MiniGames.night===6) {
-             if(k==='Space') MiniGames.state.cur++; // Spam space to hold curtain
-        } else {
-            if(k==='ArrowLeft') p.x-=15; if(k==='ArrowRight') p.x+=15;
-            if(k==='ArrowUp') p.y-=15; if(k==='ArrowDown') p.y+=15;
-        }
+        if([1,2,7,8].includes(MiniGames.night)) { if(k==='ArrowLeft') p.x-=15; if(k==='ArrowRight') p.x+=15; if(MiniGames.night !== 1) { if(k==='ArrowUp') p.y-=15; if(k==='ArrowDown') p.y+=15; } else { if(k==='ArrowDown') p.duck=true; if(k==='ArrowUp') p.duck=false; } }
+        if(MiniGames.night === 5 && k==='Space') { MiniGames.state.vel -= 1.5; }
+    },
+    handleMove: (e) => {
+        if(MiniGames.night === 4) { const r = document.getElementById('mg-canvas').getBoundingClientRect(); MiniGames.player.x = e.clientX - r.left; MiniGames.player.y = e.clientY - r.top; }
     },
     handleClick: (e) => {
-        if(MiniGames.night===3) {
-             const r = MiniGames.canvas.getBoundingClientRect();
-             const mx = e.clientX-r.left, my = e.clientY-r.top;
-             MiniGames.enemies.forEach((t,i) => {
-                 if(Math.sqrt((mx-t.x)**2+(my-t.y)**2) < t.r) { MiniGames.state.score++; MiniGames.enemies.splice(i,1); MiniGames.spawnClickTarget(); }
-             });
-        }
+        if(MiniGames.night===3) { const r = document.getElementById('mg-canvas').getBoundingClientRect(); const mx = e.clientX-r.left, my = e.clientY-r.top; MiniGames.enemies.forEach((t,i) => { if(Math.sqrt((mx-t.x)**2+(my-t.y)**2) < t.r) { MiniGames.state.score++; MiniGames.enemies.splice(i,1); MiniGames.spawnClickTarget(); } }); }
+        if(MiniGames.night===6) { if(!MiniGames.state.waiting) MiniGames.win(); else MiniGames.lose(); }
     },
-    win: () => {
-        MiniGames.active=false;
-        const n = MiniGames.night;
-        const txt = TEXTS[Lang.current]['lf_'+n] || "LORE FOUND.";
-        alert(txt);
-        SAVEDATA.night = parseInt(n)+1; SAVEDATA.stars[n]=true;
-        localStorage.setItem('mf_save_v4', JSON.stringify(SAVEDATA));
-        location.reload();
-    },
-    lose: () => { MiniGames.active=false; alert("FAIL."); location.reload(); }
-};
-
-const UI = {
-    modalOpen: false,
-    showScreen: (id) => { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); },
-    openLore: () => { document.getElementById('modal-lore').style.display = 'flex'; UI.modalOpen = true; },
-    openSettings: () => { document.getElementById('modal-settings').style.display = 'flex'; UI.modalOpen = true; },
-    closeModals: () => { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); UI.modalOpen = false; }
+    win: () => { MiniGames.active=false; AudioSys.stop('bgm-minigame'); const n = MiniGames.night; const txt = TEXTS[Lang.current]['lf_'+n] || "DATA RECOVERED."; alert(txt); SAVEDATA.night = parseInt(n)+1; SAVEDATA.stars[n]=true; localStorage.setItem('mf_save_v4', JSON.stringify(SAVEDATA)); location.reload(); },
+    lose: () => { MiniGames.active=false; AudioSys.stop('bgm-minigame'); alert("FAIL."); location.reload(); }
 };
 
 Game.initMenu();
