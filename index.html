@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Maifer's Factory: The 8 Nights (v12.5 Lore Update)</title>
+    <title>Maifer's Factory: The 8 Nights (v15.1 Audio Fix)</title>
     <style>
         /* ==========================================================================
            ESTILOS Y FUENTES
@@ -319,7 +319,7 @@
         <button id="btn-updates" class="menu-btn" onclick="UI.openUpdates()">UPDATES</button>
         <button id="btn-settings" class="menu-btn" onclick="UI.openSettings()">AJUSTES</button>
     </div>
-    <p style="position: absolute; bottom: 10px; font-size: 0.8rem; color: #444;">v12.5 - Lore Update</p>
+    <p style="position: absolute; bottom: 10px; font-size: 0.8rem; color: #444;">v15.1 - Audio Balance</p>
     <p id="credits-text">Creado por Jonlet Santos</p>
 </div>
 
@@ -498,7 +498,7 @@
 
 <script>
 /* ==========================================================================
-   DATOS Y TEXTOS (FIXED)
+   DATOS Y TEXTOS
    ========================================================================== */
 const LORE_ES = `📖 MAIFER’S FACTORY — ARCHIVOS CLASIFICADOS
 
@@ -548,9 +548,9 @@ Maifer工厂始于90年代的一个实验性机器人设施。创始人Michael B
 前任警卫的笔记：
 “这无关胜利。这是关于Boyko获取他的数据。你是实验室的小白鼠。如果你活过第8夜……快跑。”`;
 
-const UPDATES_ES = ["✅ Custom Night (Noche 9)", "✅ Modo Móvil Optimizado", "✅ Ranking Local", "✅ Texturas HD", "✅ IA Exclusiva", "✅ Jumpscare Richard CSS", "✅ Ajustes Completos"];
-const UPDATES_EN = ["✅ Custom Night (Night 9)", "✅ Mobile Optimized", "✅ Local Rank", "✅ HD Textures", "✅ Exclusive AI", "✅ Richard CSS Jumpscare", "✅ Full Settings"];
-const UPDATES_CN = ["✅ 自定义夜 (第9夜)", "✅ 移动优化", "✅ 本地排名", "✅ 高清纹理", "✅ 独家AI", "✅ Richard CSS Jumpscare", "✅ 完整设置"];
+const UPDATES_ES = ["✅ Custom Night", "✅ Modo Móvil", "✅ Ranking Local", "✅ Texturas HD", "✅ IA Exclusiva", "✅ Jumpscare Richard CSS", "✅ Ajustes Completos", "✅ Jomar IA Fix", "✅ Nuevo Minijuego N5"];
+const UPDATES_EN = ["✅ Custom Night", "✅ Mobile Mode", "✅ Local Rank", "✅ HD Textures", "✅ Exclusive AI", "✅ Richard CSS Jumpscare", "✅ Full Settings", "✅ Jomar AI Fix", "✅ New Minigame N5"];
+const UPDATES_CN = ["✅ 自定义夜", "✅ 移动模式", "✅ 本地排名", "✅ 高清纹理", "✅ 独家AI", "✅ Richard CSS Jumpscare", "✅ 完整设置", "✅ Jomar修复", "✅ 新迷你游戏N5"];
 
 const TEXTS = {
     ES: {
@@ -568,7 +568,8 @@ const TEXTS = {
         win_msg: "Espero que hayas disfrutado el juego que creé con mucho esfuerzo. Disfrútalo mientras puedas... Cinco noches con Maifer 2 próximamente.",
         cn_start: "INICIAR NOCHE", lb_title: "GANADORES", lb_ph: "TU NOMBRE", credits: "Creado por Jonlet Santos", rank_btn: "🏆 RANK",
         st_h_aud: "AUDIO", st_h_gfx: "GRÁFICOS", st_h_ctrl: "CONTROLES",
-        st_full: "PANTALLA COMPLETA", st_gli: "EFECTO GLITCH", st_sens: "SENSIBILIDAD", st_del: "BORRAR DATOS"
+        st_full: "PANTALLA COMPLETA", st_gli: "EFECTO GLITCH", st_sens: "SENSIBILIDAD", st_del: "BORRAR DATOS",
+        mg5_hint: "PRESIONA ESPACIO RAPIDO"
     },
     EN: {
         play: "PLAY (NIGHT", new: "NEW GAME", lore: "DATA / LORE", st: "SETTINGS",
@@ -585,7 +586,8 @@ const TEXTS = {
         win_msg: "I hope you enjoyed the game I created with much effort. Enjoy it while you can... Five Nights at Maifer's 2 coming soon.",
         cn_start: "START NIGHT", lb_title: "SURVIVORS", lb_ph: "YOUR NAME", credits: "Created by Jonlet Santos", rank_btn: "🏆 RANK",
         st_h_aud: "AUDIO", st_h_gfx: "GRAPHICS", st_h_ctrl: "CONTROLS",
-        st_full: "FULLSCREEN", st_gli: "GLITCH FX", st_sens: "SENSITIVITY", st_del: "RESET DATA"
+        st_full: "FULLSCREEN", st_gli: "GLITCH FX", st_sens: "SENSITIVITY", st_del: "RESET DATA",
+        mg5_hint: "MASH SPACE FAST"
     },
     CN: {
         play: "开始游戏 (夜", new: "新游戏", lore: "数据 / 传说", st: "设置",
@@ -602,7 +604,8 @@ const TEXTS = {
         win_msg: "我希望你喜欢我努力制作的游戏。尽情享受吧... Maifer的五夜2即将推出。",
         cn_start: "开始", lb_title: "幸存者", lb_ph: "你的名字", credits: "作者: Jonlet Santos", rank_btn: "🏆 排行",
         st_h_aud: "音频", st_h_gfx: "图形", st_h_ctrl: "控制",
-        st_full: "全屏", st_gli: "故障效果", st_sens: "灵敏度", st_del: "重置数据"
+        st_full: "全屏", st_gli: "故障效果", st_sens: "灵敏度", st_del: "重置数据",
+        mg5_hint: "快速按空格"
     }
 };
 
@@ -958,9 +961,16 @@ const Game = {
 
     aiLoop: () => {
         if(Game.state.over) return;
-        const rng = (lvl) => (Math.random() * 20) < lvl;
+        
+        // 1. CHECK DEADLY STATES FIRST
+        if(Game.ai.pos.jomar === 1) {
+            Game.die('jomar');
+            return;
+        }
+
         if(Game.ai.busy && Game.state.night < 8) return;
 
+        const rng = (lvl) => (Math.random() * 20) < lvl;
         let killTime = 3000;
         if(Game.state.night >= 5) killTime = 2000;
         if(Game.state.night === 8) killTime = 1500; 
@@ -972,12 +982,12 @@ const Game = {
                 Game.ai.busy = true; 
                 UI.flicker();
                 setTimeout(() => {
-                    AudioSys.play('sfx-maifer', true);
+                    AudioSys.play('sfx-maifer', true, 0.3); // VOLUMEN BAJO 0.3
                     document.getElementById('vis-maifer').style.display = 'block';
                     setTimeout(() => {
                         if(!Game.state.hidden) Game.die('maifer');
                         else { 
-                            AudioSys.stopLoops(); AudioSys.play('sfx-leave', false, 1.0); 
+                            AudioSys.stopLoops(); AudioSys.play('sfx-leave', false, 1.0); // VOLUMEN ALTO 1.0
                             document.getElementById('vis-maifer').style.display = 'none'; 
                             Game.ai.pos.maifer = 0; Game.ai.busy = false;
                         }
@@ -1002,7 +1012,7 @@ const Game = {
              }
         } else {
              if(Game.state.vent) {
-                 AudioSys.play('sfx-leave', false, 1.0);
+                 AudioSys.play('sfx-leave', false, 1.0); // VOLUMEN ALTO
                  Game.ai.pos.vent = 0;
                  document.getElementById('vent-img').style.display = 'none';
              } else {
@@ -1017,12 +1027,12 @@ const Game = {
                 Game.ai.busy = true; 
                 UI.flicker();
                 setTimeout(() => {
-                    AudioSys.play('sfx-isaac', true);
+                    AudioSys.play('sfx-isaac', true, 0.3); // VOLUMEN BAJO
                     document.getElementById('vis-isaac').style.display = 'block';
                     setTimeout(() => {
                         if(!Game.state.mask) Game.die('isaac');
                         else { 
-                            AudioSys.stopLoops(); AudioSys.play('sfx-leave', false, 1.0); 
+                            AudioSys.stopLoops(); AudioSys.play('sfx-leave', false, 1.0); // VOLUMEN ALTO
                             document.getElementById('vis-isaac').style.display = 'none'; 
                             Game.ai.pos.isaac = 0; Game.ai.busy = false;
                         }
@@ -1031,19 +1041,17 @@ const Game = {
             }
         }
 
-        // JOMAR
-        if(rng(Game.ai.jomar)) {
-            if(Game.ai.pos.jomar === 0) { 
-                Game.ai.busy = true; 
-                UI.flicker();
-                Game.ai.pos.jomar = 1; 
-                setTimeout(() => {
+        // JOMAR (FIXED LETHAL LOGIC)
+        if(Game.ai.pos.jomar === 0 && rng(Game.ai.jomar)) {
+            Game.ai.busy = true; 
+            UI.flicker(); 
+            Game.ai.pos.jomar = 1; 
+            setTimeout(() => {
+                if(Game.ai.pos.jomar === 1) { // Check active
                     document.getElementById('vis-jomar').style.display = 'block'; 
-                    AudioSys.play('sfx-jomar', true); 
-                }, 500);
-            } else {
-                if(Math.random() > 0.8) Game.die('jomar'); 
-            }
+                    AudioSys.play('sfx-jomar', true, 0.3); // VOLUMEN BAJO
+                }
+            }, 500);
         }
 
         // RICHARD
@@ -1054,7 +1062,7 @@ const Game = {
             }
         } else {
             if(Game.state.curtain) {
-                AudioSys.play('sfx-leave', false, 1.0);
+                AudioSys.play('sfx-leave', false, 1.0); // VOLUMEN ALTO
                 Game.ai.pos.richard = 0;
             } else {
                 if(rng(Game.ai.richard + 5)) { 
@@ -1178,7 +1186,7 @@ const Mechanics = {
                 Game.ai.pos.jomar = 0; 
                 document.getElementById('vis-jomar').style.display = 'none'; 
                 AudioSys.stopLoops(); 
-                AudioSys.play('sfx-leave', false, 1.0); 
+                AudioSys.play('sfx-leave', false, 1.0); // VOLUMEN ALTO
                 Game.ai.busy = false; 
             } 
         } 
@@ -1324,7 +1332,11 @@ const MiniGames = {
         else if(n===2) { MiniGames.player = {x:20, y:20, w:20, h:20}; MiniGames.target = {x:550, y:350, w:30, h:30, active:true}; MiniGames.enemies = [{x:100,y:0,h:300,dir:1},{x:300,y:100,h:300,dir:-1},{x:500,y:0,h:300,dir:1}]; } 
         else if(n===3) { MiniGames.state = {score:0}; MiniGames.spawnClickTarget(); } 
         else if(n===4) { MiniGames.enemies = []; MiniGames.player = {x:300, y:300, w:10, h:10}; } 
-        else if(n===5) { MiniGames.state = {pos: 200, vel: 0, target: 200}; } 
+        // NEW N5 MINIGAME: MASH SPACE
+        else if(n===5) { 
+            MiniGames.state = {energy: 50, timer: 1000}; 
+            document.getElementById('mg-controls-hint').innerText = TEXTS[Lang.current].mg5_hint;
+        } 
         else if(n===6) { MiniGames.state = {timer: Math.random()*200 + 100, color: 'red', waiting: true}; } 
         else if(n===7) { MiniGames.player = {x:20, y:20, w:20, h:20}; MiniGames.target = {x:560, y:360, w:20, h:20}; MiniGames.enemies = [{x:100,y:50,w:20,h:350}, {x:250,y:0,w:20,h:350}, {x:400,y:50,w:20,h:350}]; } 
         else if(n===8) { MiniGames.player = {x:300, y:200, w:20, h:20}; MiniGames.state = {timer: 1800}; }
@@ -1358,11 +1370,20 @@ const MiniGames = {
             MiniGames.enemies.forEach(e => { e.y += e.vy; ctx.fillStyle='red'; ctx.fillRect(e.x, e.y, e.w, e.h); if(Math.abs(e.x - MiniGames.player.x) < 15 && Math.abs(e.y - MiniGames.player.y) < 15) MiniGames.lose(); });
             if(MiniGames.frame > 1000) MiniGames.win();
         } else if(n===5) {
-            ctx.fillStyle = '#fff'; ctx.fillText("KEEP IN CENTER (SPACE)", 200, 50);
-            MiniGames.state.vel += (Math.random()-0.5) * 2; MiniGames.state.pos += MiniGames.state.vel;
-            ctx.fillStyle = '#333'; ctx.fillRect(100, 200, 400, 20); ctx.fillStyle = '#0f0'; ctx.fillRect(MiniGames.state.pos, 190, 40, 40);
-            if(MiniGames.state.pos < 100 || MiniGames.state.pos > 460) MiniGames.lose();
-            if(MiniGames.frame > 800) MiniGames.win();
+            // NEW MINIGAME N5: MASH
+            MiniGames.state.energy -= 0.5; // Drain
+            MiniGames.state.timer--;
+            
+            ctx.fillStyle='#fff'; 
+            ctx.fillText("KEEP CHARGED! (SPACE)", 200, 50);
+            
+            // Draw Bar
+            ctx.fillStyle = '#333'; ctx.fillRect(150, 200, 300, 30);
+            ctx.fillStyle = MiniGames.state.energy > 20 ? '#0f0' : '#f00';
+            ctx.fillRect(150, 200, (MiniGames.state.energy/100)*300, 30);
+            
+            if(MiniGames.state.energy <= 0) MiniGames.lose();
+            if(MiniGames.state.timer <= 0) MiniGames.win();
         } else if(n===6) {
             if(MiniGames.state.waiting) { MiniGames.state.timer--; ctx.fillStyle = 'red'; ctx.fillRect(200,100,200,200); if(MiniGames.state.timer <= 0) { MiniGames.state.waiting = false; MiniGames.state.color = 'green'; MiniGames.state.timer = 60; } } 
             else { ctx.fillStyle = 'green'; ctx.fillRect(200,100,200,200); MiniGames.state.timer--; if(MiniGames.state.timer <= 0) MiniGames.lose(); }
@@ -1383,7 +1404,10 @@ const MiniGames = {
         if(!MiniGames.active) return;
         const k=e.code, p=MiniGames.player;
         if([1,2,7,8].includes(MiniGames.night)) { if(k==='ArrowLeft') p.x-=15; if(k==='ArrowRight') p.x+=15; if(MiniGames.night !== 1) { if(k==='ArrowUp') p.y-=15; if(k==='ArrowDown') p.y+=15; } else { if(k==='ArrowDown') p.duck=true; if(k==='ArrowUp') p.duck=false; } }
-        if(MiniGames.night === 5 && k==='Space') { MiniGames.state.vel -= 1.5; }
+        // NEW N5 INPUT
+        if(MiniGames.night === 5 && k==='Space') { 
+            MiniGames.state.energy = Math.min(100, MiniGames.state.energy + 8); 
+        }
     },
     handleMove: (e) => {
         if(MiniGames.night === 4) { const r = document.getElementById('mg-canvas').getBoundingClientRect(); MiniGames.player.x = e.clientX - r.left; MiniGames.player.y = e.clientY - r.top; }
