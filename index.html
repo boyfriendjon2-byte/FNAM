@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Maifer's Factory: Ultimate Online (v20.0)</title>
+    <title>Maifer's Factory: Online Live (v21.0)</title>
     
-    <!-- LIBRERÍAS DE FIREBASE (Requeridas para el modo Online) -->
+    <!-- LIBRERÍAS DE FIREBASE -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
@@ -179,6 +179,30 @@
             font-size: 0.9rem; 
             color: #00aaff; 
             text-shadow: 0 0 5px #00aaff; 
+        }
+
+        /* ESTRELLAS */
+        #star-row { 
+            display: flex; 
+            gap: 8px; 
+            margin-bottom: 20px; 
+            height: 35px; 
+            z-index: 5; 
+        }
+
+        .star { 
+            font-size: 2rem; 
+            color: #222; 
+        }
+
+        .star.earned { 
+            color: gold; 
+            text-shadow: 0 0 10px gold; 
+        }
+
+        .star.blue { 
+            color: #0088ff; 
+            text-shadow: 0 0 15px #0088ff; 
         }
 
         /* ==========================================================================
@@ -404,23 +428,8 @@
             overflow: hidden; 
         }
 
-        #window-frame { 
-            position: absolute; 
-            top: 20%; 
-            right: 5%; 
-            width: 25vw; 
-            max-width: 240px; 
-            height: 35vh; 
-            background: #050505; 
-            border: 10px solid #222; 
-            border-right: 10px solid #444; 
-            border-bottom: 10px solid #111;
-            box-shadow: 5px 5px 15px rgba(0,0,0,0.8); 
-            overflow: hidden; 
-            z-index: 5; 
-        }
-        
-        /* CORTINA Y RICHARD ELIMINADOS VISUALMENTE PERO MANTENGO CSS POR SI ACASO */
+        /* CORTINA Y RICHARD ELIMINADOS DE LA VISTA */
+        #window-frame { display: none; }
         #curtain { display: none; } 
         #richard-eyes { display: none; }
 
@@ -579,7 +588,7 @@
             position: fixed; 
             background: var(--hud-bg); 
             border: 2px solid var(--hud-border); 
-            padding: 10px 20px; 
+            padding: 5px 10px; 
             color: #fff; 
             font-family: 'VT323'; 
             z-index: 900; 
@@ -588,8 +597,8 @@
         }
 
         #hud-time-box { 
-            top: 20px; 
-            right: 20px; 
+            top: 10px; 
+            right: 10px; 
             text-align: right; 
         }
 
@@ -601,19 +610,18 @@
         }
 
         #hud-night { 
-            font-size: 1.5rem; 
+            font-size: clamp(1rem, 3vw, 1.5rem); 
             color: #aaccaa; 
         }
 
         #hud-power-box { 
-            bottom: 20px; 
-            left: 20px; 
+            bottom: 90px; 
+            left: 10px; 
             width: auto; 
-            min-width: 220px;
         }
 
         #hud-power-text { 
-            font-size: 1.8rem; 
+            font-size: clamp(1.2rem, 4vw, 1.8rem); 
             margin-bottom: 5px; 
             color: #eeffee; 
         }
@@ -622,13 +630,13 @@
             display: flex; 
             gap: 5px; 
             align-items: center; 
-            font-size: 1.2rem; 
+            font-size: 1rem; 
             color: #aaccaa; 
         }
 
         .usage-block { 
-            width: 25px; 
-            height: 10px; 
+            width: 15px; 
+            height: 8px; 
             background: #222; 
             border: 1px solid #444; 
         }
@@ -636,21 +644,19 @@
         .usage-block.active { 
             background: #0f0; 
             box-shadow: 0 0 5px #0f0; 
-            border-color: #0f0; 
         }
 
         .usage-block.high { 
             background: #ff0000; 
             box-shadow: 0 0 5px #ff0000; 
-            border-color: #ff0000; 
         }
 
         #hud-toxic { 
             position: fixed; 
-            top: 20px; 
-            left: 20px; 
-            width: 200px; 
-            height: 15px; 
+            top: 10px; 
+            left: 10px; 
+            width: 150px; 
+            height: 10px; 
             border: 2px solid #004400; 
             background: #001100; 
             z-index: 900; 
@@ -666,17 +672,17 @@
 
         #btn-mute { 
             position: absolute; 
-            top: 120px; 
-            left: 20px; 
+            top: 50px; 
+            left: 10px; 
             background: #222; 
             color: #fff; 
             border: 1px solid #555; 
             font-family: 'VT323'; 
             cursor: pointer; 
             z-index: 160; 
-            padding: 5px 10px; 
+            padding: 5px; 
             opacity: 0.8; 
-            font-size: 1.2rem; 
+            font-size: 1rem; 
         }
 
         /* MOBILE CONTROLS (TÁCTIL) */
@@ -1037,7 +1043,7 @@
         <button id="btn-comm" class="menu-btn" onclick="UI.openComments()">COMUNIDAD</button>
         <button id="btn-settings" class="menu-btn" onclick="UI.openSettings()">AJUSTES</button>
     </div>
-    <p style="position: absolute; bottom: 10px; font-size: 0.8rem; color: #444;">v20.0 - Ultimate Restoration</p>
+    <p style="position: absolute; bottom: 10px; font-size: 0.8rem; color: #444;">v21.0 - Online Activated</p>
     <p id="credits-text">Creado por Jonlet Santos</p>
 </div>
 
@@ -1062,7 +1068,7 @@
 <div id="modal-comments" class="modal-overlay">
     <div class="modal-box">
         <h2 class="lore-header">COMUNIDAD (ONLINE)</h2>
-        <div style="color: #666; font-size: 0.8rem; margin-bottom: 10px;">Configura Firebase para modo global. Modo Local activo.</div>
+        <div style="color: #666; font-size: 0.8rem; margin-bottom: 10px;">Chat Global Activado</div>
         <div id="comment-feed" style="height: 300px; overflow-y: auto; border: 1px solid #333; margin-bottom: 10px; padding: 10px; background:#000;">
             <!-- Comentarios aqui -->
         </div>
@@ -1218,12 +1224,24 @@
 <div id="screen-jumpscare" class="screen"><img id="jump-img" src=""></div>
 
 <script>
-// --- CONFIGURACIÓN FIREBASE (OPCIONAL: Pega tus claves aquí para modo Online) ---
-// var firebaseConfig = { apiKey: "...", authDomain: "...", databaseURL: "...", projectId: "...", storageBucket: "...", messagingSenderId: "...", appId: "..." };
-// if(typeof firebase !== 'undefined') firebase.initializeApp(firebaseConfig);
+// --- CONFIGURACIÓN FIREBASE ---
+const firebaseConfig = {
+  apiKey: "AIzaSyC6whCq_9B-yeqzHvLWbswadJwCXRnqmt0",
+  authDomain: "maifer-factory.firebaseapp.com",
+  databaseURL: "https://maifer-factory-default-rtdb.firebaseio.com",
+  projectId: "maifer-factory",
+  storageBucket: "maifer-factory.firebasestorage.app",
+  messagingSenderId: "700963667348",
+  appId: "1:700963667348:web:6fd8dba0bcb3ada7a2e381"
+};
+
+// Inicializar Firebase
+if(typeof firebase !== 'undefined') {
+    firebase.initializeApp(firebaseConfig);
+}
 // -------------------------------------------------------------------------------
 
-const LORE_ES = `📖 MAIFER’S FACTORY — ARCHIVOS CLASIFICADOS\n\nREGISTRO 01: EL ORIGEN\nMaifer’s Factory comenzó como una instalación de robótica...`;
+const LORE_ES = `📖 MAIFER’S FACTORY — ARCHIVOS CLASIFICADOS\n\nREGISTRO 01: EL ORIGEN\nMaifer’s Factory comenzó como una instalación de robótica experimental...`;
 const LORE_EN = `📖 MAIFER’S FACTORY — CLASSIFIED FILES\n\nLOG 01: ORIGIN\nMaifer’s Factory began as an experimental robotics facility...`;
 const LORE_CN = `📖 MAIFER’S FACTORY — 机密档案\n\n日志 01：起源\nMaifer工厂始于90年代...`;
 
@@ -1309,7 +1327,7 @@ const FB = {
             if(!s.exists()) return;
             let arr=[]; s.forEach(c => arr.push(c.val()));
             arr.reverse().forEach(p => {
-                let li = document.createElement('li'); li.innerHTML = `${p.n} - ${p.d}`; l.appendChild(li);
+                let li = document.createElement('li'); li.innerHTML = `<span style="color:#0f0">${p.n}</span> - ${p.d}`; l.appendChild(li);
             });
         });
     },
@@ -1753,7 +1771,7 @@ const Game = {
 
         let src="maifer.png", snd="jump-maifer";
         
-        if(causeKey === 'maifer' || causeKey === 'vent') { src="maifer.png"; snd="jump-maifer"; }
+        if(causeKey === 'maifer') { src="maifer.png"; snd="jump-maifer"; }
         else if(causeKey === 'isaac') { src="isaac.png"; snd="jump-isaac"; }
         else if(causeKey === 'jomar') { src="jomar.png"; snd="jump-jomar"; }
         
@@ -2054,6 +2072,7 @@ const MiniGames = {
         if(!MiniGames.active) return;
         const k=e.code, p=MiniGames.player;
         if([1,2,7,8].includes(MiniGames.night)) { if(k==='ArrowLeft') p.x-=15; if(k==='ArrowRight') p.x+=15; if(MiniGames.night !== 1) { if(k==='ArrowUp') p.y-=15; if(k==='ArrowDown') p.y+=15; } else { if(k==='ArrowDown') p.duck=true; if(k==='ArrowUp') p.duck=false; } }
+        // NEW N5 INPUT
         if(MiniGames.night === 5 && k==='Space') { 
             MiniGames.state.energy = Math.min(100, MiniGames.state.energy + 8); 
         }
