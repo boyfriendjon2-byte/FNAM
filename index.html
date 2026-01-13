@@ -1,9 +1,11 @@
+
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Maifer's Factory: Online Live (v21.0)</title>
+    <title>Maifer's Factory: Ultimate v30.0 (Menu Style & Localized)</title>
     
     <!-- LIBRERÍAS DE FIREBASE -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -11,7 +13,7 @@
 
     <style>
         /* ==========================================================================
-           1. FUENTES E IMPORTACIONES
+           1. FUENTES TIPOGRÁFICAS
            ========================================================================== */
         @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Nosifer&display=swap');
@@ -21,12 +23,12 @@
            2. VARIABLES Y RESET GENERAL
            ========================================================================== */
         :root { 
-            --primary: #ff0000; 
-            --secondary: #00ff00;
-            --bg-dark: #050505; 
-            --hud-bg: rgba(0, 20, 0, 0.85);
-            --hud-border: #446644;
-            --metal-gradient: linear-gradient(135deg, #111 0%, #333 40%, #555 50%, #333 60%, #111 100%);
+            --primary-color: #ff0000; 
+            --secondary-color: #00ff00;
+            --background-dark: #000000; 
+            --hud-background: rgba(0, 10, 0, 0.85);
+            --hud-border-color: #446644;
+            --text-color: #cccccc;
         }
 
         * { 
@@ -42,22 +44,42 @@
             padding: 0; 
             width: 100%; 
             height: 100%; 
-            background: var(--bg-dark); 
-            color: #ccc; 
+            background-color: var(--background-dark); 
+            color: var(--text-color); 
             font-family: 'Share Tech Mono', monospace; 
             overflow: hidden; 
         }
 
-        /* CONTENEDOR PRINCIPAL PARA ESCALADO MÓVIL */
-        #game-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
+        /* --- CLASES PARA MODO MOVIL --- */
+        body.mode-mobile .hud-container { 
+            transform: scale(0.7); 
+            transform-origin: top left; 
+        }
+        
+        body.mode-mobile .menu-btn { 
+            padding: 10px; 
+            font-size: 1.2rem; 
+            width: 90%; 
+        }
+        
+        body.mode-mobile .title-text { 
+            font-size: 3rem; 
+        }
+        
+        body.mode-mobile #mobile-controls { 
+            height: 15vh; 
+        }
+        
+        body.mode-mobile .mob-btn { 
+            font-size: 1rem; 
+        }
+        
+        body.mode-mobile #star-row { 
+            transform: scale(0.8); 
         }
 
         /* ==========================================================================
-           3. SISTEMA DE PANTALLAS
+           3. SISTEMA DE PANTALLAS (FULL SCREEN FLUIDO)
            ========================================================================== */
         .screen { 
             position: absolute; 
@@ -69,7 +91,7 @@
             flex-direction: column; 
             align-items: center; 
             justify-content: center; 
-            background: #000; 
+            background-color: #000; 
             z-index: 10; 
         }
 
@@ -77,16 +99,61 @@
             display: flex; 
         }
 
+        /* PANTALLA DE SELECCION DE DISPOSITIVO */
+        #screen-device { 
+            z-index: 9999; 
+            background: #050505; 
+        }
+        
+        #loading-bar-container { 
+            width: 80%; 
+            height: 20px; 
+            border: 2px solid #333; 
+            margin-top: 20px; 
+            display: none; 
+        }
+        
+        #loading-bar { 
+            width: 0%; 
+            height: 100%; 
+            background: #0f0; 
+            transition: width 0.2s; 
+        }
+
+        /* PANTALLA DE INTRO (NOCHE X - 12 AM) */
+        #screen-intro { 
+            z-index: 5000; 
+            background: #000; 
+            color: #fff; 
+            font-family: 'VT323'; 
+            text-align: center; 
+        }
+        
+        .intro-text { 
+            font-size: 4rem; 
+            opacity: 0; 
+            animation: fadeInOut 4s forwards; 
+        }
+
+        @keyframes fadeInOut { 
+            0% { opacity: 0; } 
+            20% { opacity: 1; } 
+            80% { opacity: 1; } 
+            100% { opacity: 0; } 
+        }
+
         /* ==========================================================================
-           4. MENU PRINCIPAL (DISEÑO MEJORADO)
+           4. MENÚ PRINCIPAL (ESTILO MEJORADO)
            ========================================================================== */
         #screen-menu { 
-            background: #000 url('https://www.transparenttextures.com/patterns/dark-matter.png');
+            /* NUEVO FONDO */
+            background: url('start_screen.png') no-repeat center center fixed; 
+            background-size: cover;
             position: relative; 
             overflow: hidden;
         }
 
-        /* Efecto Scanlines */
+        /* Overlay de viñeta oscura para legibilidad */
         #screen-menu::before {
             content: " "; 
             display: block; 
@@ -94,50 +161,84 @@
             inset: 0; 
             pointer-events: none; 
             z-index: 2;
-            background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.25) 50%), linear-gradient(90deg, rgba(255,0,0,0.06), rgba(0,255,0,0.02), rgba(0,0,255,0.06));
-            background-size: 100% 2px, 3px 100%;
+            background: radial-gradient(circle, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.8) 80%, rgba(0,0,0,1) 100%);
+            background-size: 100% 100%;
+        }
+        
+        /* Efecto de lineas de scanline */
+        #screen-menu::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 3;
+            background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.1) 50%);
+            background-size: 100% 4px;
         }
 
         .title-text { 
             font-family: 'Nosifer'; 
-            font-size: clamp(3rem, 10vw, 5rem); 
-            color: var(--primary); 
-            text-shadow: 4px 4px 0 #500; 
+            font-size: clamp(3.5rem, 12vw, 7rem); /* Más grande */
+            color: var(--primary-color); 
+            text-shadow: 0 0 10px #500, 0 0 20px #f00; /* Glow mejorado */
             text-align: center; 
-            animation: glitch 4s infinite; 
+            animation: glitch 4s infinite, pulseTitle 3s infinite alternate; 
             margin-bottom: 30px; 
             z-index: 5; 
+            width: 90%;
+        }
+        
+        @keyframes pulseTitle {
+            from { text-shadow: 0 0 10px #500, 0 0 20px #f00; transform: scale(1); }
+            to { text-shadow: 0 0 20px #800, 0 0 40px #f00; transform: scale(1.02); }
+        }
+
+        /* Contenedor flexible para botones del menú */
+        .menu-container {
+            display: flex; 
+            flex-direction: column; 
+            align-items: center;
+            width: 100%;
+            max-height: 60vh;
+            overflow-y: auto; 
+            z-index: 10;
+            padding-bottom: 20px;
         }
 
         .menu-btn {
-            background: rgba(10, 0, 0, 0.9); 
-            border: 2px solid #600; 
-            color: #aaa;
-            padding: 12px 25px; 
+            background-color: rgba(0, 0, 0, 0.7); 
+            border: 2px solid #440000; 
+            color: #cccccc;
+            padding: 1.5vh 2vw; 
             font-family: 'VT323'; 
-            font-size: clamp(1.2rem, 4vw, 1.8rem); 
+            font-size: clamp(1.5rem, 4vw, 2rem); 
             margin: 8px;
             cursor: pointer; 
             text-transform: uppercase; 
-            transition: 0.3s; 
-            width: clamp(300px, 80%, 450px); 
+            transition: all 0.2s ease; 
+            width: clamp(300px, 80%, 500px); 
             position: relative; 
             z-index: 10; 
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            box-shadow: 0 0 5px rgba(0,0,0,0.8);
+            flex-shrink: 0;
+            backdrop-filter: blur(2px);
         }
 
         .menu-btn:hover:not(.locked) { 
-            border-color: var(--primary); 
-            color: #fff; 
-            background: #400; 
-            transform: scale(1.05); 
+            border-color: #ff0000; 
+            color: #ffffff; 
+            background-color: rgba(50, 0, 0, 0.9); 
+            transform: scale(1.05) translateX(5px); 
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.4);
+            text-shadow: 0 0 5px #fff;
         }
 
         .menu-btn.locked { 
-            opacity: 0.4; 
+            opacity: 0.5; 
             cursor: not-allowed; 
-            border-color: #333; 
-            filter: grayscale(1); 
+            border-color: #333333; 
+            filter: grayscale(100%); 
         }
 
         .icon-lock { 
@@ -150,12 +251,17 @@
             top: 20px; 
             left: 20px; 
             width: auto; 
-            min-width: 80px; 
             font-family: 'VT323'; 
-            font-size: 1.2rem; 
-            z-index: 200; 
-            border-color: #444; 
+            font-size: 1.5rem; 
+            z-index: 20; 
+            border: 1px solid #444; 
+            background: rgba(0,0,0,0.8); 
+            color: #fff; 
+            padding: 5px 10px; 
+            cursor: pointer;
         }
+        
+        #lang-btn:hover { background: #222; border-color: #888; }
 
         #btn-leaderboard { 
             position: absolute; 
@@ -163,17 +269,21 @@
             right: 20px; 
             width: auto; 
             font-family: 'VT323'; 
-            font-size: 1.2rem; 
-            z-index: 200; 
-            background: #002244; 
-            border-color: #0088ff; 
+            font-size: 1.5rem; 
+            z-index: 20; 
+            background-color: rgba(0, 34, 68, 0.8); 
+            border: 1px solid #0088ff; 
             color: #0088ff; 
+            padding: 5px 10px; 
+            cursor: pointer;
         }
+        
+        #btn-leaderboard:hover { background-color: #004488; color: #fff; }
 
         #credits-text { 
             position: absolute; 
-            bottom: 10px; 
-            left: 20px; 
+            bottom: 5px; 
+            right: 10px; 
             z-index: 20; 
             font-family: 'Share Tech Mono'; 
             font-size: 0.9rem; 
@@ -184,34 +294,37 @@
         /* ESTRELLAS */
         #star-row { 
             display: flex; 
-            gap: 8px; 
-            margin-bottom: 20px; 
-            height: 35px; 
+            gap: 15px; 
+            margin-bottom: 30px; 
+            height: 50px; 
             z-index: 5; 
         }
 
         .star { 
-            font-size: 2rem; 
-            color: #222; 
+            font-size: 3rem; 
+            color: #222222; 
+            transition: transform 0.3s;
         }
+        
+        .star:hover { transform: scale(1.2) rotate(10deg); }
 
         .star.earned { 
             color: gold; 
-            text-shadow: 0 0 10px gold; 
+            text-shadow: 0 0 15px gold; 
         }
 
         .star.blue { 
             color: #0088ff; 
-            text-shadow: 0 0 15px #0088ff; 
+            text-shadow: 0 0 20px #0088ff; 
         }
 
         /* ==========================================================================
-           5. MODALES Y VENTANAS EMERGENTES
+           5. MODALES Y VENTANAS EMERGENTES (RESPONSIVE)
            ========================================================================== */
         .modal-overlay { 
             position: fixed; 
             inset: 0; 
-            background: rgba(0,0,0,0.98); 
+            background-color: rgba(0,0,0,0.98); 
             z-index: 6000; 
             display: none; 
             align-items: center; 
@@ -219,16 +332,16 @@
         }
 
         .modal-box { 
-            background: linear-gradient(135deg, #0d0d0d, #050505); 
-            border: 2px solid var(--primary); 
-            width: 800px; 
-            max-width: 95%; 
-            max-height: 90vh; 
+            background-color: #0b0b0b; 
+            border: 2px solid var(--primary-color); 
+            width: 90%; 
+            max-width: 800px; 
+            max-height: 90%; 
             overflow-y: auto; 
             padding: 30px; 
-            color: #fff; 
+            color: #ffffff; 
             box-shadow: 0 0 50px rgba(255,0,0,0.2); 
-            border-radius: 5px;
+            border-radius: 8px;
         }
 
         .lore-text { 
@@ -236,29 +349,30 @@
             white-space: pre-wrap; 
             text-align: left; 
             line-height: 1.6; 
-            color: #0f0; 
+            color: #00ff00; 
             font-size: 1rem; 
         }
 
         .lore-header { 
-            color: var(--primary); 
+            color: var(--primary-color); 
             font-family: 'Nosifer'; 
-            border-bottom: 2px solid #333; 
+            border-bottom: 1px solid #333; 
             padding-bottom: 15px; 
             margin-bottom: 25px; 
             text-align: center; 
+            font-size: 1.8rem;
         }
 
         .update-list { 
             text-align: left; 
             font-family: 'VT323'; 
-            color: #ccc; 
+            color: #cccccc; 
             padding-left: 20px; 
         }
 
         .update-list li { 
             margin-bottom: 8px; 
-            font-size: 1.3rem; 
+            font-size: 1.2rem; 
             list-style-type: square; 
         }
 
@@ -266,21 +380,21 @@
             color: red; 
             font-family: 'Nosifer'; 
             text-align: center; 
-            margin-top: 40px; 
+            margin-top: 30px; 
             animation: glitch 2s infinite; 
-            font-size: 1.5rem; 
+            font-size: 1.2rem; 
         }
 
-        /* SECCIONES DE AJUSTES */
+        /* AJUSTES UI */
         .setting-section { 
             border: 1px solid #333; 
-            background: rgba(255,255,255,0.02); 
+            background-color: rgba(255,255,255,0.02); 
             padding: 15px; 
             margin-bottom: 15px; 
         }
         
         .setting-header { 
-            color: #aaa; 
+            color: #aaaaaa; 
             font-family: 'Nosifer'; 
             font-size: 1.2rem; 
             margin-bottom: 10px; 
@@ -298,68 +412,72 @@
         }
 
         input[type=range] { 
-            width: 150px; 
+            width: 50%; 
             cursor: pointer; 
-            accent-color: var(--primary); 
+            accent-color: var(--primary-color); 
         }
 
         input[type=checkbox] { 
             transform: scale(1.5); 
             cursor: pointer; 
-            accent-color: var(--primary); 
+            accent-color: var(--primary-color); 
         }
 
-        /* CAJA DE COMENTARIOS */
+        /* COMUNIDAD */
         .comment-box { 
             border-bottom: 1px solid #333; 
             padding: 10px; 
             font-family: 'Share Tech Mono'; 
-            background: #080808; 
+            background-color: #080808; 
             margin-bottom: 5px; 
+            font-size: 1rem;
         }
         
         .comment-user { 
             color: #0088ff; 
             font-weight: bold; 
-            font-size: 0.9rem; 
         }
         
         .comment-msg { 
             display: block; 
             margin-top: 5px; 
-            color: #ccc; 
-            font-size: 1rem; 
+            color: #cccccc; 
         }
 
         /* ==========================================================================
-           6. CUSTOM NIGHT
+           6. CUSTOM NIGHT UI
            ========================================================================== */
         #screen-custom { 
-            background: #111; 
+            background-color: #111; 
             overflow-y: auto; 
             padding: 20px; 
+            padding-top: 50px;
         }
 
-        /* 3 COLUMNAS AHORA (SIN RICHARD) */
         .cn-grid { 
             display: grid; 
-            grid-template-columns: repeat(3, 1fr); 
-            gap: 20px; 
-            margin-bottom: 30px; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 15px; 
+            width: 100%; 
+            max-width: 900px; 
+            justify-items: center;
         }
-
+        
+        /* Ajuste para 4 personajes */
         .cn-char { 
-            background: #000; 
+            background-color: #000; 
             border: 2px solid #444; 
-            padding: 15px; 
+            padding: 10px; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
+            width: 100%;
+            max-width: 250px;
         }
 
         .cn-img { 
-            width: 80px; 
-            height: 80px; 
+            width: 70px; 
+            height: 70px; 
             object-fit: contain; 
             margin-bottom: 10px; 
             border: 1px solid #333; 
@@ -368,81 +486,93 @@
         .cn-controls { 
             display: flex; 
             align-items: center; 
-            gap: 15px; 
+            gap: 10px; 
         }
 
         .cn-btn { 
-            width: 40px; 
-            height: 40px; 
-            background: #333; 
+            width: 35px; 
+            height: 35px; 
+            background-color: #333; 
             color: #fff; 
             border: 1px solid #666; 
             cursor: pointer; 
-            font-size: 1.5rem; 
+            font-size: 1.2rem; 
         }
 
         .cn-val { 
             font-family: 'VT323'; 
-            font-size: 2.5rem; 
+            font-size: 2rem; 
             color: #fff; 
-            width: 50px; 
+            width: 40px; 
             text-align: center; 
         }
 
         /* ==========================================================================
-           7. JUEGO - TEXTURAS Y OBJETOS 3D
+           7. JUEGO - ENTORNO 3D SIMULADO (FLUIDO)
            ========================================================================== */
         #view-office { 
             position: absolute; 
-            inset: 0; 
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background-color: #111;
             background-image: 
                 radial-gradient(circle at center, transparent 30%, #000 130%), 
-                url('https://www.transparenttextures.com/patterns/dark-concrete.png'), 
-                url('https://www.transparenttextures.com/patterns/wall-4-light.png');
-            background-blend-mode: multiply; 
+                url('https://www.transparenttextures.com/patterns/dark-concrete.png');
+            background-size: cover;
+            background-position: center;
             overflow: hidden; 
         }
 
         #layer-flicker { 
             position: fixed; 
             inset: 0; 
-            background: #000; 
+            background-color: #000; 
             opacity: 0; 
             pointer-events: none; 
             z-index: 80; 
         }
         
+        /* PASILLO CENTRADO (PORCENTAJES) */
         #hallway { 
             position: absolute; 
             top: 15%; 
             left: 50%; 
             transform: translateX(-50%); 
-            width: 40vw; 
-            max-width: 320px; 
-            height: 60vh; 
-            background: #000; 
-            border: 30px solid #1a1a1a; 
+            width: 45vw; /* Ancho relativo */
+            max-width: 400px; /* Limite PC */
+            height: 70vh; /* Alto relativo */
+            background-color: #000; 
+            border: 20px solid #1a1a1a; 
             border-image: linear-gradient(to right, #111, #333, #555, #222) 1;
             box-shadow: inset 0 0 50px #000; 
             overflow: hidden; 
         }
 
-        /* CORTINA Y RICHARD ELIMINADOS DE LA VISTA */
-        #window-frame { display: none; }
-        #curtain { display: none; } 
-        #richard-eyes { display: none; }
+        /* ANIMATRONICOS */
+        .anim-img { 
+            position: absolute; 
+            pointer-events: none; 
+            display: none; 
+            z-index: 20; 
+            filter: brightness(0.6); 
+        }
 
-        /* VENTILACIÓN */
+        #vis-maifer { right: 0; bottom: 0; height: 90%; max-height: 100vh; }
+        #vis-isaac { left: 0; bottom: 0; height: 95%; max-height: 100vh; }
+        #vis-jomar { left: 50%; bottom: 0; transform: translateX(-50%); height: 80%; z-index: 4; }
+
+        /* VENTILACIÓN (IZQUIERDA) */
         #vent-system {
             position: absolute; 
-            top: 30%; 
+            top: 25%; 
             left: 0; 
             width: 25vw; 
-            max-width: 160px; 
-            height: 25vh; 
-            background: #0a0a0a; 
-            border: 8px solid #222; 
+            max-width: 200px;
+            height: 30vh; 
+            background-color: #0a0a0a; 
+            border: 5px solid #222; 
             border-left: none;
             box-shadow: 5px 5px 15px #000; 
             z-index: 35; 
@@ -468,7 +598,7 @@
             left: 0; 
             width: 100%; 
             height: 100%; 
-            background: #2a2a2a; 
+            background-color: #2a2a2a; 
             transform: translateY(-100%);
             transition: transform 0.2s; 
             border-bottom: 5px solid #444; 
@@ -494,31 +624,31 @@
 
         #vent-btn { 
             width: 100%; 
-            height: 40px; 
-            background: #600; 
+            height: 25%; 
+            background-color: #600; 
             color: #fff; 
             border: none; 
             font-family: 'VT323'; 
             cursor: pointer; 
             z-index: 6; 
             border-top: 4px solid #800; 
-            font-size: 1.1rem; 
+            font-size: 1.2rem; 
         }
 
         #vent-btn.active { 
-            background: #006600; 
+            background-color: #006600; 
             border-top: 4px solid #008800; 
         }
 
-        /* GENERADOR */
+        /* GENERADOR (IZQUIERDA - ABAJO) */
         #gen-panel { 
             position: absolute; 
-            bottom: 25%; 
-            left: 18%; 
+            bottom: 20%; 
+            left: 20%; 
             width: 15vh; 
             height: 20vh; 
-            background: #1a1a1a; 
-            border: 6px solid #333; 
+            background-color: #1a1a1a; 
+            border: 4px solid #333; 
             z-index: 40; 
             display: flex; 
             flex-direction: column; 
@@ -531,97 +661,96 @@
             height: auto; 
             aspect-ratio: 1/1; 
             border-radius: 50%; 
-            border: 5px dashed #555; 
+            border: 4px dashed #555; 
             animation: spin 4s linear infinite; 
             margin-bottom: 10px; 
-            background: #000; 
+            background-color: #000; 
         }
 
         #gen-btn { 
-            width: 40px; 
-            height: 40px; 
+            width: 40%; 
+            aspect-ratio: 1/1; 
             background: radial-gradient(circle, #ff5555, #990000); 
             border: 2px solid #fff; 
             border-radius: 50%; 
             cursor: pointer; 
-            position: absolute; 
             box-shadow: 0 0 10px red; 
         }
 
-        /* MESA */
+        /* MESA (FONDO) */
         #desk { 
             position: absolute; 
             bottom: 0; 
             width: 100%; 
-            height: 20vh; 
+            height: 15vh; /* Altura relativa */
             background: linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0.9)), url('https://www.transparenttextures.com/patterns/wood-pattern.png'), #2d2d2d;
             z-index: 30; 
             display: flex; 
             justify-content: center; 
             align-items: flex-end; 
-            border-top: 8px solid #111; 
+            border-top: 5px solid #333; 
             box-shadow: inset 0 20px 30px rgba(0,0,0,0.8);
         }
 
         .monitor-btn { 
-            width: 50%; 
-            max-width: 400px; 
-            height: 50px;
-            background: #111; 
+            width: 80%; 
+            max-width: 600px;
+            height: 100%;
+            background-color: #111; 
             color: #0f0; 
             border: 2px solid #0f0; 
             border-bottom: 0; 
             font-family: 'VT323'; 
-            font-size: 2rem; 
+            font-size: clamp(1.5rem, 5vw, 3rem); 
             cursor: pointer; 
         }
 
         .monitor-btn:hover { 
-            background: #002200; 
-            height: 60px; 
+            background-color: #002200; 
         }
 
         /* ==========================================================================
-           8. HUD E INTERFAZ DE JUEGO
+           8. HUD (INTERFAZ FLOTANTE)
            ========================================================================== */
         .hud-container { 
-            position: fixed; 
-            background: var(--hud-bg); 
+            position: absolute; 
+            background-color: var(--hud-bg); 
             border: 2px solid var(--hud-border); 
-            padding: 5px 10px; 
+            padding: 5px 15px; 
             color: #fff; 
             font-family: 'VT323'; 
             z-index: 900; 
             border-radius: 4px; 
             backdrop-filter: blur(2px); 
+            pointer-events: none; /* Click through */
         }
 
         #hud-time-box { 
-            top: 10px; 
-            right: 10px; 
+            top: 20px; 
+            right: 20px; 
             text-align: right; 
         }
 
         #hud-time { 
-            font-size: clamp(2rem, 5vw, 3.5rem); 
+            font-size: clamp(2rem, 8vw, 4rem); 
             line-height: 0.9; 
             color: #eeffee; 
             text-shadow: 0 0 10px #0f0; 
         }
 
         #hud-night { 
-            font-size: clamp(1rem, 3vw, 1.5rem); 
+            font-size: clamp(1rem, 4vw, 2rem); 
             color: #aaccaa; 
         }
 
         #hud-power-box { 
-            bottom: 90px; 
-            left: 10px; 
+            bottom: 140px; /* Evita controles moviles */
+            left: 20px; 
             width: auto; 
         }
 
         #hud-power-text { 
-            font-size: clamp(1.2rem, 4vw, 1.8rem); 
+            font-size: clamp(1.5rem, 5vw, 2.5rem); 
             margin-bottom: 5px; 
             color: #eeffee; 
         }
@@ -630,373 +759,138 @@
             display: flex; 
             gap: 5px; 
             align-items: center; 
-            font-size: 1rem; 
+            font-size: 1.2rem; 
             color: #aaccaa; 
         }
 
         .usage-block { 
-            width: 15px; 
-            height: 8px; 
-            background: #222; 
+            width: 20px; 
+            height: 10px; 
+            background-color: #222; 
             border: 1px solid #444; 
         }
 
-        .usage-block.active { 
-            background: #0f0; 
-            box-shadow: 0 0 5px #0f0; 
-        }
-
-        .usage-block.high { 
-            background: #ff0000; 
-            box-shadow: 0 0 5px #ff0000; 
-        }
+        .usage-block.active { background-color: #0f0; box-shadow: 0 0 5px #0f0; }
+        .usage-block.high { background-color: #ff0000; box-shadow: 0 0 5px #ff0000; }
 
         #hud-toxic { 
-            position: fixed; 
-            top: 10px; 
-            left: 10px; 
-            width: 150px; 
-            height: 10px; 
-            border: 2px solid #004400; 
-            background: #001100; 
-            z-index: 900; 
-            display: none; 
+            position: absolute; top: 20px; left: 20px; width: 30%; height: 20px; 
+            border: 2px solid #004400; background-color: #001100; z-index: 900; display: none; 
         }
-
-        #toxic-bar { 
-            height: 100%; 
-            background: #0f0; 
-            width: 0%; 
-            box-shadow: 0 0 10px #0f0; 
-        }
+        #toxic-bar { height: 100%; background-color: #0f0; width: 0%; box-shadow: 0 0 10px #0f0; }
 
         #btn-mute { 
-            position: absolute; 
-            top: 50px; 
-            left: 10px; 
-            background: #222; 
-            color: #fff; 
-            border: 1px solid #555; 
-            font-family: 'VT323'; 
-            cursor: pointer; 
-            z-index: 160; 
-            padding: 5px; 
-            opacity: 0.8; 
-            font-size: 1rem; 
+            position: absolute; top: 80px; left: 20px; 
+            background-color: #222; color: #fff; border: 1px solid #555; 
+            font-family: 'VT323'; cursor: pointer; z-index: 950; padding: 5px; 
+            pointer-events: auto; /* Clickable */
         }
 
-        /* MOBILE CONTROLS (TÁCTIL) */
+        /* CONTROLES MÓVILES */
         #mobile-controls {
-            position: fixed; 
-            bottom: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 80px;
-            background: rgba(0,0,0,0.9); 
-            z-index: 400; 
-            display: none; 
-            justify-content: space-around; 
-            align-items: center; 
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 12vh;
+            background-color: rgba(0,0,0,0.95); z-index: 1000; 
+            display: none; /* JS activa */
+            justify-content: space-around; align-items: center; 
             border-top: 2px solid #333;
             padding-bottom: env(safe-area-inset-bottom);
         }
 
         .mob-btn {
-            width: 19%; 
-            height: 60px; 
-            background: #222; 
-            border: 2px solid #555;
-            color: #fff; 
-            font-family: 'VT323'; 
-            font-size: 1.2rem; 
-            border-radius: 8px;
-            touch-action: manipulation;
+            width: 18%; height: 80%; background-color: #222; border: 2px solid #555;
+            color: #fff; font-family: 'VT323'; font-size: clamp(1rem, 4vw, 1.5rem); 
+            border-radius: 8px; touch-action: manipulation;
         }
-
-        .mob-btn:active, .mob-btn.active { 
-            background: #555; 
-            border-color: var(--primary); 
-        }
+        .mob-btn:active, .mob-btn.active { background-color: #555; border-color: var(--primary-color); }
 
         /* ==========================================================================
-           9. CAPAS VISUALES Y ANIMATRONICOS
+           9. CAPAS
            ========================================================================== */
-        #layer-mask { 
-            position: fixed; 
-            inset: 0; 
-            z-index: 100; 
-            display: none; 
-            pointer-events: none; 
-            background: radial-gradient(circle at center, transparent 30%, rgba(0,20,0,0.8) 60%, #000 95%); 
-            box-shadow: inset 0 0 100px #000; 
-        }
-
-        #layer-flashlight { 
-            position: fixed; 
-            inset: 0; 
-            background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.7) 0%, transparent 60%); 
-            z-index: 50; 
-            display: none; 
-            mix-blend-mode: overlay; 
-            pointer-events: none; 
-            opacity: 0.4; /* Menos brillo */
-        }
-
-        #layer-under-desk { 
-            position: fixed; 
-            inset: 0; 
-            z-index: 90; 
-            display: none; 
-            align-items: center; 
-            justify-content: center; 
-            background: radial-gradient(circle, transparent 20%, rgba(0,0,0,0.9) 60%, #000 95%);
-            animation: breathing 4s infinite ease-in-out;
-        }
-
-        #layer-under-desk h2 { 
-            font-family: 'Share Tech Mono'; 
-            color: #444; 
-            background: #000; 
-            padding: 5px 10px; 
-            border: 1px solid #333; 
-            font-size: 1.2rem; 
-            margin-top: 300px; 
-        }
-
-        .anim-img { 
-            position: absolute; 
-            pointer-events: none; 
-            display: none; 
-            z-index: 20; 
-            filter: brightness(0.6); 
-        }
-
-        #vis-maifer { right: 5%; bottom: 0; height: 85%; }
-        #vis-isaac { left: 5%; bottom: 0; height: 90%; }
-        #vis-jomar { left: 50%; bottom: 0; transform: translateX(-50%); height: 80%; z-index: 4; }
-
-        /* ==========================================================================
-           10. MONITOR Y MAPA
-           ========================================================================== */
-        #screen-monitor { 
-            position: fixed; 
-            inset: 0; 
-            background: #111; 
-            z-index: 200; 
-            display: none; 
-            flex-direction: column; 
-            padding: 10px; 
-        }
-
-        #cam-view { 
-            flex: 2; 
-            background: #000; 
-            border: 4px solid #333; 
-            position: relative; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            overflow: hidden; 
-            margin-bottom: 10px; 
-        }
-
-        #cam-static { 
-            position: absolute; 
-            inset: 0; 
-            opacity: 0.15; 
-            background: url('https://media.giphy.com/media/oEI9uBYSzLpBK/giphy.gif'); 
-            pointer-events: none; 
-            z-index: 5; 
-        }
-
-        #cam-content { 
-            position: absolute; 
-            inset: 0; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            z-index: 2; 
-            flex-direction: column; 
-        }
-
-        .cam-spot { 
-            font-family: 'Share Tech Mono'; 
-            color: #fff; 
-            font-size: 1.5rem; 
-            border: 2px solid #fff; 
-            background: rgba(0,0,0,0.5); 
-            padding: 10px; 
-            margin: 10px; 
-            width: auto; 
-            text-align: center; 
-        }
-
-        .cam-spot.active-anim { 
-            color: #f00; 
-            border-color: #f00; 
-            background: rgba(50,0,0,0.5); 
-            animation: glitch 1s infinite; 
-        }
-
-        #map-layout { 
-            height: 250px; 
-            background: #051505; 
-            border: 2px solid #0f0; 
-            position: relative; 
-            margin-top: 10px; 
-            box-shadow: inset 0 0 20px #002200; 
-            flex-shrink: 0;
-        }
-
-        .map-room { 
-            position: absolute; 
-            border: 2px solid #004400; 
-            background: rgba(0, 50, 0, 0.3); 
-        }
-
-        /* Posiciones Mapa */
-        #room-06 { top: 10px; left: 35%; width: 30%; height: 60px; }
-        #room-04 { top: 80px; left: 10%; width: 35%; height: 80px; }
-        #room-05 { top: 80px; right: 10%; width: 35%; height: 80px; }
-        #room-02 { top: 170px; left: 20%; width: 25%; height: 70px; }
-        #room-03 { top: 170px; right: 20%; width: 25%; height: 70px; }
-        #room-you { bottom: 0px; left: 45%; width: 10%; height: 20px; background: #200; }
-
-        .cam-btn { 
-            position: absolute; 
-            width: 40px; 
-            height: 30px; 
-            background: #002200; 
-            border: 1px solid #0f0; 
-            color: #0f0; 
-            font-family: 'VT323'; 
-            font-size: 1rem; 
-            cursor: pointer; 
-            z-index: 10; 
-        }
-
-        .cam-btn:hover { background: #004400; }
+        #layer-mask { position: absolute; inset: 0; z-index: 100; display: none; pointer-events: none; background: radial-gradient(circle at center, transparent 30%, rgba(0,20,0,0.8) 60%, #000 95%); }
+        #layer-flashlight { position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.7) 0%, transparent 60%); z-index: 50; display: none; mix-blend-mode: overlay; pointer-events: none; opacity: 0.85 !important; }
+        #layer-under-desk { position: absolute; inset: 0; z-index: 90; display: none; align-items: center; justify-content: center; background: radial-gradient(circle, transparent 20%, rgba(0,0,0,0.9) 60%, #000 95%); }
+        #layer-under-desk h2 { font-family: 'Share Tech Mono'; color: #444; background: #000; padding: 10px; border: 1px solid #333; margin-top: 40%; }
         
-        .cam-btn.active { 
-            background: #0f0; 
-            color: #000; 
-            animation: blink 1s infinite; 
+        /* ==========================================================================
+           10. MONITOR
+           ========================================================================== */
+        #screen-monitor { position: absolute; inset: 0; background-color: #111; z-index: 200; display: none; flex-direction: column; padding: 2vh; }
+        #cam-view { flex: 2; background-color: #000; border: 4px solid #333; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 10px; }
+        #cam-static { position: absolute; inset: 0; opacity: 0.15; background: url('https://media.giphy.com/media/oEI9uBYSzLpBK/giphy.gif'); pointer-events: none; z-index: 5; }
+        #cam-content { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 2; flex-direction: column; }
+        .cam-spot { font-family: 'Share Tech Mono'; color: #fff; font-size: 1.5rem; border: 2px solid #fff; background: rgba(0,0,0,0.5); padding: 10px; text-align: center; }
+        .cam-spot.active-anim { color: #f00; border-color: #f00; background: rgba(50,0,0,0.5); animation: glitch 1s infinite; }
+        
+        /* MAPA */
+        #map-layout { 
+            height: 35vh; background: #051505; border: 2px solid #0f0; 
+            position: relative; flex-shrink: 0; box-shadow: inset 0 0 30px #020; 
         }
-
-        #btn-c6 { top: 25px; left: 48%; }
-        #btn-c4 { top: 105px; left: 20%; }
-        #btn-c5 { top: 105px; right: 20%; }
-        #btn-c2 { top: 190px; left: 30%; }
-        #btn-c3 { top: 190px; right: 30%; }
-        #btn-c1 { bottom: 25px; left: 48%; }
+        .map-room { position: absolute; border: 2px solid #004400; background: rgba(0, 50, 0, 0.3); }
+        .cam-btn { 
+            position: absolute; width: 12%; height: 15%; 
+            background-color: #002200; border: 1px solid #0f0; color: #0f0; 
+            font-family: 'VT323'; font-size: clamp(0.8rem, 3vw, 1.2rem); 
+            cursor: pointer; z-index: 10; display: flex; justify-content: center; align-items: center;
+        }
+        .cam-btn:hover { background-color: #004400; }
+        .cam-btn.active { background-color: #0f0; color: #000; animation: blink 1s infinite; }
+        
+        /* Coordenadas en Porcentaje (%) */
+        #room-06 { top: 5%; left: 35%; width: 30%; height: 20%; }
+        #room-04 { top: 30%; left: 10%; width: 35%; height: 25%; }
+        #room-05 { top: 30%; right: 10%; width: 35%; height: 25%; }
+        #room-02 { top: 60%; left: 20%; width: 25%; height: 20%; }
+        #room-03 { top: 60%; right: 20%; width: 25%; height: 20%; }
+        #room-you { bottom: 0; left: 45%; width: 10%; height: 5%; background: #200; }
+        
+        #btn-c6 { top: 8%; left: 44%; }
+        #btn-c4 { top: 35%; left: 20%; }
+        #btn-c5 { top: 35%; right: 20%; }
+        #btn-c2 { top: 65%; left: 26%; }
+        #btn-c3 { top: 65%; right: 26%; }
+        #btn-c1 { bottom: 5%; left: 44%; }
         
         #btn-close-mon { 
-            position: absolute; 
-            bottom: 10px; 
-            right: 10px; 
-            background: #f00; 
-            color: #fff; 
-            border: 2px solid #fff; 
-            padding: 5px 15px; 
-            font-family: 'VT323'; 
-            cursor: pointer; 
-            font-size: 1.5rem;
+            position: absolute; bottom: 5px; right: 5px; 
+            background-color: #f00; color: #fff; border: 2px solid #fff; 
+            padding: 5px 15px; font-family: 'VT323'; cursor: pointer; font-size: 1.2rem;
         }
 
         /* ==========================================================================
-           11. EXTRAS (WIN, GAME OVER, MINIGAMES)
+           12. EXTRAS (WIN, GAME OVER)
            ========================================================================== */
-        #screen-win { 
-            background: #000; 
-            text-align: center; 
-        }
-
-        #win-msg { 
-            color: #00aaff; 
-            font-family: 'Share Tech Mono'; 
-            font-size: 1.2rem; 
-            max-width: 600px; 
-            margin: 20px; 
-            line-height: 1.5; 
-        }
-
+        #screen-win { background-color: #000; text-align: center; }
+        #win-msg { color: #00aaff; font-family: 'Share Tech Mono'; font-size: 1.5rem; max-width: 80%; margin: 20px; line-height: 1.5; }
+        
         #screen-gameover { 
-            z-index: 9500; 
-            background: #050000; 
-            flex-direction: row; 
-            gap: 50px; 
+            z-index: 9500; background: #050000; 
+            flex-direction: row; gap: 30px; flex-wrap: wrap;
             background-image: url('https://media.giphy.com/media/oEI9uBYSzLpBK/giphy.gif'); 
-            background-blend-mode: overlay; 
-            background-size: cover; 
+            background-blend-mode: overlay; background-size: cover; 
         }
+        #death-card { width: 90%; max-width: 500px; border: 4px solid #500; background: #100; padding: 20px; text-align: center; transform: rotate(-2deg); }
+        #death-card h1 { font-size: 3rem; margin: 0 0 20px 0; text-shadow: 2px 2px #000; animation: glitch 1s infinite; }
+        #death-img { border: 2px solid #300; filter: contrast(1.2) sepia(0.5); width: 100%; }
+        
+        #screen-jumpscare { z-index: 9600; background-color: #000; display: none; align-items: center; justify-content: center; }
+        #jump-img { width: 100%; height: 100%; object-fit: cover; animation: shake 0.2s infinite; }
 
-        #death-card { 
-            width: 400px; 
-            border: 4px solid #500; 
-            background: #100; 
-            padding: 20px; 
-            text-align: center; 
-            box-shadow: 0 0 50px #500; 
-            transform: rotate(-2deg); 
-        }
+        #screen-minigame { background-color: #000; }
+        #mg-canvas { background: #111; border: 2px solid #444; box-shadow: 0 0 20px #222; max-width: 95%; max-height: 50vh; cursor: default; }
 
-        #death-card h1 { 
-            font-size: 3rem; 
-            margin: 0 0 20px 0; 
-            text-shadow: 2px 2px #000; 
-            animation: glitch 1s infinite; 
-        }
-
-        #death-img { 
-            border: 2px solid #300; 
-            filter: contrast(1.2) sepia(0.5); 
-        }
-
-        #screen-jumpscare { 
-            z-index: 9600; 
-            background: #000; 
-            display: none; 
-            align-items: center; 
-            justify-content: center; 
-        }
-
-        #jump-img { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; 
-            animation: shake 0.2s infinite; 
-        }
-
-        #screen-minigame { background: #000; }
-        #mg-canvas { background: #111; border: 2px solid #444; box-shadow: 0 0 20px #222; max-width: 100%; cursor: default; }
-        #mg-info { color: #fff; font-family: 'VT323'; font-size: 1.5rem; margin-bottom: 10px; text-align: center; }
-        #mg-controls-hint { color: #888; margin-top: 10px; font-size: 0.9rem; }
-
-        /* ESTRELLAS ESTRELLAS AZULES */
-        #star-row { display: flex; gap: 8px; margin-bottom: 20px; height: 35px; z-index: 5; }
-        .star { font-size: 2rem; color: #222; }
-        .star.earned { color: gold; text-shadow: 0 0 10px gold; }
-        .star.blue { color: #0088ff; text-shadow: 0 0 15px #0088ff; }
-
-        @keyframes breathing { 0% { transform: scale(1); opacity: 0.95; } 50% { transform: scale(1.02); opacity: 1; } 100% { transform: scale(1); opacity: 0.95; } }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-        @keyframes glitch { 0% { transform: translate(0); } 20% { transform: translate(-2px, 2px); } 40% { transform: translate(-2px, -2px); } 60% { transform: translate(2px, 2px); } 80% { transform: translate(2px, -2px); } 100% { transform: translate(0); } }
-        @keyframes shake { 0% { transform: translate(5px, 5px); } 25% { transform: translate(-5px, -5px); } 50% { transform: translate(5px, -5px); } 75% { transform: translate(-5px, 5px); } }
-        @keyframes flickerAnim { 0% { opacity: 0; } 10% { opacity: 0.95; background:#000; } 20% { opacity: 0.1; } 30% { opacity: 0.95; background:#000; } 40% { opacity: 0; } 50% { opacity: 0.8; } 100% { opacity: 0; } }
+        @keyframes glitch { 0% { transform: translate(0); } 20% { transform: translate(-2px, 2px); } 80% { transform: translate(2px, -2px); } 100% { transform: translate(0); } }
+        @keyframes shake { 0% { transform: translate(5px, 5px); } 50% { transform: translate(-5px, -5px); } }
+        @keyframes flickerAnim { 0% { opacity: 0; } 10% { opacity: 0.95; background:#000; } 50% { opacity: 0.8; } 100% { opacity: 0; } }
         .flickering { animation: flickerAnim 0.8s linear; }
 
-        /* RESPONSIVE MEDIA QUERIES */
+        /* Media Queries para Tablets/Móviles */
         @media (max-width: 768px) {
-            #hallway { width: 60vw; }
-            #window-frame { width: 40vw; right: 2%; }
-            #gen-panel { left: 10px; bottom: 15%; transform: scale(0.9); }
-            #hud-power-box { bottom: 90px; } /* Evita tapar con botones moviles */
-            #map-layout { height: 180px; }
-            .cam-btn { width: 30px; height: 25px; font-size: 0.8rem; }
-            .menu-btn { width: 90%; }
             #screen-gameover { flex-direction: column; }
-            #death-card { width: 90%; transform: rotate(0deg); }
+            .lore-text { font-size: 0.9rem; }
+            #hud-power-box { bottom: 100px; } /* Ajuste para no tapar controles */
         }
+
     </style>
 </head>
 <body>
@@ -1026,24 +920,52 @@
     <audio id="jump-maifer" src="maifer_mata.mp3"></audio>
     <audio id="sfx-gen" src="turn_on_the_light.mp3"></audio>
     <audio id="sfx-gameover" src="game_over.mp3"></audio>
+    
+    <!-- NUEVO: AUDIO GOLDEN MAIFER -->
+    <audio id="sfx-oh" src="oh_oh.mp3"></audio>
+    <audio id="jump-golden" src="golden_maifer_jumpscare.mp3"></audio>
+    
+    <!-- NUEVO: SONIDO INICIO NOCHE -->
+    <audio id="sfx-night-start" src="night_shift_start.mp3"></audio>
+</div>
+
+<!-- DEVICE SELECTION SCREEN (LOADER) -->
+<div id="screen-device" class="screen active">
+    <h1 class="title-text" style="font-size: 3rem;">SELECT DEVICE / DISPOSITIVO</h1>
+    <div style="display:flex; gap:20px;">
+        <button class="menu-btn" onclick="App.selectMode('PC')">PC (ORIGINAL)</button>
+        <button class="menu-btn" onclick="App.selectMode('MOBILE')">MOBILE (OPTIMIZED)</button>
+    </div>
+    <div id="loading-bar-container">
+        <div id="loading-bar"></div>
+    </div>
+    <p id="loading-txt" style="margin-top:10px; font-family:'VT323'; color:#0f0; display:none;">INITIALIZING SYSTEMS...</p>
+</div>
+
+<!-- INTRO SEQUENCE SCREEN -->
+<div id="screen-intro" class="screen">
+    <div id="intro-msg" class="intro-text"></div>
 </div>
 
 <!-- MENU -->
-<div id="screen-menu" class="screen active">
-    <button id="lang-btn" class="menu-btn" onclick="Lang.toggle()">ESPANOL</button>
-    <button id="btn-leaderboard" class="menu-btn" style="width:auto;" onclick="UI.openLeaderboard()">🏆 RANK</button>
+<div id="screen-menu" class="screen">
+    <button id="lang-btn" class="menu-btn" style="width: auto;" onclick="Lang.toggle()">ESPANOL</button>
+    <button id="btn-leaderboard" class="menu-btn" style="width: auto;" onclick="UI.openLeaderboard()">🏆 RANK</button>
+    
     <h1 class="title-text">MAIFER'S<br>FACTORY</h1>
     <div id="star-row"></div>
-    <div style="display: flex; flex-direction: column;">
-        <button id="btn-play" class="menu-btn" onclick="Game.initNight()">JUGAR (NOCHE <span id="menu-night">1</span>)</button>
-        <button id="btn-custom" class="menu-btn locked" onclick="Game.initCustomSetup()" disabled>CUSTOM NIGHT <span class="icon-lock">🔒</span></button>
+    
+    <div class="menu-container">
+        <button id="btn-play" class="menu-btn" onclick="Game.initNight()">JUGAR</button>
+        <button id="btn-custom" class="menu-btn locked" onclick="Game.initCustomSetup()" disabled>CUSTOM NIGHT</button>
         <button id="btn-new" class="menu-btn" onclick="Game.newGame()">NUEVA PARTIDA</button>
         <button id="btn-lore" class="menu-btn" onclick="UI.openLore()">DATOS / LORE</button>
         <button id="btn-updates" class="menu-btn" onclick="UI.openUpdates()">UPDATES</button>
         <button id="btn-comm" class="menu-btn" onclick="UI.openComments()">COMUNIDAD</button>
         <button id="btn-settings" class="menu-btn" onclick="UI.openSettings()">AJUSTES</button>
     </div>
-    <p style="position: absolute; bottom: 10px; font-size: 0.8rem; color: #444;">v21.0 - Online Activated</p>
+    
+    <p style="position: absolute; bottom: 10px; font-size: 0.8rem; color: #444;">v30.0 - Ultimate Sequence</p>
     <p id="credits-text">Creado por Jonlet Santos</p>
 </div>
 
@@ -1052,7 +974,7 @@
     <div class="modal-box">
         <h2 id="lore-title" class="lore-header">MAIFER'S FACTORY — LORE OFICIAL</h2>
         <div id="lore-content" class="lore-text"></div>
-        <button id="btn-close-lore" class="menu-btn" onclick="UI.closeModals()" style="width: 100%; margin-top:20px;">CERRAR</button>
+        <button id="btn-close-lore" class="menu-btn" onclick="UI.closeModals()">CERRAR</button>
     </div>
 </div>
 
@@ -1061,19 +983,19 @@
         <h2 class="lore-header">UPDATES LOG</h2>
         <ul id="update-list" class="update-list"></ul>
         <h2 id="teaser-text" class="teaser-text"></h2>
-        <button id="btn-close-upd" class="menu-btn" onclick="UI.closeModals()" style="width: 100%; margin-top:20px;">CERRAR</button>
+        <button id="btn-close-upd" class="menu-btn" onclick="UI.closeModals()">CERRAR</button>
     </div>
 </div>
 
 <div id="modal-comments" class="modal-overlay">
     <div class="modal-box">
         <h2 class="lore-header">COMUNIDAD (ONLINE)</h2>
-        <div style="color: #666; font-size: 0.8rem; margin-bottom: 10px;">Chat Global Activado</div>
-        <div id="comment-feed" style="height: 300px; overflow-y: auto; border: 1px solid #333; margin-bottom: 10px; padding: 10px; background:#000;">
-            <!-- Comentarios aqui -->
+        <div id="comm-warning" style="color: #00ff00; font-size: 0.8rem; margin-bottom: 10px;">Sistema de Moderación IA Activo</div>
+        <div id="comment-feed" style="height: 300px; overflow-y: auto; border: 1px solid #333; margin-bottom: 10px; padding: 10px; background-color:#000;">
+            <!-- Comentarios -->
         </div>
         <div style="display:flex; gap:10px;">
-            <input type="text" id="comm-input" placeholder="Escribe algo..." style="flex:1; font-family:'VT323'; font-size:1.2rem; padding:5px;">
+            <input type="text" id="comm-input" placeholder="Escribe algo..." style="flex:1; font-family:'VT323'; font-size:1.5rem; padding:5px;">
             <button class="menu-btn" style="width:auto;" onclick="CommentSystem.post()">ENVIAR</button>
         </div>
         <button class="menu-btn" onclick="UI.closeModals()">CERRAR</button>
@@ -1084,7 +1006,7 @@
     <div class="modal-box">
         <h2 id="lb-title" class="lore-header">TOP SURVIVORS</h2>
         <ul id="lb-list" class="update-list" style="list-style: none;">
-            <!-- Ranks aqui -->
+            <!-- Ranks -->
         </ul>
         <div id="lb-input" style="display:none; margin-top:20px; text-align: center;">
             <p>¡NOCHE 8 COMPLETADA!</p>
@@ -1103,24 +1025,37 @@
             <div id="st-h-aud" class="setting-header">AUDIO</div>
             <div class="setting-row"><span id="st-vol">VOLUMEN</span><input type="range" min="0" max="100" value="100" oninput="AudioSys.setVolume(this.value)"></div>
         </div>
+        <!-- NUEVO: CONTROLES SECTION (Insertado aquí para respetar estructura visual) -->
         <div class="setting-section">
-            <div id="st-h-gfx" class="setting-header">GRÁFICOS</div>
-            <div class="setting-row"><span id="st-full">PANTALLA COMPLETA</span><button class="menu-btn" style="width: auto; font-size: 1rem;" onclick="Config.toggleFullscreen()">TOGGLE</button></div>
+            <div class="setting-header">CONTROLES (CLICK PARA CAMBIAR)</div>
+            <div class="setting-row"><span id="lbl-st-mask">MASCARA</span><button class="menu-btn" style="width:auto;font-size:1rem;" id="bind-mask" onclick="Input.rebind('mask')">SPACE</button></div>
+            <div class="setting-row"><span id="lbl-st-flash">LINTERNA</span><button class="menu-btn" style="width:auto;font-size:1rem;" id="bind-flash" onclick="Input.rebind('flash')">F</button></div>
+            <div class="setting-row"><span id="lbl-st-mon">MONITOR</span><button class="menu-btn" style="width:auto;font-size:1rem;" id="bind-monitor" onclick="Input.rebind('monitor')">TAB</button></div>
+            <div class="setting-row"><span id="lbl-st-vent">CERRAR VENTILACION</span><button class="menu-btn" style="width:auto;font-size:1rem;" id="bind-vent" onclick="Input.rebind('vent')">V</button></div>
+        </div>
+        <div class="setting-section">
+            <div id="st-h-gfx" class="setting-header">GRÁFICOS & GAMEPLAY</div>
+            <div class="setting-row"><span id="st-full">PANTALLA COMPLETA</span><button class="menu-btn" style="width: auto; font-size: 1.2rem;" onclick="Config.toggleFullscreen()">TOGGLE</button></div>
             <div class="setting-row"><span id="st-gli">EFECTO GLITCH</span><input type="checkbox" id="chk-glitch" checked onchange="Config.toggleGlitch()"></div>
-            <div class="setting-row"><span id="st-sens">SENSIBILIDAD</span><input type="range" min="1" max="10" value="5"></div>
-            <div class="setting-row"><span id="st-del" style="color: red;">BORRAR DATOS</span><button class="menu-btn" style="width: auto; font-size: 1rem; border-color: red; color: red;" onclick="Game.newGame()">RESET</button></div>
+            <!-- NUEVO: MÁS AJUSTES CON IDS PARA TRADUCCION -->
+            <div class="setting-row"><span id="lbl-st-static">ESTATICIDAD CÁMARA</span><input type="checkbox" checked onchange="Config.toggleStatic(this.checked)"></div>
+            <div class="setting-row"><span id="lbl-st-3d">PERSPECTIVA 3D</span><input type="checkbox" checked onchange="Config.togglePerspective(this.checked)"></div>
+            
+            <div class="setting-row"><span id="st-del" style="color: red;">BORRAR DATOS</span><button class="menu-btn" style="width: auto; font-size: 1.2rem; border-color: red; color: red;" onclick="Game.newGame()">RESET</button></div>
         </div>
         <button id="btn-save-st" class="menu-btn" onclick="UI.closeModals()">CERRAR</button>
     </div>
 </div>
 
-<!-- CUSTOM NIGHT SCREEN -->
+<!-- CUSTOM NIGHT SCREEN (UPDATED) -->
 <div id="screen-custom" class="screen">
-    <h1 class="title-text" style="font-size: 2.5rem;">CUSTOM NIGHT</h1>
+    <h1 class="title-text" style="font-size: 3rem;">CUSTOM NIGHT</h1>
     <div class="cn-grid">
         <div class="cn-char"><img src="maifer.png" class="cn-img"><span style="color:#fff;">MAIFER</span><div class="cn-controls"><button class="cn-btn" onclick="CustomNight.adj('maifer',-1)">-</button><div id="val-maifer" class="cn-val">0</div><button class="cn-btn" onclick="CustomNight.adj('maifer',1)">+</button></div></div>
         <div class="cn-char"><img src="isaac.png" class="cn-img"><span style="color:#fff;">ISAAC</span><div class="cn-controls"><button class="cn-btn" onclick="CustomNight.adj('isaac',-1)">-</button><div id="val-isaac" class="cn-val">0</div><button class="cn-btn" onclick="CustomNight.adj('isaac',1)">+</button></div></div>
         <div class="cn-char"><img src="jomar.png" class="cn-img"><span style="color:#fff;">JOMAR</span><div class="cn-controls"><button class="cn-btn" onclick="CustomNight.adj('jomar',-1)">-</button><div id="val-jomar" class="cn-val">0</div><button class="cn-btn" onclick="CustomNight.adj('jomar',1)">+</button></div></div>
+        <!-- NUEVO: GOLDEN MAIFER EN CUSTOM -->
+        <div class="cn-char" style="border-color: gold;"><img src="golden_maifer.png" class="cn-img"><span style="color:gold;">G. MAIFER</span><div class="cn-controls"><button class="cn-btn" onclick="CustomNight.adj('golden',-1)">-</button><div id="val-golden" class="cn-val">0</div><button class="cn-btn" onclick="CustomNight.adj('golden',1)">+</button></div></div>
     </div>
     <button id="btn-cn-start" class="menu-btn" onclick="CustomNight.start()">INICIAR</button>
     <button class="menu-btn" style="border-color:red;" onclick="location.reload()">ATRAS</button>
@@ -1140,15 +1075,15 @@
 
     <div id="view-office">
         <div id="layer-flicker"></div>
+        
         <div id="vent-system">
             <img id="vent-img" src="">
             <div id="vent-grill"></div>
             <div id="vent-door"></div>
-            <button id="vent-btn" onclick="Mechanics.toggleVent()">CLOSE VENT</button>
+            <button id="vent-btn" onclick="Mechanics.toggleVent()">CLOSE</button>
         </div>
+        
         <div id="hallway"><img id="vis-jomar" class="anim-img" src="jomar.png"></div>
-        <!-- Richard Removed -->
-        <div id="window-frame"></div>
         
         <img id="vis-isaac" class="anim-img" src="isaac.png">
         <img id="vis-maifer" class="anim-img" src="maifer.png">
@@ -1189,11 +1124,10 @@
 </div>
 
 <!-- WIN / GAMEOVER -->
-<div id="screen-win" class="screen" style="background:#000;">
-    <h1 style="font-family:'VT323'; font-size:5rem; color:#00aaff;">YOU WIN</h1>
+<div id="screen-win" class="screen" style="background-color:#000;">
+    <h1 style="font-family:'VT323'; font-size:6rem; color:#00aaff;">YOU WIN</h1>
     <div id="win-stars" style="display:flex; gap:10px;"></div>
-    <p id="win-msg" style="color:#fff; font-family:'Share Tech Mono'; margin:20px; text-align:center;"></p>
-    <!-- Rank Input for Code Winners -->
+    <p id="win-msg" style="color:#fff; font-family:'Share Tech Mono'; margin:20px; text-align:center; font-size: 1.5rem;"></p>
     <div id="win-rank-input" style="display:none; text-align:center;">
         <input type="text" id="win-name" placeholder="YOUR NAME" style="font-family:'VT323'; font-size:1.5rem; width:200px;">
         <button class="menu-btn" style="width:auto;" onclick="Leaderboard.addFromWin()">ADD RANK</button>
@@ -1201,9 +1135,9 @@
     <button class="menu-btn" onclick="location.reload()">MENU</button>
 </div>
 
-<div id="screen-8am" class="screen" style="background:#000;">
-    <h1 style="font-family:'VT323'; font-size:6rem; color:#0f0;">8:00 AM</h1>
-    <p id="lbl-win" style="color:#fff;">TURNO FINALIZADO.</p>
+<div id="screen-8am" class="screen" style="background-color:#000;">
+    <h1 style="font-family:'VT323'; font-size:8rem; color:#0f0;">8:00 AM</h1>
+    <p id="lbl-win" style="color:#fff; font-size: 2rem;">TURNO FINALIZADO.</p>
 </div>
 
 <div id="screen-minigame" class="screen">
@@ -1221,7 +1155,9 @@
     <button id="btn-menu-go" class="menu-btn" onclick="location.reload()">MENU</button>
 </div>
 
-<div id="screen-jumpscare" class="screen"><img id="jump-img" src=""></div>
+<div id="screen-jumpscare" class="screen">
+    <img id="jump-img" src="">
+</div>
 
 <script>
 // --- CONFIGURACIÓN FIREBASE ---
@@ -1235,30 +1171,34 @@ const firebaseConfig = {
   appId: "1:700963667348:web:6fd8dba0bcb3ada7a2e381"
 };
 
-// Inicializar Firebase
 if(typeof firebase !== 'undefined') {
     firebase.initializeApp(firebaseConfig);
 }
-// -------------------------------------------------------------------------------
 
-const LORE_ES = `📖 MAIFER’S FACTORY — ARCHIVOS CLASIFICADOS\n\nREGISTRO 01: EL ORIGEN\nMaifer’s Factory comenzó como una instalación de robótica experimental...`;
-const LORE_EN = `📖 MAIFER’S FACTORY — CLASSIFIED FILES\n\nLOG 01: ORIGIN\nMaifer’s Factory began as an experimental robotics facility...`;
-const LORE_CN = `📖 MAIFER’S FACTORY — 机密档案\n\n日志 01：起源\nMaifer工厂始于90年代...`;
+// ============================================================================
+// DATOS, TEXTOS Y LOCALIZACIÓN (LORE OFICIAL COMPLETO)
+// ============================================================================
+const LORE_ES_FULL = `📖 MAIFER’S FACTORY — LORE OFICIAL\n\nMaifer’s Factory es una antigua fábrica industrial dedicada al desarrollo de robots de vigilancia y asistencia mecánica. El lugar pertenece a Michael Boyko.\n\n👤 EL PROTAGONISTA\nAceptas el trabajo por necesidad. Solo una advertencia: “No interfieras con los animatrónicos. Sigue los protocolos.”\n\n☎️ LA CHICA DEL TELÉFONO\nCada noche recibes una llamada de una mujer que trabaja en la fábrica. Nunca dice su nombre.\n\n🤖 LOS ROBOTS\n🟡 MAIFER: Agresivo con presencia humana. Escóndete debajo de la mesa.\n🎭 ISAAC: Responde a rostros. La máscara lo engaña.\n🔦 JOMAR: Odia la luz. Usa la linterna.\n🟥 RICHARD: Unidad de contención. Cierra la cortina.\n\n🕰️ LAS NOCHES\nSobrevivir hasta las 8:00 AM no significa que ganaste. Significa que fuiste tolerado.`;
 
-const UPDATES_ES = ["✅ Online Leaderboard", "✅ Comentarios Globales", "✅ Resolución Móvil Fix", "✅ Jumpscares Fix", "✅ Jomar 100% Letal"];
-const UPDATES_EN = ["✅ Online Leaderboard", "✅ Global Comments", "✅ Mobile Res Fix", "✅ Jumpscares Fix", "✅ Jomar 100% Lethal"];
-const UPDATES_CN = ["✅ 在线排行榜", "✅ 全球评论", "✅ 移动分辨率", "✅ 跳跃恐惧修复", "✅ Jomar 100% 致命"];
+const LORE_EN_FULL = `📖 MAIFER’S FACTORY — OFFICIAL LORE\n\nMaifer’s Factory is an old industrial factory owned by Michael Boyko.\n\n👤 THE PROTAGONIST\nYou accept the job out of necessity. Warning: "Do not interfere with the animatronics."\n\n☎️ PHONE GIRL\nEvery night you receive a call from a woman. She never says her name.\n\n🤖 THE ROBOTS\n🟡 MAIFER: Aggressive. Hide under the table.\n🎭 ISAAC: Responds to faces. Use the mask.\n🔦 JOMAR: Hates light. Use flashlight.\n🟥 RICHARD: Containment unit. Close curtain.\n\n🕰️ THE NIGHTS\nSurviving until 8:00 AM doesn't mean you won. It means you were tolerated.`;
+
+const LORE_CN_FULL = `📖 MAIFER’S FACTORY — 官方传说\n\nMaifer工厂归Michael Boyko所有。\n\n👤 主角\n你接受了这份工作。警告：“不要干涉电子动画。”\n\n☎️ 电话女孩\n每晚你会接到一个女人的电话。\n\n🤖 机器人\n🟡 MAIFER：攻击性。躲在桌子底下。\n🎭 ISAAC：对面孔有反应。使用面具。\n🔦 JOMAR：讨厌光。使用手电筒。\n🟥 RICHARD：遏制装置。拉下窗帘。\n\n🕰️ 夜晚\n活到8:00并不意味着你赢了。`;
+
+const UPDATES_ES = ["✅ Online Leaderboard", "✅ Comentarios Globales", "✅ Pantalla Fluida (Fix)", "✅ Jumpscares Fix", "✅ Jomar 100% Letal"];
+const UPDATES_EN = ["✅ Online Leaderboard", "✅ Global Comments", "✅ Fluid Screen Fix", "✅ Jumpscares Fix", "✅ Jomar 100% Lethal"];
+const UPDATES_CN = ["✅ 在线排行榜", "✅ 全球评论", "✅ 流畅屏幕修复", "✅ 跳跃恐惧修复", "✅ Jomar 100% 致命"];
 
 const TEXTS = {
     ES: {
         play: "JUGAR (NOCHE", new: "NUEVA PARTIDA", lore: "DATOS / LORE", st: "AJUSTES", 
         custom: "NOCHE PERSONALIZADA", night: "NOCHE", under: "DEBAJO DE LA MESA", win: "TURNO FINALIZADO",
         g_over: "FIN DEL JUEGO", st_title: "AJUSTES", st_vol: "VOLUMEN", st_ctrl: "CONTROLES",
-        btn_close: "CERRAR", btn_save: "GUARDAR Y CERRAR", lore_txt: LORE_ES,
+        btn_close: "CERRAR", btn_save: "GUARDAR Y CERRAR", lore_txt: LORE_ES_FULL, /* NEW LORE */
         lbl_mask: "MÁSCARA", lbl_flash: "LINTERNA", lbl_hide: "ESCONDERSE", lbl_curtain: "CORTINA", lbl_mon: "MONITOR",
         lbl_sys: "SISTEMA", lbl_pwr: "PODER", lbl_usage: "USO", lbl_night: "NOCHE",
         d_maifer: "Maifer te atrapó.", d_isaac: "Isaac no fue engañado.", d_jomar: "La oscuridad te consumió.",
         d_power: "Apagón total.", d_air: "Falta de aire.", d_vent: "Algo salió de la ventilación.",
+        d_golden: "ERES DEMASIADO LENTO.", /* NEW */
         lf_1: "N1: Registro encontrado.", lf_2: "N2: Rostro detectado.",
         mg_1: "N1: ESQUIVAR OBSTÁCULOS", mg_2: "N2: BUSCA LA MÁSCARA", mg_3: "N3: CARGA LA BATERÍA",
         teaser: "FIVE NIGHTS AT MAIFER'S 2 IS COMING", upd_list: UPDATES_ES, mute: "SILENCIAR 📞", upd_btn: "ACTUALIZACIONES",
@@ -1266,17 +1206,22 @@ const TEXTS = {
         cn_start: "INICIAR NOCHE", lb_title: "GANADORES (GLOBAL)", lb_ph: "TU NOMBRE", credits: "Creado por Jonlet Santos", rank_btn: "🏆 RANK",
         st_h_aud: "AUDIO", st_h_gfx: "GRÁFICOS", st_h_ctrl: "CONTROLES",
         st_full: "PANTALLA COMPLETA", st_gli: "EFECTO GLITCH", st_sens: "SENSIBILIDAD", st_del: "BORRAR DATOS",
-        mg5_hint: "PRESIONA ESPACIO RAPIDO", comm_btn: "COMUNIDAD"
+        mg5_hint: "PRESIONA ESPACIO RAPIDO", comm_btn: "COMUNIDAD",
+        intro: "NOCHE ", am: " - 12:00 AM",
+        /* --- AJUSTES TRADUCIDOS --- */
+        st_mask: "MÁSCARA", st_flash: "LINTERNA", st_mon: "MONITOR", st_vent: "CERRAR VENT.",
+        st_static: "ESTÁTICA CÁMARA", st_3d: "PERSPECTIVA 3D"
     },
     EN: {
         play: "PLAY (NIGHT", new: "NEW GAME", lore: "DATA / LORE", st: "SETTINGS",
         custom: "CUSTOM NIGHT", night: "NIGHT", under: "UNDER THE DESK", win: "SHIFT COMPLETED",
         g_over: "GAME OVER", st_title: "SETTINGS", st_vol: "VOLUME", st_ctrl: "CONTROLS",
-        btn_close: "CLOSE", btn_save: "SAVE & CLOSE", lore_txt: LORE_EN,
+        btn_close: "CLOSE", btn_save: "SAVE & CLOSE", lore_txt: LORE_EN_FULL, /* NEW LORE */
         lbl_mask: "MASK", lbl_flash: "FLASHLIGHT", lbl_hide: "HIDE", lbl_curtain: "CURTAIN", lbl_mon: "MONITOR",
         lbl_sys: "SYSTEM", lbl_pwr: "POWER", lbl_usage: "USAGE", lbl_night: "NIGHT",
         d_maifer: "Maifer caught you.", d_isaac: "Isaac wasn't fooled.", d_jomar: "Darkness took you.",
         d_power: "Blackout.", d_air: "No air.", d_vent: "Ventilation breach.",
+        d_golden: "YOU ARE TOO SLOW.", /* NEW */
         lf_1: "N1: Record found.", lf_2: "N2: Face detected.",
         mg_1: "N1: DODGE", mg_2: "N2: FIND MASK", mg_3: "N3: CHARGE BATTERY",
         teaser: "FIVE NIGHTS AT MAIFER'S 2 IS COMING", upd_list: UPDATES_EN, mute: "MUTE CALL 📞", upd_btn: "UPDATES",
@@ -1284,17 +1229,22 @@ const TEXTS = {
         cn_start: "START NIGHT", lb_title: "SURVIVORS (GLOBAL)", lb_ph: "YOUR NAME", credits: "Created by Jonlet Santos", rank_btn: "🏆 RANK",
         st_h_aud: "AUDIO", st_h_gfx: "GRAPHICS", st_h_ctrl: "CONTROLS",
         st_full: "FULLSCREEN", st_gli: "GLITCH FX", st_sens: "SENSITIVITY", st_del: "RESET DATA",
-        mg5_hint: "MASH SPACE FAST", comm_btn: "COMMUNITY"
+        mg5_hint: "MASH SPACE FAST", comm_btn: "COMMUNITY",
+        intro: "NIGHT ", am: " - 12:00 AM",
+        /* --- AJUSTES TRADUCIDOS --- */
+        st_mask: "MASK", st_flash: "FLASHLIGHT", st_mon: "MONITOR", st_vent: "CLOSE VENT",
+        st_static: "CAMERA STATIC", st_3d: "3D PERSPECTIVE"
     },
     CN: {
         play: "开始游戏 (夜", new: "新游戏", lore: "数据 / 传说", st: "设置",
         custom: "自定义夜", night: "夜", under: "桌子底下", win: "下班了",
         g_over: "游戏结束", st_title: "设置", st_vol: "音量", st_ctrl: "控制",
-        btn_close: "关闭", btn_save: "保存并关闭", lore_txt: LORE_CN,
+        btn_close: "关闭", btn_save: "保存并关闭", lore_txt: LORE_CN_FULL, /* NEW LORE */
         lbl_mask: "面具", lbl_flash: "手电筒", lbl_hide: "隐藏", lbl_curtain: "窗帘", lbl_mon: "监视器",
         lbl_sys: "系统", lbl_pwr: "功率", lbl_usage: "用法", lbl_night: "夜",
         d_maifer: "Maifer抓住了你。", d_isaac: "Isaac看到了你的脸。", d_jomar: "黑暗吞噬了你。",
         d_power: "停电。", d_air: "窒息。", d_vent: "通风口。",
+        d_golden: "你太慢了。", /* NEW */
         lf_1: "N1: 记录。", lf_2: "N2: 脸。",
         mg_1: "N1: 躲避", mg_2: "N2: 找面具", mg_3: "N3: 充电",
         teaser: "FIVE NIGHTS AT MAIFER'S 2 IS COMING", upd_list: UPDATES_CN, mute: "静音通话 📞", upd_btn: "更新",
@@ -1302,23 +1252,37 @@ const TEXTS = {
         cn_start: "开始", lb_title: "幸存者", lb_ph: "你的名字", credits: "作者: Jonlet Santos", rank_btn: "🏆 排行",
         st_h_aud: "音频", st_h_gfx: "图形", st_h_ctrl: "控制",
         st_full: "全屏", st_gli: "故障效果", st_sens: "灵敏度", st_del: "重置数据",
-        mg5_hint: "快速按空格", comm_btn: "社区"
+        mg5_hint: "快速按空格", comm_btn: "社区",
+        intro: "夜 ", am: " - 12:00 AM",
+        /* --- AJUSTES TRADUCIDOS --- */
+        st_mask: "面具", st_flash: "手电筒", st_mon: "监视器", st_vent: "关闭通风口",
+        st_static: "摄像机静电", st_3d: "3D 透视"
     }
 };
 
-const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 800;
+// DETECCION DE DISPOSITIVO PARA MOSTRAR CONTROLES
+const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
 let SAVEDATA = {night:1, stars:{}, binds:null, leaderboard:[], comments:[]};
-try { let l=localStorage.getItem('mf_v20'); if(l) SAVEDATA=JSON.parse(l); } catch(e){}
+try { 
+    let l=localStorage.getItem('mf_v27'); 
+    if(l) SAVEDATA=JSON.parse(l); 
+    if(!SAVEDATA.leaderboard) SAVEDATA.leaderboard = []; 
+    if(!SAVEDATA.comments) SAVEDATA.comments = [];
+} catch(e) {}
 
 // FIREBASE WRAPPERS
 const FB = {
     active: typeof firebase !== 'undefined',
     getRank: () => {
         if(!FB.active) {
-            // Local Fallback
-            const l = document.getElementById('lb-list'); l.innerHTML='';
+            const l = document.getElementById('lb-list'); 
+            l.innerHTML='<li style="color:red">OFFLINE MODE</li>';
             (SAVEDATA.leaderboard || []).slice(-10).reverse().forEach(p => {
-                let li = document.createElement('li'); li.innerHTML = `${p.n} - ${p.d}`; l.appendChild(li);
+                let li = document.createElement('li'); 
+                li.style.display = 'flex'; li.style.justifyContent = 'space-between';
+                li.innerHTML = `<span style="color:#0f0">${p.n}</span> <span>${p.d}</span>`; 
+                l.appendChild(li);
             });
             return;
         }
@@ -1327,15 +1291,17 @@ const FB = {
             if(!s.exists()) return;
             let arr=[]; s.forEach(c => arr.push(c.val()));
             arr.reverse().forEach(p => {
-                let li = document.createElement('li'); li.innerHTML = `<span style="color:#0f0">${p.n}</span> - ${p.d}`; l.appendChild(li);
+                let li = document.createElement('li'); 
+                li.style.display = 'flex'; li.style.justifyContent = 'space-between';
+                li.innerHTML = `<span style="color:#0f0">${p.n}</span> <span>${p.d}</span>`; 
+                l.appendChild(li);
             });
         });
     },
     addRank: (name) => {
         if(!FB.active) {
-            if(!SAVEDATA.leaderboard) SAVEDATA.leaderboard = [];
             SAVEDATA.leaderboard.push({n:name, d:new Date().toLocaleDateString()});
-            localStorage.setItem('mf_v20', JSON.stringify(SAVEDATA));
+            localStorage.setItem('mf_v27', JSON.stringify(SAVEDATA));
             FB.getRank();
             return;
         }
@@ -1343,7 +1309,8 @@ const FB = {
     },
     getComm: () => {
         if(!FB.active) {
-            const b = document.getElementById('comment-feed'); b.innerHTML='';
+            const b = document.getElementById('comment-feed'); 
+            b.innerHTML='<div class="comment-msg">Offline Mode. Saving locally.</div>';
             (SAVEDATA.comments || []).forEach(c => {
                  let d = document.createElement('div'); d.className='comment-box';
                  d.innerHTML = `<span class="comment-user">${c.u}:</span> <span class="comment-msg">${c.t}</span>`;
@@ -1352,11 +1319,13 @@ const FB = {
             return;
         }
         firebase.database().ref('comments').limitToLast(20).on('value', (s) => {
-            const b = document.getElementById('comment-feed'); b.innerHTML='';
+            const b = document.getElementById('comment-feed'); 
+            b.innerHTML='';
             if(!s.exists()) return;
             s.forEach(c => {
                 let v = c.val();
-                let d = document.createElement('div'); d.className='comment-box';
+                let d = document.createElement('div'); 
+                d.className='comment-box';
                 d.innerHTML = `<span class="comment-user">${v.u}:</span> <span class="comment-msg">${v.t}</span>`;
                 b.appendChild(d);
             });
@@ -1364,14 +1333,22 @@ const FB = {
         });
     },
     postComm: (txt) => {
+        const lower = txt.toLowerCase();
+        const keywords = ['bug','error','fail','fix','good','bad','scary','level','night','jomar','isaac','maifer','love','cool','game','help'];
+        const hasKeyword = keywords.some(k => lower.includes(k));
+        
+        if (!hasKeyword && txt.length < 5) {
+             alert("SYSTEM: RELEVANCE ERROR. PLEASE POST ABOUT THE GAME.");
+             return;
+        }
+
         if(!FB.active) {
-            if(!SAVEDATA.comments) SAVEDATA.comments = [];
             SAVEDATA.comments.push({u:"Player", t:txt});
-            localStorage.setItem('mf_v20', JSON.stringify(SAVEDATA));
+            localStorage.setItem('mf_v27', JSON.stringify(SAVEDATA));
             FB.getComm();
             return;
         }
-        firebase.database().ref('comments').push({u:"Player", t:txt});
+        firebase.database().ref('comments').push({u:"User", t:txt});
     }
 };
 
@@ -1379,7 +1356,8 @@ const Lang = {
     current: 'ES',
     toggle: () => {
         const order = ['ES', 'EN', 'CN'];
-        Lang.current = order[(order.indexOf(Lang.current)+1)%3];
+        let idx = order.indexOf(Lang.current);
+        Lang.current = order[(idx + 1) % 3];
         Lang.apply();
     },
     setText: (id, text) => { const el = document.getElementById(id); if (el) el.innerText = text; },
@@ -1424,10 +1402,20 @@ const Lang = {
                 let li = document.createElement('li'); li.innerText = item; ul.appendChild(li); 
             });
         }
+        
+        /* TRADUCCION AJUSTES */
+        Lang.setText('lbl-st-mask', t.st_mask);
+        Lang.setText('lbl-st-flash', t.st_flash);
+        Lang.setText('lbl-st-mon', t.st_mon);
+        Lang.setText('lbl-st-vent', t.st_vent);
+        Lang.setText('lbl-st-static', t.st_static);
+        Lang.setText('lbl-st-3d', t.st_3d);
     }
 };
 
-const BINDINGS = SAVEDATA.binds || { mask: 'Space', flash: 'KeyF', hide: 'ControlLeft', curtain: 'KeyS', monitor: 'Tab' };
+// --- IMPLEMENTACIÓN NUEVA: TECLA VENTILACIÓN 'KeyV' POR DEFECTO ---
+const BINDINGS = SAVEDATA.binds || { mask: 'Space', flash: 'KeyF', hide: 'ControlLeft', curtain: 'KeyS', monitor: 'Tab', vent: 'KeyV' };
+
 const NIGHT_CONFIG = {
     1: { maifer: 2, isaac: 1, jomar: 1 }, 
     2: { maifer: 4, isaac: 3, jomar: 2 },
@@ -1450,6 +1438,12 @@ const Config = {
         Config.glitchEnabled = !Config.glitchEnabled;
         document.querySelectorAll('.active-anim').forEach(el => el.style.animation = Config.glitchEnabled ? 'glitch 1s infinite' : 'none');
         document.querySelectorAll('.title-text').forEach(el => el.style.animation = Config.glitchEnabled ? 'glitch 4s infinite' : 'none');
+    },
+    toggleStatic: (checked) => { 
+        document.getElementById('cam-static').style.display = checked ? 'block' : 'none'; 
+    },
+    togglePerspective: (checked) => { 
+        document.getElementById('view-office').style.transform = checked ? 'perspective(1000px) rotateX(2deg)' : 'none'; 
     }
 };
 
@@ -1474,7 +1468,7 @@ const Input = {
             BINDINGS[action] = e.code;
             btn.innerText = e.code;
             SAVEDATA.binds = BINDINGS;
-            localStorage.setItem('mf_v20', JSON.stringify(SAVEDATA));
+            localStorage.setItem('mf_v27', JSON.stringify(SAVEDATA));
             document.removeEventListener('keydown', handler);
         };
         document.addEventListener('keydown', handler);
@@ -1489,18 +1483,52 @@ document.addEventListener('keydown', (e) => {
     if (k === BINDINGS.hide) Mechanics.toggleHide();
     if (k === BINDINGS.curtain) Mechanics.toggleCurtain();
     if (k === BINDINGS.monitor) Mechanics.toggleMonitor();
+    if (k === BINDINGS.vent) Mechanics.toggleVent();
 });
 
+// NUEVA LOGICA DE APLICACION (DISPOSITIVO Y CARGA)
+const App = {
+    selectMode: (mode) => {
+        const body = document.body;
+        if(mode === 'MOBILE') body.classList.add('mode-mobile');
+        else body.classList.remove('mode-mobile');
+        
+        document.querySelector('#screen-device h1').style.display = 'none';
+        document.querySelector('#screen-device div').style.display = 'none';
+        document.getElementById('loading-bar-container').style.display = 'block';
+        document.getElementById('loading-txt').style.display = 'block';
+        
+        // Simular carga
+        let p = 0;
+        const int = setInterval(() => {
+            p += 2;
+            document.getElementById('loading-bar').style.width = p + '%';
+            if(p >= 100) {
+                clearInterval(int);
+                setTimeout(() => {
+                    UI.showScreen('screen-menu');
+                    Game.initMenu(); // Iniciar música y menú
+                }, 500);
+            }
+        }, 30);
+    }
+};
+
 const CustomNight = {
-    levels: { maifer:0, isaac:0, jomar:0 },
+    levels: { maifer:0, isaac:0, jomar:0, golden:0 },
     adj: (char, amount) => {
         CustomNight.levels[char] = Math.max(0, Math.min(20, CustomNight.levels[char] + amount));
-        if(document.getElementById('val-'+char)) document.getElementById('val-'+char).innerText = CustomNight.levels[char];
+        const el = document.getElementById('val-'+char);
+        if(el) el.innerText = CustomNight.levels[char];
     },
     start: () => {
         const l = CustomNight.levels;
-        if(l.maifer===20 && l.isaac===20 && l.jomar===20) { Game.startLevel(9, l); } 
-        else { Game.startLevel('CUSTOM', l); }
+        // DETECTAR NOCHE 9 (20/20/20) - Ignoramos Golden para el trigger de noche 9 a menos que sea explícito
+        if(l.maifer===20 && l.isaac===20 && l.jomar===20) { 
+            Game.startSequence(9, l); 
+        } else { 
+            Game.startSequence('CUSTOM', l); 
+        }
     }
 };
 
@@ -1508,13 +1536,24 @@ const Leaderboard = {
     add: () => {
         const name = document.getElementById('inp-name').value || "ANON";
         FB.addRank(name);
+        // FIX: Guardar también localmente si no hay conexión
+        SAVEDATA.leaderboard.push({n:name, d:new Date().toLocaleDateString()});
+        localStorage.setItem('mf_v27', JSON.stringify(SAVEDATA));
         document.getElementById('lb-input').style.display = 'none';
         UI.openLeaderboard();
     },
     addFromWin: () => {
         const name = document.getElementById('win-name').value || "ANON";
-        FB.addRank(name);
-        document.getElementById('win-rank-input').innerHTML = "<p>SAVED!</p>";
+        
+        // GLOBAL RANK FORCE
+        if(FB.active) {
+            firebase.database().ref('leaderboard').push({n:name, d:new Date().toLocaleDateString()});
+        }
+        
+        // FIX: Guardar también localmente por seguridad
+        SAVEDATA.leaderboard.push({n:name, d:new Date().toLocaleDateString()});
+        localStorage.setItem('mf_v27', JSON.stringify(SAVEDATA));
+        document.getElementById('win-rank-input').innerHTML = "<p>GLOBAL RANK SAVED!</p>";
     },
     show: () => {
         FB.getRank();
@@ -1529,75 +1568,152 @@ const CommentSystem = {
             document.getElementById('comm-input').value = "";
         }
     },
-    render: () => {
-        FB.getComm();
-    }
+    render: () => { FB.getComm(); }
 };
 
-// SECRET CODE
 let cheatCode = [];
 const secret = "BOYFRIENDISCOOL456";
 document.addEventListener('keydown', (e) => {
     cheatCode.push(e.key.toUpperCase());
-    if (cheatCode.length > secret.length) cheatCode.shift();
-    if (cheatCode.join('').includes(secret)) {
-        alert("DEV MODE ACTIVATED");
-        const b = document.getElementById('btn-custom');
-        b.disabled = false; b.classList.remove('locked'); b.innerText = "CUSTOM NIGHT";
-        const sr = document.getElementById('star-row'); 
-        sr.innerHTML = '<span class="star earned blue">★</span>'.repeat(4);
-        
+    if (cheatCode.length > 20) cheatCode.shift(); /* Safety limit */
+    const codeStr = cheatCode.join('');
+
+    /* ORIGINAL CHEAT LISTENER (MANTENEMOS LOGICA) */
+    if (codeStr.includes(secret)) {
+        // --- IMPLEMENTACION NUEVA: WINNER + RANK DIRECTO ---
+        AudioSys.stopAll();
         UI.showScreen('screen-win');
-        document.getElementById('win-msg').innerText = "THANKS FOR PLAYING! (CHEAT ACTIVATED)";
+        document.getElementById('win-msg').innerText = "CHEAT ACTIVATED: GLOBAL RANK ACCESS GRANTED";
         document.getElementById('win-rank-input').style.display = 'block';
-        AudioSys.play('sfx-win');
+        cheatCode = [];
+    }
+    if (codeStr.includes("FNFLOVER")) {
+        // --- IMPLEMENTACION NUEVA: UNLOCK NIGHT 9 + CUSTOM + 4 BLUE STARS ---
+        alert("GOD MODE: FULL UNLOCK");
+        SAVEDATA.night = 9;
+        SAVEDATA.stars = {6:true, 7:true, 8:true, 9:true, 'custom':true}; /* Añadir estrellas azules logica */
+        // Hack visual para estrellas azules
+        const row = document.getElementById('star-row');
+        if(row) row.innerHTML = '<span class="star earned blue">★</span><span class="star earned blue">★</span><span class="star earned blue">★</span><span class="star earned blue">★</span>';
+        localStorage.setItem('mf_v27', JSON.stringify(SAVEDATA));
+        location.reload();
+    }
+    // --- IMPLEMENTACION NUEVA: RESET COMPLETO ---
+    if (codeStr.includes("FNAF")) {
+        localStorage.removeItem('mf_v27');
+        alert("SYSTEM RESET: ALL DATA DELETED");
+        location.reload();
     }
 });
 
 const Game = {
     state: {}, timers: {}, ai: {},
     
+    // --- NUEVO: ESTADO PARA GOLDEN MAIFER ---
+    goldenState: { active: false, timer: null },
+
     initMenu: () => {
-        document.getElementById('menu-night').innerText = SAVEDATA.night;
+        const menuNightEl = document.getElementById('menu-night');
+        // LIMITAR EL BOTON JUGAR A NOCHE 8
+        const realNight = SAVEDATA.night > 8 ? 8 : SAVEDATA.night;
+        if(menuNightEl) menuNightEl.innerText = realNight;
+        
         const row = document.getElementById('star-row');
-        row.innerHTML = '';
-        if(SAVEDATA.night > 6) row.innerHTML += '<span class="star earned">★</span>';
-        if(SAVEDATA.night > 7) row.innerHTML += '<span class="star earned">★</span>';
-        if(SAVEDATA.night > 8) row.innerHTML += '<span class="star earned">★</span>';
-        if(SAVEDATA.night > 9) row.innerHTML += '<span class="star earned">★</span>';
+        if(row) {
+            row.innerHTML = '';
+            if(SAVEDATA.night > 6) row.innerHTML += '<span class="star earned">★</span>';
+            if(SAVEDATA.night > 7) row.innerHTML += '<span class="star earned">★</span>';
+            if(SAVEDATA.night > 8) row.innerHTML += '<span class="star earned">★</span>';
+            if(SAVEDATA.night > 9) row.innerHTML += '<span class="star earned">★</span>';
+            
+            // Fix: Si se desbloqueó con el cheat, mostrar azules
+            if(SAVEDATA.stars['custom']) {
+                 row.innerHTML = '<span class="star earned blue">★</span><span class="star earned blue">★</span><span class="star earned blue">★</span><span class="star earned blue">★</span>';
+            }
+        }
         
         const cnBtn = document.getElementById('btn-custom');
-        if(SAVEDATA.night > 8) { 
-            cnBtn.disabled = false; cnBtn.classList.remove('locked'); cnBtn.querySelector('.icon-lock').style.display = 'none'; 
+        if(SAVEDATA.night > 8 && cnBtn) { 
+            cnBtn.disabled = false; cnBtn.classList.remove('locked'); 
+            const lockIcon = cnBtn.querySelector('.icon-lock');
+            if(lockIcon) lockIcon.style.display = 'none'; 
         }
+        
         for(let k in BINDINGS) { const el = document.getElementById('bind-'+k); if(el) el.innerText = BINDINGS[k]; }
         Lang.apply();
         AudioSys.play('bgm-menu', true);
     },
 
-    newGame: () => { if(confirm("DELETE DATA?")) { localStorage.removeItem('mf_v20'); location.reload(); } },
+    newGame: () => { if(confirm("DELETE DATA?")) { localStorage.removeItem('mf_v27'); location.reload(); } },
 
-    initNight: () => { Game.startLevel(parseInt(SAVEDATA.night) > 8 ? 8 : parseInt(SAVEDATA.night)); },
+    initNight: () => { 
+        // Lógica de jugar normal (Maximo 8)
+        let n = parseInt(SAVEDATA.night);
+        if(n > 8) n = 8;
+        Game.startSequence(n); 
+    },
+    
     initCustomSetup: () => { UI.showScreen('screen-custom'); },
 
+    // NUEVA FUNCION: SECUENCIA DE INICIO (AUDIO + PANTALLA NEGRA)
+    startSequence: (n, customAI=null) => {
+        AudioSys.stopAll();
+        UI.showScreen('screen-intro');
+        
+        const t = TEXTS[Lang.current];
+        const displayN = n === 'CUSTOM' ? 'CUSTOM' : n;
+        document.getElementById('intro-msg').innerText = t.intro + displayN + t.am;
+
+        const isNight9 = (n === 9);
+        const introAudio = isNight9 ? 'bgm-night9' : 'sfx-night-start'; // Usar night_9 como intro si es la noche 9
+        
+        // Reproducir audio intro
+        AudioSys.play(introAudio);
+        
+        // Configurar evento para cuando termine el audio
+        const audioEl = document.getElementById(introAudio);
+        
+        audioEl.onended = () => {
+             Game.startLevel(n, customAI);
+        };
+        
+        // Fallback por si el audio falla
+        setTimeout(() => {
+            if(Game.state.view !== 'office') Game.startLevel(n, customAI);
+        }, isNight9 ? 8000 : 5000); // Forzar inicio si el evento no dispara
+    },
+
     startLevel: (n, customAI=null) => {
-        // TIME: 0.04 (Slow)
         Game.state = { night: n, power: 100, time: 0, over: false, view: 'office', mask: false, hidden: false, curtain: false, flash: false, toxic: 0, vent: false, inMinigame: false };
         if(n === 'CUSTOM') {
             Game.ai = { ...customAI, pos: {maifer:0, isaac:0, jomar:0, vent:0}, busy: false };
             document.getElementById('game-night-num').innerText = "C";
+        } else if (n === 9) {
+            // Noche 9 via custom 20/20/20
+            Game.ai = { maifer:20, isaac:20, jomar:20, golden: (customAI ? customAI.golden : 0), pos: {maifer:0, isaac:0, jomar:0, vent:0}, busy: false };
+            document.getElementById('game-night-num').innerText = "9";
         } else {
-            Game.ai = { ...NIGHT_CONFIG[n], pos: {maifer:0, isaac:0, jomar:0, vent:0}, busy: false };
+            Game.ai = { ...NIGHT_CONFIG[n], pos: {maifer:0, isaac:0, jomar:0, vent:0}, busy: false, golden: 0 };
             document.getElementById('game-night-num').innerText = n;
         }
+        
+        // Golden Maifer Logic
+        if(customAI && customAI.golden) Game.ai.golden = customAI.golden;
+        
         UI.showScreen('screen-game');
-        AudioSys.stopAll();
         
         if(isMobile) document.getElementById('mobile-controls').style.display = 'flex';
 
+        // Iniciar ambiente DESPUES de la intro
         setTimeout(() => {
-            if(n === 9) AudioSys.play('bgm-night9', true); 
-            else AudioSys.play('bgm-game', true, 0.6);
+            if(n === 9) {
+                // Si night_9 ya sonó en la intro, quizas poner ambiente genérico o nada
+                // O si night_9 ERA la musica de fondo.
+                AudioSys.play('bgm-game', true, 0.8); 
+            } else {
+                AudioSys.play('bgm-game', true, 0.6);
+            }
+            
             if(n === 1) AudioSys.play('voice-1');
             if(n === 2) AudioSys.play('voice-2');
             document.getElementById('btn-mute').style.display = 'block';
@@ -1615,7 +1731,35 @@ const Game = {
         Mechanics.moveGenButton();
         Game.timers.main = setInterval(Game.loop, 100);
         Game.timers.ai = setInterval(Game.aiLoop, (n===8 || n===9) ? 1000 : 2000);
+        
+        // --- IMPLEMENTACIÓN NUEVA: GOLDEN MAIFER TIMER ---
+        Game.goldenState.active = false;
+        if(n === 6 || n === 7 || n === 8 || n === 9 || Game.ai.golden > 0) {
+             Game.timers.golden = setInterval(Game.goldenLoop, 5000);
+        }
+
         Lang.apply(); 
+    },
+
+    // --- IMPLEMENTACIÓN NUEVA: GOLDEN LOGIC ---
+    goldenLoop: () => {
+        if(Game.state.over || Game.goldenState.active) return;
+        // Probabilidad aleatoria
+        let chance = 0.3;
+        // Si es custom y tiene nivel
+        if(Game.ai.golden > 0) chance = Game.ai.golden * 0.05;
+
+        if(Math.random() < chance) { 
+             Game.goldenState.active = true;
+             AudioSys.play('sfx-oh'); // oh_oh.mp3
+             // 3 segundos para morir
+             Game.goldenState.timer = setTimeout(() => {
+                 if(Game.goldenState.active) {
+                     // Jumpscare usando golden_maifer.png
+                     Game.die('golden');
+                 }
+             }, 3000);
+        }
     },
 
     loop: () => {
@@ -1627,8 +1771,7 @@ const Game = {
         document.getElementById('hud-time').innerText = (hour === 0 ? 12 : hour) + " AM";
         if(Game.state.time >= 100) { Game.reach8AM(); return; }
         
-        // POWER DRAIN LOGIC FIXED
-        let drain = 0.08; // Base (Fan + Light)
+        let drain = 0.08; 
         let usage = 1;
         if(Game.state.night >= 8) drain = 0.12; 
         if(Game.state.mask) { drain += 0.06; usage++; }
@@ -1662,7 +1805,6 @@ const Game = {
     aiLoop: () => {
         if(Game.state.over) return;
         
-        // JOMAR LETHAL CHECK FIRST (PRIORITY 1)
         if(Game.ai.pos.jomar === 1) {
             Game.die('jomar');
             return;
@@ -1671,7 +1813,7 @@ const Game = {
         if(Game.ai.busy && Game.state.night < 8) return;
 
         const rng = (lvl) => (Math.random() * 20) < lvl;
-        let killTime = 3000; // Night 1 default (slow)
+        let killTime = 3000; 
         if(Game.state.night >= 5) killTime = 2000;
         if(Game.state.night === 8) killTime = 1500; 
 
@@ -1679,8 +1821,7 @@ const Game = {
         if(rng(Game.ai.maifer) && Game.ai.pos.maifer < 5 && Game.ai.pos.vent !== 'maifer') {
             Game.ai.pos.maifer++;
             if(Game.ai.pos.maifer === 5) {
-                Game.ai.busy = true; 
-                UI.flicker();
+                Game.ai.busy = true; UI.flicker();
                 setTimeout(() => {
                     AudioSys.play('sfx-maifer', true, 0.3);
                     document.getElementById('vis-maifer').style.display = 'block';
@@ -1717,7 +1858,6 @@ const Game = {
                  document.getElementById('vent-img').style.display = 'none';
              } else {
                  if(Math.random() > 0.6) {
-                     // Pass the correct killer name for Jump
                      Game.die(Game.ai.pos.vent === 'maifer' ? 'maifer' : 'isaac'); 
                  }
              }
@@ -1727,8 +1867,7 @@ const Game = {
         if(rng(Game.ai.isaac) && Game.ai.pos.isaac < 5 && Game.ai.pos.vent !== 'isaac') {
             Game.ai.pos.isaac++;
             if(Game.ai.pos.isaac === 5) {
-                Game.ai.busy = true; 
-                UI.flicker();
+                Game.ai.busy = true; UI.flicker();
                 setTimeout(() => {
                     AudioSys.play('sfx-isaac', true, 0.3);
                     document.getElementById('vis-isaac').style.display = 'block';
@@ -1759,8 +1898,8 @@ const Game = {
     die: (causeKey) => {
         if(Game.state.over) return;
         Game.state.over = true;
-        clearInterval(Game.timers.main); 
-        clearInterval(Game.timers.ai); 
+        clearInterval(Game.timers.main); clearInterval(Game.timers.ai); 
+        if(Game.timers.golden) clearInterval(Game.timers.golden);
         AudioSys.stopAll();
         
         const js = document.getElementById('screen-jumpscare');
@@ -1770,13 +1909,13 @@ const Game = {
         img.style.display = 'block';
 
         let src="maifer.png", snd="jump-maifer";
-        
-        if(causeKey === 'maifer') { src="maifer.png"; snd="jump-maifer"; }
+        if(causeKey === 'maifer' || causeKey === 'vent') { src="maifer.png"; snd="jump-maifer"; }
         else if(causeKey === 'isaac') { src="isaac.png"; snd="jump-isaac"; }
         else if(causeKey === 'jomar') { src="jomar.png"; snd="jump-jomar"; }
+        // NUEVO: GOLDEN JUMPSCARE
+        else if(causeKey === 'golden') { src="golden_maifer.png"; snd="jump-golden"; }
         
-        img.src = src; 
-        AudioSys.play(snd);
+        img.src = src; AudioSys.play(snd);
         
         setTimeout(() => {
             js.style.display = 'none'; 
@@ -1788,17 +1927,16 @@ const Game = {
 
     reach8AM: () => {
         Game.state.over = true; 
-        clearInterval(Game.timers.main); 
-        clearInterval(Game.timers.ai); 
+        clearInterval(Game.timers.main); clearInterval(Game.timers.ai); 
+        if(Game.timers.golden) clearInterval(Game.timers.golden);
         AudioSys.stopAll();
-        UI.showScreen('screen-8am'); 
-        AudioSys.play('sfx-win');
+        UI.showScreen('screen-8am'); AudioSys.play('sfx-win');
         setTimeout(() => { 
             if(typeof Game.state.night === 'number' && Game.state.night < 9) { 
                 MiniGames.start(Game.state.night); 
             } else if (Game.state.night === 9) {
                 SAVEDATA.night = 10; SAVEDATA.stars[9]=true; 
-                localStorage.setItem('mf_save_v4', JSON.stringify(SAVEDATA));
+                localStorage.setItem('mf_v27', JSON.stringify(SAVEDATA));
                 UI.showScreen('screen-win'); 
                 document.getElementById('win-stars').innerHTML = '<span class="star earned blue">★</span><span class="star earned blue">★</span><span class="star earned blue">★</span><span class="star earned blue">★</span>';
             } else { location.reload(); }
@@ -1813,7 +1951,6 @@ const Mechanics = {
         if(Game.state.mask) count++; 
         if(Game.state.view === 'monitor') count++;
         if(Game.state.flash) count++; 
-        if(Game.state.curtain) count++; 
         if(Game.state.hidden) count++;
         if(Game.state.vent) count++;
         return count < 4; 
@@ -1821,106 +1958,55 @@ const Mechanics = {
     toggleMonitor: () => { 
         if(Game.state.over || Game.state.hidden || Game.state.mask) return; 
         const m = document.getElementById('screen-monitor'); 
-        if(Game.state.view==='monitor') { 
-            m.style.display='none'; 
-            Game.state.view='office'; 
-        } 
-        else { 
-            if(!Mechanics.canAct(false)) return; 
-            m.style.display='flex'; 
-            Game.state.view='monitor'; 
-            AudioSys.play('sfx-monitor'); 
-        } 
+        if(Game.state.view==='monitor') { m.style.display='none'; Game.state.view='office'; } 
+        else { if(!Mechanics.canAct(false)) return; m.style.display='flex'; Game.state.view='monitor'; AudioSys.play('sfx-monitor'); } 
     },
     toggleMask: () => { 
         if(Game.state.view !== 'office') return; 
-        if(Game.state.mask) { 
-            Game.state.mask = false; 
-            document.getElementById('layer-mask').style.display = 'none'; 
-            AudioSys.stop('sfx-mask'); 
-        } 
-        else { 
-            if(!Mechanics.canAct(false)) return; 
-            Game.state.mask = true; 
-            document.getElementById('layer-mask').style.display = 'block'; 
-            AudioSys.play('sfx-mask', true); 
-        } 
+        // --- NUEVO: CHECK GOLDEN MAIFER CANCEL ---
+        if(!Game.state.mask) {
+             // Al ponerse la mascara
+             if(Game.goldenState.active) {
+                 clearTimeout(Game.goldenState.timer);
+                 Game.goldenState.active = false;
+                 AudioSys.stop('sfx-oh');
+             }
+        }
+
+        if(Game.state.mask) { Game.state.mask = false; document.getElementById('layer-mask').style.display = 'none'; AudioSys.stop('sfx-mask'); } 
+        else { if(!Mechanics.canAct(false)) return; Game.state.mask = true; document.getElementById('layer-mask').style.display = 'block'; AudioSys.play('sfx-mask', true); } 
     },
     toggleFlashlight: () => { 
         if(Game.state.view !== 'office') return; 
-        if(Game.state.flash) { 
-            Game.state.flash = false; 
-            document.getElementById('layer-flashlight').style.display = 'none'; 
-        } 
+        if(Game.state.flash) { Game.state.flash = false; document.getElementById('layer-flashlight').style.display = 'none'; } 
         else { 
             if(!Mechanics.canAct(false)) return; 
-            Game.state.flash = true; 
-            document.getElementById('layer-flashlight').style.display = 'block'; 
-            AudioSys.play('sfx-flash'); 
+            Game.state.flash = true; document.getElementById('layer-flashlight').style.display = 'block'; AudioSys.play('sfx-flash'); 
             if(Game.ai.pos.jomar === 1) { 
-                Game.ai.pos.jomar = 0; 
-                document.getElementById('vis-jomar').style.display = 'none'; 
-                AudioSys.stopLoops(); 
-                AudioSys.play('sfx-leave', false, 1.0); // VOLUMEN ALTO
-                Game.ai.busy = false; 
+                Game.ai.pos.jomar = 0; document.getElementById('vis-jomar').style.display = 'none'; 
+                AudioSys.stopLoops(); AudioSys.play('sfx-leave', false, 1.0); Game.ai.busy = false; 
             } 
         } 
     },
-    toggleCurtain: () => { 
-        if(Game.state.view !== 'office') return; 
-        if(Game.state.curtain) { 
-            Game.state.curtain = false; 
-        } 
-        else { 
-            if(!Mechanics.canAct(false)) return; 
-            Game.state.curtain = true; 
-            AudioSys.play('sfx-curtain'); 
-        } 
-        document.getElementById('curtain').classList.toggle('closed', Game.state.curtain); 
-    },
     toggleHide: () => { 
         if(Game.state.view !== 'office') return; 
-        if(Game.state.hidden) { 
-            Game.state.hidden = false; 
-            document.getElementById('layer-under-desk').style.display = 'none'; 
-        } 
-        else { 
-            if(!Mechanics.canAct(false)) return; 
-            Game.state.hidden = true; 
-            document.getElementById('layer-under-desk').style.display = 'flex'; 
-            AudioSys.play('sfx-hide'); 
-        } 
+        if(Game.state.hidden) { Game.state.hidden = false; document.getElementById('layer-under-desk').style.display = 'none'; } 
+        else { if(!Mechanics.canAct(false)) return; Game.state.hidden = true; document.getElementById('layer-under-desk').style.display = 'flex'; AudioSys.play('sfx-hide'); } 
     },
     toggleVent: () => {
         if(Game.state.view !== 'office') return;
-        if(Game.state.vent) { 
-            Game.state.vent = false; 
-        } 
-        else { 
-            if(!Mechanics.canAct(false)) return; 
-            Game.state.vent = true; 
-            AudioSys.play('sfx-curtain'); 
-        }
+        if(Game.state.vent) { Game.state.vent = false; } 
+        else { if(!Mechanics.canAct(false)) return; Game.state.vent = true; AudioSys.play('sfx-curtain'); }
         document.getElementById('vent-door').classList.toggle('closed', Game.state.vent);
         document.getElementById('vent-btn').classList.toggle('active', Game.state.vent);
     },
-    muteCall: () => {
-        AudioSys.stop('voice-1'); 
-        AudioSys.stop('voice-2');
-        document.getElementById('btn-mute').style.display = 'none';
-    },
-    moveGenButton: () => { 
-        const btn = document.getElementById('gen-btn'); 
-        btn.style.left = Math.random()*90 + 'px'; 
-        btn.style.top = Math.random()*140 + 'px'; 
-        btn.style.display = 'block'; 
-    },
+    muteCall: () => { AudioSys.stop('voice-1'); AudioSys.stop('voice-2'); document.getElementById('btn-mute').style.display = 'none'; },
+    moveGenButton: () => { const btn = document.getElementById('gen-btn'); btn.style.left = Math.random()*90 + 'px'; btn.style.top = Math.random()*140 + 'px'; btn.style.display = 'block'; },
     chargeGen: () => { 
         if(Game.state.over) return; 
         Game.state.power = Math.min(100, Game.state.power + 5); 
         document.getElementById('pwr-val').innerText = Math.floor(Game.state.power); 
-        AudioSys.play('sfx-gen'); 
-        document.getElementById('gen-btn').style.display = 'none'; 
+        AudioSys.play('sfx-gen'); document.getElementById('gen-btn').style.display = 'none'; 
         setTimeout(Mechanics.moveGenButton, 3000 + Math.random()*5000); 
     }
 };
@@ -1937,30 +2023,16 @@ const Monitor = {
     },
     update: () => {
         if(Game.state.view !== 'monitor') return;
-        const div = document.getElementById('cam-content'); 
-        div.innerHTML = '';
-        const c = Monitor.current; 
-        const p = Game.ai.pos;
+        const div = document.getElementById('cam-content'); div.innerHTML = '';
+        const c = Monitor.current; const p = Game.ai.pos;
         let html = '';
 
-        if(c===6) {
-            if(p.maifer === 0) html += '<div class="cam-spot">MAIFER (IDLE)</div>';
-            if(p.isaac === 0) html += '<div class="cam-spot">ISAAC (IDLE)</div>';
-        }
+        if(c===6) { if(p.maifer === 0) html += '<div class="cam-spot">MAIFER (IDLE)</div>'; if(p.isaac === 0) html += '<div class="cam-spot">ISAAC (IDLE)</div>'; }
         if(c===5 && p.maifer === 1) html += '<div class="cam-spot active-anim">MAIFER DETECTED</div>';
         if(c===4 && p.isaac === 1) html += '<div class="cam-spot active-anim">ISAAC DETECTED</div>';
-        if(c===3) {
-            if(p.maifer === 2) html += '<div class="cam-spot active-anim">MAIFER DETECTED</div>';
-            if(p.isaac === 2) html += '<div class="cam-spot active-anim">ISAAC DETECTED</div>';
-        }
-        if(c===2) {
-            if(p.maifer === 3) html += '<div class="cam-spot active-anim">MAIFER DETECTED</div>';
-            if(p.isaac === 4) html += '<div class="cam-spot active-anim">ISAAC (NEAR)</div>';
-        }
-        if(c===1) {
-            if(p.maifer === 4) html += '<div class="cam-spot active-anim">MAIFER (NEAR)</div>';
-            if(p.isaac === 3) html += '<div class="cam-spot active-anim">ISAAC DETECTED</div>';
-        }
+        if(c===3) { if(p.maifer === 2) html += '<div class="cam-spot active-anim">MAIFER DETECTED</div>'; if(p.isaac === 2) html += '<div class="cam-spot active-anim">ISAAC DETECTED</div>'; }
+        if(c===2) { if(p.maifer === 3) html += '<div class="cam-spot active-anim">MAIFER DETECTED</div>'; if(p.isaac === 4) html += '<div class="cam-spot active-anim">ISAAC (NEAR)</div>'; }
+        if(c===1) { if(p.maifer === 4) html += '<div class="cam-spot active-anim">MAIFER (NEAR)</div>'; if(p.isaac === 3) html += '<div class="cam-spot active-anim">ISAAC DETECTED</div>'; }
 
         if(html === '') html = '<h1 style="color:#333;">NO SIGNAL</h1>';
         div.innerHTML = html;
@@ -1969,23 +2041,14 @@ const Monitor = {
 
 const UI = {
     modalOpen: false,
-    showScreen: (id) => { 
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
-        document.getElementById(id).classList.add('active'); 
-    },
+    showScreen: (id) => { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); },
     openLore: () => { document.getElementById('modal-lore').style.display = 'flex'; },
     openUpdates: () => { document.getElementById('modal-updates').style.display = 'flex'; },
     openSettings: () => { document.getElementById('modal-settings').style.display = 'flex'; },
     openLeaderboard: () => { document.getElementById('modal-leaderboard').style.display = 'flex'; Leaderboard.show(); },
     openComments: () => { document.getElementById('modal-comments').style.display = 'flex'; CommentSystem.render(); },
     closeModals: () => { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); },
-    flicker: () => { 
-        if(!Config.glitchEnabled) return;
-        const el = document.getElementById('layer-flicker'); 
-        el.classList.remove('flickering'); 
-        void el.offsetWidth; 
-        el.classList.add('flickering'); 
-    }
+    flicker: () => { if(!Config.glitchEnabled) return; const el = document.getElementById('layer-flicker'); el.classList.remove('flickering'); void el.offsetWidth; el.classList.add('flickering'); }
 };
 
 const MiniGames = {
@@ -2072,7 +2135,6 @@ const MiniGames = {
         if(!MiniGames.active) return;
         const k=e.code, p=MiniGames.player;
         if([1,2,7,8].includes(MiniGames.night)) { if(k==='ArrowLeft') p.x-=15; if(k==='ArrowRight') p.x+=15; if(MiniGames.night !== 1) { if(k==='ArrowUp') p.y-=15; if(k==='ArrowDown') p.y+=15; } else { if(k==='ArrowDown') p.duck=true; if(k==='ArrowUp') p.duck=false; } }
-        // NEW N5 INPUT
         if(MiniGames.night === 5 && k==='Space') { 
             MiniGames.state.energy = Math.min(100, MiniGames.state.energy + 8); 
         }
@@ -2084,13 +2146,13 @@ const MiniGames = {
         if(MiniGames.night===3) { const r = document.getElementById('mg-canvas').getBoundingClientRect(); const mx = e.clientX-r.left, my = e.clientY-r.top; MiniGames.enemies.forEach((t,i) => { if(Math.sqrt((mx-t.x)**2+(my-t.y)**2) < t.r) { MiniGames.state.score++; MiniGames.enemies.splice(i,1); MiniGames.spawnClickTarget(); } }); }
         if(MiniGames.night===6) { if(!MiniGames.state.waiting) MiniGames.win(); else MiniGames.lose(); }
     },
-    win: () => { MiniGames.active=false; AudioSys.stop('bgm-minigame'); const n = MiniGames.night; SAVEDATA.night = parseInt(n)+1; SAVEDATA.stars[n]=true; localStorage.setItem('mf_v20', JSON.stringify(SAVEDATA)); location.reload(); },
+    win: () => { MiniGames.active=false; AudioSys.stop('bgm-minigame'); const n = MiniGames.night; SAVEDATA.night = parseInt(n)+1; SAVEDATA.stars[n]=true; localStorage.setItem('mf_v27', JSON.stringify(SAVEDATA)); location.reload(); },
     lose: () => { MiniGames.active=false; AudioSys.stop('bgm-minigame'); alert("FAIL."); location.reload(); }
 };
 
-// Start Up
 if(isMobile) document.getElementById('mobile-controls').style.display='flex';
-Game.initMenu();
+// El juego ahora espera a que el usuario seleccione dispositivo
 </script>
 </body>
 </html>
+```
