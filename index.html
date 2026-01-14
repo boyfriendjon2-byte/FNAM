@@ -1,18 +1,3 @@
-¡Entendido! Tienes razón. En la versión anterior, la ventilación generaba animatrónicos basándose en el "azar general" de la noche, ignorando si habías puesto a Maifer o Isaac en nivel 0 en la Custom Night.
-
-Aquí tienes la **Versión v41.0 DEFINITIVA Y CORREGIDA**.
-
-### 🛠️ CAMBIOS ESPECÍFICOS (LÓGICA AI):
-1.  **Ventilación Estricta:** Ahora, el sistema verifica `Game.ai.maifer > 0` y `Game.ai.isaac > 0` antes de decidir si entra alguien al conducto.
-    *   Si pones a Maifer en 0, **NUNCA** saldrá en la ventilación.
-    *   Si pones a Isaac en 0, **NUNCA** saldrá en la ventilación.
-    *   Si pones solo a Jomar, la ventilación estará vacía toda la noche.
-2.  **Golden Maifer Estricto:** Se corrigió la probabilidad base. Si el nivel de Golden es 0 (y no es una noche de historia 6+), la probabilidad de aparición es exactamente **0%**.
-3.  **Richard Estricto:** Se añadió una validación extra para asegurar que Richard no se mueva si su nivel es 0.
-
-Copia el código completo. He mantenido la expansión del código para respetar tus reglas.
-
-```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -2535,4 +2520,3 @@ if(isMobile) document.getElementById('mobile-controls').style.display='flex';
 </script>
 </body>
 </html>
-```
