@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Maifer's Factory: Ultimate v37.0 (Hardcore Energy & Richard Fix)</title>
+    <title>Maifer's Factory: Ultimate v38.0 (Menu Grid & Fixes)</title>
     
     <!-- LIBRERÍAS DE FIREBASE -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -48,16 +48,28 @@
             overflow: hidden; 
         }
 
-        /* --- CLASES PARA MODO MOVIL (INTERCAMBIADO) --- */
+        /* --- CLASES PARA MODO MOVIL --- */
         body.mode-mobile .hud-container { 
             transform: scale(0.7); 
             transform-origin: top left; 
         }
         
+        /* MENU EN MOVIL: Vertical con Scroll */
+        body.mode-mobile .menu-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-y: auto; /* SCROLL ACTIVADO */
+            max-height: 60vh;
+            width: 100%;
+            padding-bottom: 50px;
+        }
+        
         body.mode-mobile .menu-btn { 
-            padding: 10px; 
-            font-size: 1.2rem; 
-            width: 90%; 
+            padding: 15px; 
+            font-size: 1.5rem; 
+            width: 80%; 
+            margin: 10px 0;
         }
         
         body.mode-mobile .title-text { 
@@ -81,6 +93,27 @@
             height: 12%;
             font-size: 1rem;
             pointer-events: auto;
+        }
+
+        /* --- ESTILOS PARA PC (NO SCROLL, GRID) --- */
+        /* Si NO tiene la clase mode-mobile, se asume PC */
+        body:not(.mode-mobile) .menu-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 2 Columnas */
+            gap: 15px;
+            justify-items: center;
+            align-content: center;
+            width: 80%;
+            max-width: 800px;
+            max-height: none; /* Sin limite de altura forzado */
+            overflow: hidden; /* SIN SCROLL */
+            margin: 0 auto;
+        }
+
+        body:not(.mode-mobile) .menu-btn {
+            width: 100%;
+            font-size: 1.8rem;
+            padding: 10px;
         }
 
         /* ==========================================================================
@@ -196,29 +229,17 @@
             to { text-shadow: 0 0 20px #800, 0 0 40px #f00; transform: scale(1.02); }
         }
 
-        .menu-container {
-            display: flex; 
-            flex-direction: column; 
-            align-items: center;
-            width: 100%;
-            max-height: 60vh;
-            overflow-y: auto; 
-            z-index: 10;
-            padding-bottom: 20px;
-        }
-
         .menu-btn {
             background-color: rgba(0, 0, 0, 0.7); 
             border: 2px solid #440000; 
             color: #cccccc;
             padding: 1.5vh 2vw; 
             font-family: 'VT323'; 
-            font-size: clamp(1.5rem, 4vw, 2rem); 
+            /* Font size set in media queries above */
             margin: 8px;
             cursor: pointer; 
             text-transform: uppercase; 
             transition: all 0.2s ease; 
-            width: clamp(300px, 80%, 500px); 
             position: relative; 
             z-index: 10; 
             box-shadow: 0 0 5px rgba(0,0,0,0.8);
@@ -230,7 +251,7 @@
             border-color: #ff0000; 
             color: #ffffff; 
             background-color: rgba(50, 0, 0, 0.9); 
-            transform: scale(1.05) translateX(5px); 
+            transform: scale(1.05); 
             box-shadow: 0 0 15px rgba(255, 0, 0, 0.4);
             text-shadow: 0 0 5px #fff;
         }
@@ -1015,8 +1036,8 @@
 <div id="screen-device" class="screen active">
     <h1 class="title-text" style="font-size: 3rem;">SELECT DEVICE / DISPOSITIVO</h1>
     <div style="display:flex; gap:20px;">
-        <button class="menu-btn" onclick="App.selectMode('PC')">MOBILE (OPTIMIZED)</button>
-        <button class="menu-btn" onclick="App.selectMode('MOBILE')">PC (ORIGINAL)</button>
+        <button class="menu-btn" onclick="App.selectMode('PC')">PC (ORIGINAL)</button>
+        <button class="menu-btn" onclick="App.selectMode('MOBILE')">MOBILE (OPTIMIZED)</button>
     </div>
     <div id="loading-bar-container">
         <div id="loading-bar"></div>
@@ -1053,7 +1074,7 @@
         <button id="btn-settings" class="menu-btn" onclick="UI.openSettings()">AJUSTES</button>
     </div>
     
-    <p style="position: absolute; bottom: 10px; font-size: 0.8rem; color: #444;">v37.0 - Ultimate Fixes & Accounts</p>
+    <p style="position: absolute; bottom: 10px; font-size: 0.8rem; color: #444;">v38.0 - Ultimate Fixes & Accounts</p>
     <p id="credits-text">Creado por Jonlet Santos</p>
 </div>
 
@@ -1265,9 +1286,13 @@ const firebaseConfig = {
 
 if(typeof firebase !== 'undefined') firebase.initializeApp(firebaseConfig);
 
-// LORE OFICIAL & TEXTS
-const LORE_ES_FULL = `📖 MAIFER’S FACTORY — LORE OFICIAL\n\nMaifer’s Factory es una antigua fábrica industrial dedicada al desarrollo de robots de vigilancia y asistencia mecánica. El lugar pertenece a Michael Boyko.\n\n👤 EL PROTAGONISTA\nAceptas el trabajo por necesidad. Solo una advertencia: “No interfieras con los animatrónicos. Sigue los protocolos.”\n\n☎️ LA CHICA DEL TELÉFONO\nCada noche recibes una llamada de una mujer que trabaja en la fábrica. Nunca dice su nombre.\n\n🤖 LOS ROBOTS\n🟡 MAIFER: Agresivo con presencia humana. Escóndete debajo de la mesa.\n🎭 ISAAC: Responde a rostros. La máscara lo engaña.\n🔦 JOMAR: Odia la luz. Usa la linterna.\n🟥 RICHARD: Unidad de contención. Cierra la cortina si lo ves en la ventana derecha.\n\n🕰️ LAS NOCHES\nSobrevivir hasta las 8:00 AM no significa que ganaste. Significa que fuiste tolerado.`;
-const LORE_EN_FULL = `📖 MAIFER’S FACTORY — OFFICIAL LORE\n\nMaifer’s Factory is an old industrial factory owned by Michael Boyko.\n\n👤 THE PROTAGONIST\nYou accept the job out of necessity. Warning: "Do not interfere with the animatronics."\n\n☎️ PHONE GIRL\nEvery night you receive a call from a woman. She never says her name.\n\n🤖 THE ROBOTS\n🟡 MAIFER: Aggressive. Hide under the table.\n🎭 ISAAC: Responds to faces. Use the mask.\n🔦 JOMAR: Hates light. Use flashlight.\n🟥 RICHARD: Containment unit. Close curtain if seen in the window.\n\n🕰️ THE NIGHTS\nSurviving until 8:00 AM doesn't mean you won. It means you were tolerated.`;
+const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
+// ============================================================================
+// TEXTOS Y LORE
+// ============================================================================
+const LORE_ES_FULL = `📖 MAIFER’S FACTORY — LORE OFICIAL\n\nMaifer’s Factory es una antigua fábrica industrial dedicada al desarrollo de robots de vigilancia y asistencia mecánica. El lugar pertenece a Michael Boyko.\n\n👤 EL PROTAGONISTA\nAceptas el trabajo por necesidad. Solo una advertencia: “No interfieras con los animatrónicos. Sigue los protocolos.”\n\n☎️ LA CHICA DEL TELÉFONO\nCada noche recibes una llamada de una mujer que trabaja en la fábrica. Nunca dice su nombre.\n\n🤖 LOS ROBOTS\n🟡 MAIFER: Agresivo con presencia humana. Escóndete debajo de la mesa.\n🎭 ISAAC: Responde a rostros. La máscara lo engaña.\n🔦 JOMAR: Odia la luz. Usa la linterna.\n🟥 RICHARD: Unidad de contención. Cierra la cortina si lo ves en el pasillo.\n\n🕰️ LAS NOCHES\nSobrevivir hasta las 8:00 AM no significa que ganaste. Significa que fuiste tolerado.`;
+const LORE_EN_FULL = `📖 MAIFER’S FACTORY — OFFICIAL LORE\n\nMaifer’s Factory is an old industrial factory owned by Michael Boyko.\n\n👤 THE PROTAGONIST\nYou accept the job out of necessity. Warning: "Do not interfere with the animatronics."\n\n☎️ PHONE GIRL\nEvery night you receive a call from a woman. She never says her name.\n\n🤖 THE ROBOTS\n🟡 MAIFER: Aggressive. Hide under the table.\n🎭 ISAAC: Responds to faces. Use the mask.\n🔦 JOMAR: Hates light. Use flashlight.\n🟥 RICHARD: Containment unit. Close curtain if seen.\n\n🕰️ THE NIGHTS\nSurviving until 8:00 AM doesn't mean you won. It means you were tolerated.`;
 const LORE_CN_FULL = `📖 MAIFER’S FACTORY — 官方传说\n\nMaifer工厂归Michael Boyko所有。\n\n👤 主角\n你接受了这份工作。警告：“不要干涉电子动画。”\n\n☎️ 电话女孩\n每晚你会接到一个女人的电话。\n\n🤖 机器人\n🟡 MAIFER：攻击性。躲在桌子底下。\n🎭 ISAAC：对面孔有反应。使用面具。\n🔦 JOMAR：讨厌光。使用手电筒。\n🟥 RICHARD：遏制装置。拉下窗帘。\n\n🕰️ 夜晚\n活到8:00并不意味着你赢了。`;
 
 const UPDATES_ES = ["✅ Sistema de Cuentas", "✅ Richard Re-agregado", "✅ Fix Minijuego N2", "✅ Fix Batería y Tiempo", "✅ Port Movil Mejorado"];
@@ -1307,7 +1332,7 @@ const TEXTS = {
 
 let SAVEDATA = {night:1, stars:{}, binds:null, leaderboard:[], comments:[], user: null, lang: 'ES', deviceMode: null};
 try { 
-    let l=localStorage.getItem('mf_v37'); 
+    let l=localStorage.getItem('mf_v38'); 
     if(l) SAVEDATA=JSON.parse(l); 
     if(!SAVEDATA.leaderboard) SAVEDATA.leaderboard = []; 
     if(!SAVEDATA.comments) SAVEDATA.comments = [];
@@ -1325,7 +1350,7 @@ const UserSys = {
         const u = document.getElementById('auth-user').value;
         const p = document.getElementById('auth-pass').value;
         const mode = document.getElementById('auth-title').getAttribute('data-mode');
-        if(u.length < 3 || p.length < 3) { alert("INVALID INPUT"); return; }
+        if(u.length < 3 || p.length < 3) { alert("INVALID INPUT (Min 3 characters)"); return; }
         
         if(mode === 'reg') {
             if(localStorage.getItem('mf_user_'+u)) { alert("USER ALREADY EXISTS"); return; }
@@ -1340,11 +1365,11 @@ const UserSys = {
                     SAVEDATA = parsed.data;
                     SAVEDATA.user = u;
                     UserSys.activeUser = u;
-                    localStorage.setItem('mf_v37', JSON.stringify(SAVEDATA));
+                    localStorage.setItem('mf_v38', JSON.stringify(SAVEDATA));
                     UserSys.updateUI();
                     UI.closeModals();
                     Game.initMenu();
-                } else { alert("WRONG PASS"); }
+                } else { alert("WRONG PASSWORD"); }
             } else { alert("USER NOT FOUND"); }
         }
     },
@@ -1372,7 +1397,7 @@ const FB = {
         });
     },
     addRank: (name) => {
-        if(!FB.active) { SAVEDATA.leaderboard.push({n:name, d:new Date().toLocaleDateString()}); localStorage.setItem('mf_v37', JSON.stringify(SAVEDATA)); FB.getRank(); return; }
+        if(!FB.active) { SAVEDATA.leaderboard.push({n:name, d:new Date().toLocaleDateString()}); localStorage.setItem('mf_v38', JSON.stringify(SAVEDATA)); FB.getRank(); return; }
         firebase.database().ref('leaderboard').push({n:name, d:new Date().toLocaleDateString()});
     },
     getComm: () => { if(!FB.active) return; firebase.database().ref('comments').limitToLast(20).on('value', (s) => { const b = document.getElementById('comment-feed'); b.innerHTML=''; if(!s.exists()) return; s.forEach(c => { let v = c.val(); let d = document.createElement('div'); d.className='comment-box'; d.innerHTML = `<span class="comment-user">${v.u}:</span> <span class="comment-msg">${v.t}</span>`; b.appendChild(d); }); b.scrollTop = b.scrollHeight; }); },
@@ -1381,13 +1406,13 @@ const FB = {
         if(bad.some(w => txt.toLowerCase().includes(w))) { alert("MODERATION: MESSAGE BLOCKED"); return; }
         const u = SAVEDATA.user || "Guest";
         if(FB.active) firebase.database().ref('comments').push({u:u, t:txt});
-        else { SAVEDATA.comments.push({u:u, t:txt}); localStorage.setItem('mf_v37', JSON.stringify(SAVEDATA)); FB.getComm(); }
+        else { SAVEDATA.comments.push({u:u, t:txt}); localStorage.setItem('mf_v38', JSON.stringify(SAVEDATA)); FB.getComm(); }
     }
 };
 
 const Lang = {
     current: SAVEDATA.lang || 'ES',
-    toggle: () => { const order = ['ES', 'EN', 'CN']; let idx = order.indexOf(Lang.current); Lang.current = order[(idx + 1) % 3]; SAVEDATA.lang = Lang.current; localStorage.setItem('mf_v37', JSON.stringify(SAVEDATA)); Lang.apply(); },
+    toggle: () => { const order = ['ES', 'EN', 'CN']; let idx = order.indexOf(Lang.current); Lang.current = order[(idx + 1) % 3]; SAVEDATA.lang = Lang.current; localStorage.setItem('mf_v38', JSON.stringify(SAVEDATA)); Lang.apply(); },
     setText: (id, text) => { const el = document.getElementById(id); if (el) el.innerText = text; },
     apply: () => {
         const t = TEXTS[Lang.current];
@@ -1439,7 +1464,7 @@ const AudioSys = {
 };
 
 const Input = {
-    rebind: (action) => { const btn = document.getElementById('bind-'+action); btn.innerText = "..."; const h=(e)=>{ e.preventDefault(); BINDINGS[action]=e.code; btn.innerText=e.code; SAVEDATA.binds=BINDINGS; localStorage.setItem('mf_v37',JSON.stringify(SAVEDATA)); document.removeEventListener('keydown',h); }; document.addEventListener('keydown',h); }
+    rebind: (action) => { const btn = document.getElementById('bind-'+action); btn.innerText = "..."; const h=(e)=>{ e.preventDefault(); BINDINGS[action]=e.code; btn.innerText=e.code; SAVEDATA.binds=BINDINGS; localStorage.setItem('mf_v38',JSON.stringify(SAVEDATA)); document.removeEventListener('keydown',h); }; document.addEventListener('keydown',h); }
 };
 
 document.addEventListener('keydown', (e) => {
@@ -1461,7 +1486,7 @@ const App = {
         else body.classList.remove('mode-mobile');
         
         SAVEDATA.deviceMode = mode;
-        localStorage.setItem('mf_v37', JSON.stringify(SAVEDATA));
+        localStorage.setItem('mf_v38', JSON.stringify(SAVEDATA));
 
         document.querySelector('#screen-device h1').style.display = 'none';
         document.querySelector('#screen-device div').style.display = 'none';
@@ -1501,7 +1526,7 @@ const Leaderboard = {
     addFromWin: () => { 
         const name = SAVEDATA.user || document.getElementById('win-name').value || "ANON"; 
         if(FB.active) firebase.database().ref('leaderboard').push({n:name, d:new Date().toLocaleDateString()});
-        else { SAVEDATA.leaderboard.push({n:name, d:new Date().toLocaleDateString()}); localStorage.setItem('mf_v37', JSON.stringify(SAVEDATA)); }
+        else { SAVEDATA.leaderboard.push({n:name, d:new Date().toLocaleDateString()}); localStorage.setItem('mf_v38', JSON.stringify(SAVEDATA)); }
         document.getElementById('win-rank-input').innerHTML = "<p>RANK SAVED!</p>"; 
     },
     show: () => { FB.getRank(); }
@@ -1526,7 +1551,7 @@ document.addEventListener('keydown', (e) => {
     }
     if (codeStr.includes("FNFLOVER")) {
         alert("GOD MODE: FULL UNLOCK"); SAVEDATA.night = 9; SAVEDATA.stars = {6:true, 7:true, 8:true, 9:true, 'custom':true};
-        localStorage.setItem('mf_v37', JSON.stringify(SAVEDATA)); location.reload();
+        localStorage.setItem('mf_v38', JSON.stringify(SAVEDATA)); location.reload();
     }
 });
 
@@ -1556,7 +1581,7 @@ const Game = {
         Lang.apply(); AudioSys.play('bgm-menu', true);
     },
 
-    newGame: () => { if(confirm("DELETE DATA?")) { localStorage.removeItem('mf_v37'); location.reload(); } },
+    newGame: () => { if(confirm("DELETE DATA?")) { localStorage.removeItem('mf_v38'); location.reload(); } },
     initNight: () => { 
         let n = parseInt(SAVEDATA.night);
         if(n > 8) n = 8;
@@ -1652,20 +1677,20 @@ const Game = {
     loop: () => {
         if(Game.state.over || Game.state.inMinigame) return;
         
+        // TIME: 35s per hour
         Game.state.time += 0.048; 
         let hour = 12 + Math.floor(Game.state.time / 16.6); if(hour > 12) hour -= 12;
         document.getElementById('hud-time').innerText = (hour === 0 ? 12 : hour) + " AM";
         if(Game.state.time >= 100) { Game.reach8AM(); return; }
         
-        // --- NEW ENERGY LOGIC ---
-        // 50 ticks = 5 seconds (base)
-        let drainSpeed = 1; 
-        if(Game.state.flash) drainSpeed = 3;
-        if(Game.state.vent) drainSpeed = 2;
-        if(Game.state.view === 'monitor') drainSpeed = 2;
-        if(Game.state.curtain) drainSpeed = 2;
+        // BATTERY: 1% EVERY 5s (50 ticks)
+        let drainMultiplier = 1;
+        if(Game.state.flash) drainMultiplier += 2; // x3 speed
+        if(Game.state.vent) drainMultiplier += 1;  // x2 speed
+        if(Game.state.curtain) drainMultiplier += 1; // x2 speed
+        if(Game.state.view === 'monitor') drainMultiplier += 1; // x2 speed
         
-        Game.state.batteryTimer += drainSpeed; 
+        Game.state.batteryTimer += drainMultiplier;
         
         if(Game.state.batteryTimer >= 50) {
             Game.state.power--;
@@ -1710,10 +1735,10 @@ const Game = {
             }
         }
 
-        // RICHARD (WINDOW ONLY)
+        // RICHARD (NO HALLWAY, ONLY WINDOW)
         if(rng(Game.ai.richard) && Game.ai.pos.richard < 1) {
             Game.ai.pos.richard = 1;
-            // Go to window
+            // Go to window directly
             document.getElementById('vis-richard-win').style.display = 'block'; 
             setTimeout(() => {
                 if(Game.state.curtain) {
@@ -1865,7 +1890,7 @@ const UI = {
     flicker: () => { if(!Config.glitchEnabled) return; const el = document.getElementById('layer-flicker'); el.classList.remove('flickering'); void el.offsetWidth; el.classList.add('flickering'); }
 };
 
-// --- MINIGAMES FIXED ---
+// --- MINIGAMES FIXED & BALANCED ---
 const MiniGames = {
     active: false, night: 0, ctx: null, player: {}, enemies: [], target: {}, state: {}, frame: 0,
     start: (n) => { 
@@ -1927,6 +1952,7 @@ const MiniGames = {
         else if(n===6) { if(MiniGames.state.waiting) { MiniGames.state.timer--; ctx.fillStyle = 'red'; ctx.fillRect(200,100,200,200); if(MiniGames.state.timer <= 0) { MiniGames.state.waiting = false; MiniGames.state.color = 'green'; MiniGames.state.timer = 60; } } else { ctx.fillStyle = 'green'; ctx.fillRect(200,100,200,200); MiniGames.state.timer--; if(MiniGames.state.timer <= 0) MiniGames.lose(); } } 
         else if(n===7) { ctx.fillStyle = '#0f0'; ctx.fillRect(MiniGames.player.x, MiniGames.player.y, 20, 20); ctx.fillStyle = 'gold'; ctx.fillRect(MiniGames.target.x, MiniGames.target.y, 20, 20); MiniGames.enemies.forEach(e => { ctx.fillStyle = '#555'; ctx.fillRect(e.x, e.y, e.w, e.h); if(MiniGames.col(MiniGames.player, e)) MiniGames.player = {x:20, y:20, w:20, h:20}; }); if(MiniGames.col(MiniGames.player, MiniGames.target)) MiniGames.win(); } 
         else if(n===8) { ctx.fillStyle = '#0f0'; ctx.fillRect(MiniGames.player.x, MiniGames.player.y, 20, 20); if(MiniGames.frame % 5 === 0) { let side = Math.floor(Math.random()*4); let e = {w:10,h:10}; if(side===0) { e.x=Math.random()*600; e.y=0; e.vx=(Math.random()-0.5)*2; e.vy=3; } if(side===1) { e.x=Math.random()*600; e.y=400; e.vx=(Math.random()-0.5)*2; e.vy=-3; } if(side===2) { e.x=0; e.y=Math.random()*400; e.vx=3; e.vy=(Math.random()-0.5)*2; } if(side===3) { e.x=600; e.y=Math.random()*400; e.vx=-3; e.vy=(Math.random()-0.5)*2; } MiniGames.enemies.push(e); } MiniGames.enemies.forEach(e => { e.x+=e.vx; e.y+=e.vy; ctx.fillStyle='red'; ctx.fillRect(e.x,e.y,e.w,e.h); if(MiniGames.col(MiniGames.player,e)) MiniGames.lose(); }); if(MiniGames.frame > 1200) MiniGames.win(); }
+        
         requestAnimationFrame(MiniGames.loop);
     },
     col: (r1,r2) => (r1.x < r2.x+r2.w && r1.x+r1.w > r2.x && r1.y < r2.y+r2.h && r1.y+r1.h > r2.y),
