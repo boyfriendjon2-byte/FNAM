@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Maifer's Factory: Ultimate v41.0 (Strict Custom AI)</title>
+    <title>Maifer's Factory: Ultimate v41.0 (Strict AI Logic Fix)</title>
     
     <!-- LIBRERÍAS DE FIREBASE -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -319,6 +319,8 @@
             cursor: pointer;
         }
         
+        #lang-btn:hover { background: #222; border-color: #888; }
+
         #btn-leaderboard { 
             position: absolute; 
             top: 20px; 
@@ -333,6 +335,8 @@
             padding: 5px 10px; 
             cursor: pointer;
         }
+        
+        #btn-leaderboard:hover { background-color: #004488; color: #fff; }
 
         #credits-text { 
             position: absolute; 
@@ -360,6 +364,8 @@
             transition: transform 0.3s;
         }
         
+        .star:hover { transform: scale(1.2) rotate(10deg); }
+
         .star.earned { 
             color: gold; 
             text-shadow: 0 0 15px gold; 
@@ -371,7 +377,7 @@
         }
 
         /* ==========================================================================
-           6. MODALES Y VENTANAS EMERGENTES
+           6. MODALES Y VENTANAS EMERGENTES (RESPONSIVE)
            ========================================================================== */
         .modal-overlay { 
             position: fixed; 
@@ -497,7 +503,7 @@
         }
 
         /* ==========================================================================
-           7. CUSTOM NIGHT UI
+           6. CUSTOM NIGHT UI
            ========================================================================== */
         #screen-custom { 
             background-color: #111; 
@@ -559,7 +565,7 @@
         }
 
         /* ==========================================================================
-           8. JUEGO - ENTORNO 3D SIMULADO
+           7. JUEGO - ENTORNO 3D SIMULADO (FLUIDO)
            ========================================================================== */
         #view-office { 
             position: absolute; 
@@ -820,7 +826,7 @@
         }
 
         /* ==========================================================================
-           9. HUD (INTERFAZ FLOTANTE)
+           8. HUD (INTERFAZ FLOTANTE)
            ========================================================================== */
         .hud-container { 
             position: absolute; 
@@ -914,7 +920,7 @@
         .mob-btn:active, .mob-btn.active { background-color: #555; border-color: var(--primary-color); }
 
         /* ==========================================================================
-           10. CAPAS FX
+           9. CAPAS FX
            ========================================================================== */
         #layer-mask { position: absolute; inset: 0; z-index: 100; display: none; pointer-events: none; background: radial-gradient(circle at center, transparent 30%, rgba(0,20,0,0.8) 60%, #000 95%); }
         #layer-flashlight { position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.7) 0%, transparent 60%); z-index: 50; display: none; mix-blend-mode: overlay; pointer-events: none; opacity: 0.85 !important; }
@@ -922,7 +928,7 @@
         #layer-under-desk h2 { font-family: 'Share Tech Mono'; color: #444; background: #000; padding: 10px; border: 1px solid #333; margin-top: 40%; }
         
         /* ==========================================================================
-           11. MONITOR
+           10. MONITOR
            ========================================================================== */
         #screen-monitor { position: absolute; inset: 0; background-color: #111; z-index: 200; display: none; flex-direction: column; padding: 2vh; }
         #cam-view { flex: 2; background-color: #000; border: 4px solid #333; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 10px; }
@@ -1310,7 +1316,7 @@ if(typeof firebase !== 'undefined') {
 const SaveManager = {
     save: () => {
         // Guardar localmente
-        localStorage.setItem('mf_v38', JSON.stringify(SAVEDATA));
+        localStorage.setItem('mf_v39', JSON.stringify(SAVEDATA));
         
         // Guardar en cuenta de usuario si está logueado
         if(SAVEDATA.user) {
@@ -1381,7 +1387,7 @@ let SAVEDATA = {
 };
 
 try { 
-    let l = localStorage.getItem('mf_v38'); 
+    let l = localStorage.getItem('mf_v39'); 
     if(l) SAVEDATA = JSON.parse(l); 
     if(!SAVEDATA.leaderboard) SAVEDATA.leaderboard = []; 
     if(!SAVEDATA.comments) SAVEDATA.comments = [];
@@ -1422,7 +1428,7 @@ const UserSys = {
                     SAVEDATA = parsed.data;
                     SAVEDATA.user = u;
                     UserSys.activeUser = u;
-                    localStorage.setItem('mf_v38', JSON.stringify(SAVEDATA));
+                    SaveManager.save();
                     UserSys.updateUI();
                     UI.closeModals();
                     Game.initMenu();
@@ -1513,7 +1519,7 @@ const FB = {
             firebase.database().ref('comments').push({u:u, t:txt});
         } else { 
             SAVEDATA.comments.push({u:u, t:txt}); 
-            localStorage.setItem('mf_v38', JSON.stringify(SAVEDATA)); 
+            SaveManager.save(); 
             FB.getComm(); 
         }
     }
@@ -1529,7 +1535,7 @@ const Lang = {
         let idx = order.indexOf(Lang.current); 
         Lang.current = order[(idx + 1) % 3]; 
         SAVEDATA.lang = Lang.current; 
-        localStorage.setItem('mf_v38', JSON.stringify(SAVEDATA)); 
+        SaveManager.save(); 
         Lang.apply(); 
     },
     setText: (id, text) => { 
@@ -1653,7 +1659,7 @@ const Input = {
             BINDINGS[action]=e.code; 
             btn.innerText=e.code; 
             SAVEDATA.binds=BINDINGS; 
-            localStorage.setItem('mf_v38',JSON.stringify(SAVEDATA)); 
+            SaveManager.save(); 
             document.removeEventListener('keydown',h); 
         }; 
         document.addEventListener('keydown',h); 
@@ -1689,7 +1695,7 @@ const App = {
         }
         
         SAVEDATA.deviceMode = mode;
-        localStorage.setItem('mf_v38', JSON.stringify(SAVEDATA));
+        SaveManager.save();
 
         document.querySelector('#screen-device h1').style.display = 'none';
         document.querySelector('#screen-device div').style.display = 'none';
@@ -1835,7 +1841,7 @@ const Game = {
 
     newGame: () => { 
         if(confirm("DELETE DATA?")) { 
-            localStorage.removeItem('mf_v38'); 
+            localStorage.removeItem('mf_v39'); 
             location.reload(); 
         } 
     },
@@ -2348,14 +2354,7 @@ const UI = {
 
 // --- MINIGAMES FIXED & BALANCED ---
 const MiniGames = {
-    active: false, 
-    night: 0, 
-    ctx: null, 
-    player: {}, 
-    enemies: [], 
-    target: {}, 
-    state: {}, 
-    frame: 0,
+    active: false, night: 0, ctx: null, player: {}, enemies: [], target: {}, state: {}, frame: 0,
     start: (n) => { 
         Game.state.inMinigame = true; 
         MiniGames.night = n; 
@@ -2408,42 +2407,21 @@ const MiniGames = {
         MiniGames.enemies.push({x:Math.random()*560+20, y:Math.random()*360+20, r:20, life:60}); 
     },
     loop: () => {
-        if(!MiniGames.active) return; 
-        const ctx = MiniGames.ctx; 
-        const w=600, h=400; 
-        ctx.fillStyle = '#111'; 
-        ctx.fillRect(0,0,w,h); 
-        MiniGames.frame++; 
-        const n = MiniGames.night;
+        if(!MiniGames.active) return; const ctx = MiniGames.ctx; const w=600, h=400; ctx.fillStyle = '#111'; ctx.fillRect(0,0,w,h); MiniGames.frame++; const n = MiniGames.night;
         
-        if(n===1) { 
-            ctx.fillStyle = MiniGames.player.duck ? '#050' : '#0f0'; 
-            ctx.fillRect(MiniGames.player.x, MiniGames.player.duck?320:300, 30, MiniGames.player.duck?15:30); 
-            MiniGames.enemies.forEach(e => { 
-                e.x -= e.spd; 
-                ctx.fillStyle = '#f00'; 
-                ctx.fillRect(e.x, e.y, e.w, e.h); 
-                if(e.x < -50) { e.x = 650; e.spd = 4+Math.random()*3; } 
-                if(MiniGames.col(MiniGames.player, e) && !MiniGames.player.duck) MiniGames.lose(); 
-            }); 
-            if(MiniGames.frame > 900) MiniGames.win(); 
-        } 
+        if(n===1) { ctx.fillStyle = MiniGames.player.duck ? '#050' : '#0f0'; ctx.fillRect(MiniGames.player.x, MiniGames.player.duck?320:300, 30, MiniGames.player.duck?15:30); MiniGames.enemies.forEach(e => { e.x -= e.spd; ctx.fillStyle = '#f00'; ctx.fillRect(e.x, e.y, e.w, e.h); if(e.x < -50) { e.x = 650; e.spd = 4+Math.random()*3; } if(MiniGames.col(MiniGames.player, e) && !MiniGames.player.duck) MiniGames.lose(); }); if(MiniGames.frame > 900) MiniGames.win(); } 
         
         else if(n===2) {
-            ctx.fillStyle = '#0f0'; 
-            ctx.fillRect(MiniGames.player.x, MiniGames.player.y, 20, 20);
-            ctx.fillStyle = '#00f'; 
-            ctx.fillRect(MiniGames.target.x, MiniGames.target.y, 30, 30);
+            ctx.fillStyle = '#0f0'; ctx.fillRect(MiniGames.player.x, MiniGames.player.y, 20, 20);
+            ctx.fillStyle = '#00f'; ctx.fillRect(MiniGames.target.x, MiniGames.target.y, 30, 30);
             MiniGames.enemies.forEach(e => { 
                 e.y += e.dir * e.spd;
                 if(e.y < 0 || e.y > 100) e.dir *= -1;
-                ctx.fillStyle = '#555'; 
-                ctx.fillRect(e.x, e.y, 20, e.h); 
+                ctx.fillStyle = '#555'; ctx.fillRect(e.x, e.y, 20, e.h); 
                 if(MiniGames.col(MiniGames.player, {x:e.x, y:e.y, w:20, h:e.h})) MiniGames.lose(); 
             });
             if(MiniGames.col(MiniGames.player, MiniGames.target)) MiniGames.win();
         } 
-        
         else if(n===3) { ctx.fillStyle = '#fff'; ctx.fillText("CLICK GREEN ORBS: "+MiniGames.state.score+"/10", 20, 30); MiniGames.enemies.forEach((e,i) => { e.life--; ctx.fillStyle='#0f0'; ctx.beginPath(); ctx.arc(e.x,e.y,e.r,0,6.28); ctx.fill(); if(e.life<=0) { MiniGames.enemies.splice(i,1); MiniGames.spawnClickTarget(); } }); if(MiniGames.state.score >= 10) MiniGames.win(); } 
         else if(n===4) { ctx.fillStyle = '#0f0'; ctx.beginPath(); ctx.arc(MiniGames.player.x, MiniGames.player.y, 10, 0, 6.28); ctx.fill(); if(MiniGames.frame % 10 === 0) { MiniGames.enemies.push({x:Math.random()*w, y:-20, w:20, h:20, vy:3+Math.random()*2}); } MiniGames.enemies.forEach(e => { e.y += e.vy; ctx.fillStyle='red'; ctx.fillRect(e.x, e.y, e.w, e.h); if(Math.abs(e.x - MiniGames.player.x) < 15 && Math.abs(e.y - MiniGames.player.y) < 15) MiniGames.lose(); }); if(MiniGames.frame > 1000) MiniGames.win(); } 
         else if(n===5) { MiniGames.state.energy -= 0.5; MiniGames.state.timer--; ctx.fillStyle='#fff'; ctx.fillText("KEEP CHARGED! (SPACE)", 200, 50); ctx.fillStyle = '#333'; ctx.fillRect(150, 200, 300, 30); ctx.fillStyle = MiniGames.state.energy > 20 ? '#0f0' : '#f00'; ctx.fillRect(150, 200, (MiniGames.state.energy/100)*300, 30); if(MiniGames.state.energy <= 0) MiniGames.lose(); if(MiniGames.state.timer <= 0) MiniGames.win(); } 
@@ -2454,56 +2432,20 @@ const MiniGames = {
         requestAnimationFrame(MiniGames.loop);
     },
     col: (r1,r2) => (r1.x < r2.x+r2.w && r1.x+r1.w > r2.x && r1.y < r2.y+r2.h && r1.y+r1.h > r2.y),
-    handleInput: (e) => { 
-        if(!MiniGames.active) return; 
-        const k=e.code, p=MiniGames.player; 
-        if([1,2,7,8].includes(MiniGames.night)) { 
-            if(k==='ArrowLeft') p.x-=15; 
-            if(k==='ArrowRight') p.x+=15; 
-            if(MiniGames.night !== 1) { 
-                if(k==='ArrowUp') p.y-=15; 
-                if(k==='ArrowDown') p.y+=15; 
-            } else { 
-                if(k==='ArrowDown') p.duck=true; 
-                if(k==='ArrowUp') p.duck=false; 
-            } 
-        } 
-        if(MiniGames.night === 5 && k==='Space') { 
-            MiniGames.state.energy = Math.min(100, MiniGames.state.energy + 8); 
-        } 
-    },
-    handleMove: (e) => { 
-        if(MiniGames.night === 4) { 
-            const r = document.getElementById('mg-canvas').getBoundingClientRect(); 
-            MiniGames.player.x = e.clientX - r.left; 
-            MiniGames.player.y = e.clientY - r.top; 
-        } 
-    },
-    handleClick: (e) => { 
-        if(MiniGames.night===3) { 
-            const r = document.getElementById('mg-canvas').getBoundingClientRect(); 
-            const mx = e.clientX-r.left, my = e.clientY-r.top; 
-            MiniGames.enemies.forEach((t,i) => { 
-                if(Math.sqrt((mx-t.x)**2+(my-t.y)**2) < t.r) { 
-                    MiniGames.state.score++; 
-                    MiniGames.enemies.splice(i,1); 
-                    MiniGames.spawnClickTarget(); 
-                } 
-            }); 
-        } 
-        if(MiniGames.night===6) { 
-            if(!MiniGames.state.waiting) MiniGames.win(); 
-            else MiniGames.lose(); 
-        } 
-    },
+    handleInput: (e) => { if(!MiniGames.active) return; const k=e.code, p=MiniGames.player; if([1,2,7,8].includes(MiniGames.night)) { if(k==='ArrowLeft') p.x-=15; if(k==='ArrowRight') p.x+=15; if(MiniGames.night !== 1) { if(k==='ArrowUp') p.y-=15; if(k==='ArrowDown') p.y+=15; } else { if(k==='ArrowDown') p.duck=true; if(k==='ArrowUp') p.duck=false; } } if(MiniGames.night === 5 && k==='Space') { MiniGames.state.energy = Math.min(100, MiniGames.state.energy + 8); } },
+    handleMove: (e) => { if(MiniGames.night === 4) { const r = document.getElementById('mg-canvas').getBoundingClientRect(); MiniGames.player.x = e.clientX - r.left; MiniGames.player.y = e.clientY - r.top; } },
+    handleClick: (e) => { if(MiniGames.night===3) { const r = document.getElementById('mg-canvas').getBoundingClientRect(); const mx = e.clientX-r.left, my = e.clientY-r.top; MiniGames.enemies.forEach((t,i) => { if(Math.sqrt((mx-t.x)**2+(my-t.y)**2) < t.r) { MiniGames.state.score++; MiniGames.enemies.splice(i,1); MiniGames.spawnClickTarget(); } }); } if(MiniGames.night===6) { if(!MiniGames.state.waiting) MiniGames.win(); else MiniGames.lose(); } },
     win: () => { 
         MiniGames.active=false; 
         AudioSys.stop('bgm-minigame'); 
         const n = MiniGames.night; 
         SAVEDATA.night = parseInt(n)+1; 
         SAVEDATA.stars[n]=true; 
-        SaveManager.save(); // GUARDA PROGRESO
-        alert("NIGHT " + n + " COMPLETED! PROGRESS SAVED.");
+        
+        // --- GUARDADO FORZADO Y NOTIFICACION ---
+        SaveManager.save();
+        alert("NIGHT COMPLETED! PROGRESS SAVED.");
+        
         location.reload(); 
     },
     lose: () => { 
@@ -2514,7 +2456,7 @@ const MiniGames = {
     }
 };
 
-// AUTO-START
+// AUTO-START LOGIC
 if(isMobile) document.getElementById('mobile-controls').style.display='flex';
 // No cargamos automaticamente la app para forzar el selector
 </script>
