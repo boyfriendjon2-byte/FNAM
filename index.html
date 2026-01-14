@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Maifer's Factory: Ultimate v38.0 (Fully Expanded & Fixed)</title>
+    <title>Maifer's Factory: Ultimate v39.0 (Save & Scroll Fix)</title>
     
     <!-- LIBRERÍAS DE FIREBASE -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -52,7 +52,7 @@
            3. ADAPTACIÓN DE DISPOSITIVOS (PC VS MÓVIL)
            ========================================================================== */
         
-        /* MODO MÓVIL: Scroll vertical, botones grandes, HUD escalado */
+        /* --- ESTILOS MÓVIL (CORREGIDO SCROLL) --- */
         body.mode-mobile .hud-container { 
             transform: scale(0.7); 
             transform-origin: top left; 
@@ -62,18 +62,23 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            overflow-y: auto; /* SCROLL ACTIVADO */
-            max-height: 60vh;
+            /* FIX SCROLL */
+            height: 65vh; 
+            overflow-y: scroll; 
             width: 100%;
-            padding-bottom: 50px;
+            padding-bottom: 80px; /* Espacio extra abajo */
+            border-top: 1px solid #333;
+            border-bottom: 1px solid #333;
         }
         
         body.mode-mobile .menu-btn { 
             padding: 15px; 
             font-size: 1.5rem; 
-            width: 80%; 
-            margin: 10px 0;
-            flex-shrink: 0;
+            width: 85%; 
+            margin: 15px 0;
+            /* FIX NO APLASTAR */
+            flex-shrink: 0; 
+            min-height: 60px; 
         }
         
         body.mode-mobile .title-text { 
@@ -82,7 +87,7 @@
         
         body.mode-mobile #mobile-controls { 
             height: 15vh; 
-            display: flex; /* Mostrar controles */
+            display: flex; 
         }
         
         body.mode-mobile .mob-btn { 
@@ -100,17 +105,18 @@
             pointer-events: auto;
         }
 
-        /* MODO PC: Grid, sin scroll, botones compactos */
+        /* --- ESTILOS PC (GRID, SIN SCROLL) --- */
         body:not(.mode-mobile) .menu-container {
             display: grid;
-            grid-template-columns: repeat(2, 1fr); /* 2 Columnas */
-            gap: 15px;
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 20px;
             justify-items: center;
             align-content: center;
             width: 80%;
-            max-width: 800px;
-            max-height: none; 
-            overflow: hidden; /* SIN SCROLL */
+            max-width: 900px;
+            height: auto;
+            max-height: 60vh;
+            overflow: hidden; 
             margin: 0 auto;
             padding-bottom: 0;
         }
@@ -118,7 +124,7 @@
         body:not(.mode-mobile) .menu-btn {
             width: 100%;
             font-size: 1.8rem;
-            padding: 10px;
+            padding: 15px;
             margin: 0;
         }
 
@@ -147,7 +153,6 @@
             display: flex; 
         }
 
-        /* PANTALLA DE SELECCION DE DISPOSITIVO */
         #screen-device { 
             z-index: 9999; 
             background: #050505; 
@@ -168,7 +173,6 @@
             transition: width 0.2s; 
         }
 
-        /* PANTALLA DE INTRO (NOCHE X - 12 AM) */
         #screen-intro { 
             z-index: 5000; 
             background: #000; 
@@ -191,7 +195,7 @@
         }
 
         /* ==========================================================================
-           5. MENÚ PRINCIPAL (ESTILO MEJORADO)
+           5. MENÚ PRINCIPAL
            ========================================================================== */
         #screen-menu { 
             background: url('start_screen.png') no-repeat center center fixed; 
@@ -207,7 +211,12 @@
             inset: 0; 
             pointer-events: none; 
             z-index: 2;
-            background: radial-gradient(circle, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.8) 80%, rgba(0,0,0,1) 100%);
+            background: radial-gradient(
+                circle, 
+                rgba(0,0,0,0.1) 0%, 
+                rgba(0,0,0,0.8) 80%, 
+                rgba(0,0,0,1) 100%
+            );
             background-size: 100% 100%;
         }
         
@@ -218,7 +227,10 @@
             inset: 0;
             pointer-events: none;
             z-index: 3;
-            background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.1) 50%);
+            background: linear-gradient(
+                rgba(18,16,16,0) 50%, 
+                rgba(0,0,0,0.1) 50%
+            );
             background-size: 100% 4px;
         }
 
@@ -243,9 +255,7 @@
             background-color: rgba(0, 0, 0, 0.7); 
             border: 2px solid #440000; 
             color: #cccccc;
-            padding: 1.5vh 2vw; 
-            font-family: 'VT323'; 
-            /* Font size set in media queries above */
+            /* Font size controlled by media queries */
             margin: 8px;
             cursor: pointer; 
             text-transform: uppercase; 
@@ -253,7 +263,6 @@
             position: relative; 
             z-index: 10; 
             box-shadow: 0 0 5px rgba(0,0,0,0.8);
-            flex-shrink: 0;
             backdrop-filter: blur(2px);
         }
 
@@ -313,8 +322,6 @@
             cursor: pointer;
         }
         
-        #lang-btn:hover { background: #222; border-color: #888; }
-
         #btn-leaderboard { 
             position: absolute; 
             top: 20px; 
@@ -329,8 +336,6 @@
             padding: 5px 10px; 
             cursor: pointer;
         }
-        
-        #btn-leaderboard:hover { background-color: #004488; color: #fff; }
 
         #credits-text { 
             position: absolute; 
@@ -358,8 +363,6 @@
             transition: transform 0.3s;
         }
         
-        .star:hover { transform: scale(1.2) rotate(10deg); }
-
         .star.earned { 
             color: gold; 
             text-shadow: 0 0 15px gold; 
@@ -371,7 +374,7 @@
         }
 
         /* ==========================================================================
-           6. MODALES Y VENTANAS EMERGENTES (RESPONSIVE)
+           6. MODALES Y VENTANAS EMERGENTES
            ========================================================================== */
         .modal-overlay { 
             position: fixed; 
@@ -559,7 +562,7 @@
         }
 
         /* ==========================================================================
-           8. JUEGO - ENTORNO 3D SIMULADO (FLUIDO)
+           8. JUEGO - ENTORNO 3D SIMULADO
            ========================================================================== */
         #view-office { 
             position: absolute; 
@@ -998,7 +1001,7 @@
         @media (max-width: 768px) {
             #screen-gameover { flex-direction: column; }
             .lore-text { font-size: 0.9rem; }
-            #hud-power-box { bottom: 100px; }
+            #hud-power-box { bottom: 100px; } /* Ajuste para no tapar controles */
         }
 
     </style>
@@ -1345,15 +1348,27 @@ const TEXTS = {
     }
 };
 
-let SAVEDATA = {night:1, stars:{}, binds:null, leaderboard:[], comments:[], user: null, lang: 'ES', deviceMode: null};
+let SAVEDATA = {
+    night: 1, 
+    stars: {}, 
+    binds: null, 
+    leaderboard: [], 
+    comments: [], 
+    user: null, 
+    lang: 'ES', 
+    deviceMode: null
+};
+
 try { 
-    let l=localStorage.getItem('mf_v38'); 
-    if(l) SAVEDATA=JSON.parse(l); 
+    let l = localStorage.getItem('mf_v38'); 
+    if(l) SAVEDATA = JSON.parse(l); 
     if(!SAVEDATA.leaderboard) SAVEDATA.leaderboard = []; 
     if(!SAVEDATA.comments) SAVEDATA.comments = [];
 } catch(e) {}
 
-// --- AUTH SYSTEM ---
+// ============================================================================
+// SISTEMA DE CUENTAS (USER SYS)
+// ============================================================================
 const UserSys = {
     activeUser: null,
     openAuth: (type) => {
@@ -1365,10 +1380,18 @@ const UserSys = {
         const u = document.getElementById('auth-user').value;
         const p = document.getElementById('auth-pass').value;
         const mode = document.getElementById('auth-title').getAttribute('data-mode');
-        if(u.length < 3 || p.length < 3) { alert("INVALID INPUT (Min 3 characters)"); return; }
+        
+        if(u.length < 3 || p.length < 3) { 
+            alert("INVALID INPUT (Min 3 characters)"); 
+            return; 
+        }
         
         if(mode === 'reg') {
-            if(localStorage.getItem('mf_user_'+u)) { alert("USER ALREADY EXISTS"); return; }
+            if(localStorage.getItem('mf_user_'+u)) { 
+                alert("USER ALREADY EXISTS"); 
+                return; 
+            }
+            // Registrar cuenta localmente
             localStorage.setItem('mf_user_'+u, JSON.stringify({pass:p, data: SAVEDATA}));
             alert("ACCOUNT CREATED. PLEASE LOGIN.");
             UserSys.openAuth('login');
@@ -1384,8 +1407,12 @@ const UserSys = {
                     UserSys.updateUI();
                     UI.closeModals();
                     Game.initMenu();
-                } else { alert("WRONG PASSWORD"); }
-            } else { alert("USER NOT FOUND"); }
+                } else { 
+                    alert("WRONG PASSWORD"); 
+                }
+            } else { 
+                alert("USER NOT FOUND"); 
+            }
         }
     },
     updateUI: () => {
@@ -1398,6 +1425,9 @@ const UserSys = {
     }
 };
 
+// ============================================================================
+// SISTEMA DE FIREBASE Y ONLINE
+// ============================================================================
 const FB = {
     active: typeof firebase !== 'undefined',
     getRank: () => {
@@ -1454,17 +1484,26 @@ const FB = {
         }); 
     },
     postComm: (txt) => {
+        // Filtro de moderación real
         const bad = ['bad', 'sucks', 'stupid', 'hate', 'fart'];
         if(bad.some(w => txt.toLowerCase().includes(w))) { 
-            alert("MODERATION: MESSAGE BLOCKED"); 
+            alert("MODERATION: MESSAGE BLOCKED FOR INAPPROPRIATE CONTENT"); 
             return; 
         }
         const u = SAVEDATA.user || "Guest";
-        if(FB.active) firebase.database().ref('comments').push({u:u, t:txt});
-        else { SAVEDATA.comments.push({u:u, t:txt}); localStorage.setItem('mf_v38', JSON.stringify(SAVEDATA)); FB.getComm(); }
+        if(FB.active) {
+            firebase.database().ref('comments').push({u:u, t:txt});
+        } else { 
+            SAVEDATA.comments.push({u:u, t:txt}); 
+            localStorage.setItem('mf_v38', JSON.stringify(SAVEDATA)); 
+            FB.getComm(); 
+        }
     }
 };
 
+// ============================================================================
+// SISTEMA DE IDIOMAS Y CONFIGURACIÓN
+// ============================================================================
 const Lang = {
     current: SAVEDATA.lang || 'ES',
     toggle: () => { 
@@ -1482,6 +1521,7 @@ const Lang = {
     apply: () => {
         const t = TEXTS[Lang.current];
         const n = document.getElementById('menu-night') ? document.getElementById('menu-night').innerText : SAVEDATA.night;
+        
         document.getElementById('lang-btn').innerText = Lang.current === 'CN' ? '中文' : (Lang.current === 'ES' ? 'ESPAÑOL' : 'ENGLISH');
         
         if(document.getElementById('btn-play')) document.getElementById('btn-play').innerHTML = `${t.play} <span id="menu-night">${n}</span>)`;
@@ -1623,8 +1663,6 @@ const App = {
         // INTERCAMBIO DE MODOS SOLICITADO
         // PC Button -> Mobile Class (Scroll)
         // Mobile Button -> PC Class (Grid, No Scroll)
-        // Si el usuario elige "PC", aplicamos .mode-mobile para que NO tenga grid y tenga scroll (comportamiento solicitado invertido?)
-        // Espera, la solicitud era: "el boton de scroll ponselo a la version mobil y la version de pc haz que se vean todos los botones y no tenga scrooll"
         
         if(mode === 'MOBILE') {
             body.classList.add('mode-mobile'); // Activa Scroll
@@ -1751,7 +1789,11 @@ const Game = {
             if(SAVEDATA.night > 7) row.innerHTML += '<span class="star earned">★</span>';
             if(SAVEDATA.night > 8) row.innerHTML += '<span class="star earned">★</span>';
             if(SAVEDATA.night > 9) row.innerHTML += '<span class="star earned">★</span>';
-            if(SAVEDATA.stars['custom']) row.innerHTML = '<span class="star earned blue">★</span><span class="star earned blue">★</span><span class="star earned blue">★</span><span class="star earned blue">★</span>';
+            
+            // Fix: Si se desbloqueó con el cheat, mostrar azules
+            if(SAVEDATA.stars['custom']) {
+                 row.innerHTML = '<span class="star earned blue">★</span><span class="star earned blue">★</span><span class="star earned blue">★</span><span class="star earned blue">★</span>';
+            }
         }
         
         const cnBtn = document.getElementById('btn-custom');
@@ -1778,6 +1820,7 @@ const Game = {
     },
 
     initNight: () => { 
+        // Lógica de jugar normal (Maximo 8)
         let n = parseInt(SAVEDATA.night);
         if(n > 8) n = 8;
         Game.startSequence(n); 
@@ -1785,6 +1828,7 @@ const Game = {
     
     initCustomSetup: () => { UI.showScreen('screen-custom'); },
 
+    // NUEVA FUNCION: SECUENCIA DE INICIO (AUDIO + PANTALLA NEGRA)
     startSequence: (n, customAI=null) => {
         AudioSys.stopAll();
         UI.showScreen('screen-intro');
@@ -1792,31 +1836,36 @@ const Game = {
         const t = TEXTS[Lang.current];
         const displayN = n === 'CUSTOM' ? 'CUSTOM' : n;
         document.getElementById('intro-msg').innerText = t.intro + displayN + t.am;
+
+        const isNight9 = (n === 9);
+        const introAudio = isNight9 ? 'bgm-night9' : 'sfx-night-start'; // Usar night_9 como intro si es la noche 9
         
-        const introAudio = (n === 9) ? 'bgm-night9' : 'sfx-night-start'; 
+        // Reproducir audio intro
         AudioSys.play(introAudio);
         
-        // FIX CRÍTICO: Garantizar inicio
-        let launched = false;
-        const doStart = () => {
-            if(launched) return;
-            launched = true;
-            Game.startLevel(n, customAI);
-        };
-
+        // Configurar evento para cuando termine el audio
         const audioEl = document.getElementById(introAudio);
+        
+        let started = false;
+        const doStart = () => {
+            if(started) return;
+            started = true;
+             Game.startLevel(n, customAI);
+        };
+        
         if(audioEl) audioEl.onended = doStart;
         
-        setTimeout(doStart, 4000); 
+        // Fallback por si el audio falla
+        setTimeout(doStart, isNight9 ? 8000 : 5000); // Forzar inicio si el evento no dispara
     },
 
     startLevel: (n, customAI=null) => {
         Game.state = { night: n, power: 100, time: 0, batteryTimer: 0, over: false, view: 'office', mask: false, hidden: false, curtain: false, flash: false, toxic: 0, vent: false, inMinigame: false };
-        
         if(n === 'CUSTOM') {
             Game.ai = { ...customAI, pos: {maifer:0, isaac:0, jomar:0, vent:0, richard:0}, busy: false };
             document.getElementById('game-night-num').innerText = "C";
         } else if (n === 9) {
+            // Noche 9 via custom 20/20/20
             Game.ai = { maifer:20, isaac:20, jomar:20, richard:20, golden: (customAI ? customAI.golden : 0), pos: {maifer:0, isaac:0, jomar:0, vent:0, richard:0}, busy: false };
             document.getElementById('game-night-num').innerText = "9";
         } else {
@@ -1824,22 +1873,28 @@ const Game = {
             document.getElementById('game-night-num').innerText = n;
         }
         
+        // Golden Maifer Logic
         if(customAI && customAI.golden) Game.ai.golden = customAI.golden;
         
         UI.showScreen('screen-game');
+        
         if(isMobile) document.getElementById('mobile-controls').style.display = 'flex';
 
+        // Iniciar ambiente DESPUES de la intro
         setTimeout(() => {
-            if(n === 9) AudioSys.play('bgm-game', true, 0.8); 
-            else AudioSys.play('bgm-game', true, 0.6);
+            if(n === 9) {
+                // Si night_9 ya sonó en la intro, quizas poner ambiente genérico o nada
+                // O si night_9 ERA la musica de fondo.
+                AudioSys.play('bgm-game', true, 0.8); 
+            } else {
+                AudioSys.play('bgm-game', true, 0.6);
+            }
             
             if(n === 1) AudioSys.play('voice-1');
             if(n === 2) AudioSys.play('voice-2');
-            
             document.getElementById('btn-mute').style.display = 'block';
         }, 500);
 
-        // Reset visual UI
         document.getElementById('vent-door').classList.remove('closed');
         document.getElementById('curtain-fabric').classList.remove('closed');
         document.getElementById('vis-richard-win').style.display = 'none';
@@ -1852,7 +1907,6 @@ const Game = {
         
         Mechanics.moveGenButton();
         
-        // Start Loops
         if(Game.timers.main) clearInterval(Game.timers.main);
         if(Game.timers.ai) clearInterval(Game.timers.ai);
         if(Game.timers.golden) clearInterval(Game.timers.golden);
@@ -1860,24 +1914,32 @@ const Game = {
         Game.timers.main = setInterval(Game.loop, 100);
         Game.timers.ai = setInterval(Game.aiLoop, (n===8 || n===9) ? 1000 : 2000);
         
+        // --- IMPLEMENTACIÓN NUEVA: GOLDEN MAIFER TIMER ---
         Game.goldenState.active = false;
-        if(n >= 6 || Game.ai.golden > 0) {
-            Game.timers.golden = setInterval(Game.goldenLoop, 5000);
+        if(n === 6 || n === 7 || n === 8 || n === 9 || Game.ai.golden > 0) {
+             Game.timers.golden = setInterval(Game.goldenLoop, 5000);
         }
 
         Lang.apply(); 
     },
 
+    // --- IMPLEMENTACIÓN NUEVA: GOLDEN LOGIC ---
     goldenLoop: () => {
         if(Game.state.over || Game.goldenState.active) return;
+        // Probabilidad aleatoria
         let chance = 0.3;
+        // Si es custom y tiene nivel
         if(Game.ai.golden > 0) chance = Game.ai.golden * 0.05;
-        
+
         if(Math.random() < chance) { 
              Game.goldenState.active = true;
-             AudioSys.play('sfx-oh'); 
+             AudioSys.play('sfx-oh'); // oh_oh.mp3
+             // 3 segundos para morir
              Game.goldenState.timer = setTimeout(() => {
-                 if(Game.goldenState.active) Game.die('golden');
+                 if(Game.goldenState.active) {
+                     // Jumpscare usando golden_maifer.png
+                     Game.die('golden');
+                 }
              }, 3000);
         }
     },
@@ -1885,14 +1947,13 @@ const Game = {
     loop: () => {
         if(Game.state.over || Game.state.inMinigame) return;
         
-        // TIEMPO
         Game.state.time += 0.048; 
         let hour = 12 + Math.floor(Game.state.time / 16.6); 
         if(hour > 12) hour -= 12;
         document.getElementById('hud-time').innerText = (hour === 0 ? 12 : hour) + " AM";
         if(Game.state.time >= 100) { Game.reach8AM(); return; }
         
-        // BATERIA
+        // BATTERY
         let drainMultiplier = 1; 
         if(Game.state.flash) drainMultiplier += 2;
         if(Game.state.vent) drainMultiplier += 1;
@@ -1925,12 +1986,12 @@ const Game = {
 
     aiLoop: () => {
         if(Game.state.over) return;
+        
         if(Game.ai.pos.jomar === 1) { Game.die('jomar'); return; }
         
         if(Game.ai.busy && Game.state.night < 8) return;
 
         const rng = (lvl) => (Math.random() * 20) < lvl;
-        
         let killTime = 4000; 
         if(Game.state.night >= 5) killTime = 3000;
 
