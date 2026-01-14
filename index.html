@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Maifer's Factory: Ultimate v30.0 (Menu Style & Localized)</title>
+    <title>Maifer's Factory: Ultimate v37.0 (Hardcore Energy & Richard Fix)</title>
     
     <!-- LIBRERÍAS DE FIREBASE -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -48,7 +48,7 @@
             overflow: hidden; 
         }
 
-        /* --- CLASES PARA MODO MOVIL --- */
+        /* --- CLASES PARA MODO MOVIL (INTERCAMBIADO) --- */
         body.mode-mobile .hud-container { 
             transform: scale(0.7); 
             transform-origin: top left; 
@@ -74,6 +74,13 @@
         
         body.mode-mobile #star-row { 
             transform: scale(0.8); 
+        }
+        
+        body.mode-mobile .cam-btn {
+            width: 15%;
+            height: 12%;
+            font-size: 1rem;
+            pointer-events: auto;
         }
 
         /* ==========================================================================
@@ -144,14 +151,12 @@
            4. MENÚ PRINCIPAL (ESTILO MEJORADO)
            ========================================================================== */
         #screen-menu { 
-            /* NUEVO FONDO */
             background: url('start_screen.png') no-repeat center center fixed; 
             background-size: cover;
             position: relative; 
             overflow: hidden;
         }
 
-        /* Overlay de viñeta oscura para legibilidad */
         #screen-menu::before {
             content: " "; 
             display: block; 
@@ -163,7 +168,6 @@
             background-size: 100% 100%;
         }
         
-        /* Efecto de lineas de scanline */
         #screen-menu::after {
             content: " ";
             display: block;
@@ -177,9 +181,9 @@
 
         .title-text { 
             font-family: 'Nosifer'; 
-            font-size: clamp(3.5rem, 12vw, 7rem); /* Más grande */
+            font-size: clamp(3.5rem, 12vw, 7rem); 
             color: var(--primary-color); 
-            text-shadow: 0 0 10px #500, 0 0 20px #f00; /* Glow mejorado */
+            text-shadow: 0 0 10px #500, 0 0 20px #f00; 
             text-align: center; 
             animation: glitch 4s infinite, pulseTitle 3s infinite alternate; 
             margin-bottom: 30px; 
@@ -192,7 +196,6 @@
             to { text-shadow: 0 0 20px #800, 0 0 40px #f00; transform: scale(1.02); }
         }
 
-        /* Contenedor flexible para botones del menú */
         .menu-container {
             display: flex; 
             flex-direction: column; 
@@ -242,6 +245,26 @@
         .icon-lock { 
             position: absolute; 
             right: 15px; 
+        }
+
+        /* --- USER SYSTEM UI --- */
+        #user-panel {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 25;
+            display: flex;
+            gap: 10px;
+        }
+
+        .user-btn {
+            background: #001100;
+            border: 1px solid #00ff00;
+            color: #00ff00;
+            font-family: 'Share Tech Mono';
+            cursor: pointer;
+            padding: 5px 10px;
         }
         
         #lang-btn { 
@@ -461,7 +484,6 @@
             justify-items: center;
         }
         
-        /* Ajuste para 4 personajes */
         .cn-char { 
             background-color: #000; 
             border: 2px solid #444; 
@@ -538,14 +560,72 @@
             top: 15%; 
             left: 50%; 
             transform: translateX(-50%); 
-            width: 45vw; /* Ancho relativo */
-            max-width: 400px; /* Limite PC */
-            height: 70vh; /* Alto relativo */
+            width: 45vw; 
+            max-width: 400px; 
+            height: 70vh; 
             background-color: #000; 
             border: 20px solid #1a1a1a; 
             border-image: linear-gradient(to right, #111, #333, #555, #222) 1;
             box-shadow: inset 0 0 50px #000; 
             overflow: hidden; 
+        }
+
+        /* --- NUEVA CORTINA (VENTANA EN LA PARED) --- */
+        #curtain-window {
+            position: absolute;
+            top: 15%;
+            right: 5%; /* Pared derecha */
+            width: 18vw;
+            max-width: 150px;
+            height: 30vh;
+            background-color: #050505; 
+            border: 5px solid #222;
+            box-shadow: inset 0 0 20px #000;
+            z-index: 25;
+            overflow: hidden;
+        }
+
+        #curtain-fabric {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(90deg, #500, #400 10px, #300 10px, #300 20px);
+            transform: translateY(-100%); /* Abierta por defecto */
+            transition: transform 0.3s ease-out;
+            z-index: 5;
+        }
+
+        #curtain-fabric.closed {
+            transform: translateY(0);
+        }
+
+        /* Richard en la ventana */
+        #vis-richard-win {
+            position: absolute;
+            top: 10%;
+            left: 10%;
+            width: 80%;
+            height: 80%;
+            object-fit: contain;
+            display: none; /* JS activa */
+            z-index: 2;
+            filter: brightness(0.7);
+        }
+
+        #curtain-btn {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 20%;
+            background: #800;
+            color: #fff;
+            border: none;
+            border-top: 3px solid #a00;
+            cursor: pointer;
+            font-family: 'VT323';
+            z-index: 6;
         }
 
         /* ANIMATRONICOS */
@@ -560,6 +640,7 @@
         #vis-maifer { right: 0; bottom: 0; height: 90%; max-height: 100vh; }
         #vis-isaac { left: 0; bottom: 0; height: 95%; max-height: 100vh; }
         #vis-jomar { left: 50%; bottom: 0; transform: translateX(-50%); height: 80%; z-index: 4; }
+        #vis-richard { top: 20%; left: 50%; transform: translateX(-50%); width: 40%; z-index: 6; display: none; }
 
         /* VENTILACIÓN (IZQUIERDA) */
         #vent-system {
@@ -680,7 +761,7 @@
             position: absolute; 
             bottom: 0; 
             width: 100%; 
-            height: 15vh; /* Altura relativa */
+            height: 15vh; 
             background: linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0.9)), url('https://www.transparenttextures.com/patterns/wood-pattern.png'), #2d2d2d;
             z-index: 30; 
             display: flex; 
@@ -742,7 +823,7 @@
         }
 
         #hud-power-box { 
-            bottom: 140px; /* Evita controles moviles */
+            bottom: 140px; 
             left: 20px; 
             width: auto; 
         }
@@ -925,14 +1006,17 @@
     
     <!-- NUEVO: SONIDO INICIO NOCHE -->
     <audio id="sfx-night-start" src="night_shift_start.mp3"></audio>
+
+    <!-- NUEVO: SONIDO VENTILACION -->
+    <audio id="sfx-vent-close" src="ventilation_closing.mp3"></audio>
 </div>
 
 <!-- DEVICE SELECTION SCREEN (LOADER) -->
 <div id="screen-device" class="screen active">
     <h1 class="title-text" style="font-size: 3rem;">SELECT DEVICE / DISPOSITIVO</h1>
     <div style="display:flex; gap:20px;">
-        <button class="menu-btn" onclick="App.selectMode('PC')">PC (ORIGINAL)</button>
-        <button class="menu-btn" onclick="App.selectMode('MOBILE')">MOBILE (OPTIMIZED)</button>
+        <button class="menu-btn" onclick="App.selectMode('PC')">MOBILE (OPTIMIZED)</button>
+        <button class="menu-btn" onclick="App.selectMode('MOBILE')">PC (ORIGINAL)</button>
     </div>
     <div id="loading-bar-container">
         <div id="loading-bar"></div>
@@ -947,6 +1031,12 @@
 
 <!-- MENU -->
 <div id="screen-menu" class="screen">
+    <div id="user-panel">
+        <button class="user-btn" onclick="UserSys.openAuth('login')">LOGIN</button>
+        <button class="user-btn" onclick="UserSys.openAuth('reg')">REGISTER</button>
+        <span id="user-display" style="color:#0f0; font-family:'VT323'; font-size:1.5rem; display:none;"></span>
+    </div>
+    
     <button id="lang-btn" class="menu-btn" style="width: auto;" onclick="Lang.toggle()">ESPANOL</button>
     <button id="btn-leaderboard" class="menu-btn" style="width: auto;" onclick="UI.openLeaderboard()">🏆 RANK</button>
     
@@ -963,8 +1053,19 @@
         <button id="btn-settings" class="menu-btn" onclick="UI.openSettings()">AJUSTES</button>
     </div>
     
-    <p style="position: absolute; bottom: 10px; font-size: 0.8rem; color: #444;">v30.0 - Ultimate Sequence</p>
+    <p style="position: absolute; bottom: 10px; font-size: 0.8rem; color: #444;">v37.0 - Ultimate Fixes & Accounts</p>
     <p id="credits-text">Creado por Jonlet Santos</p>
+</div>
+
+<!-- AUTH MODAL -->
+<div id="modal-auth" class="modal-overlay">
+    <div class="modal-box" style="width:400px; text-align:center;">
+        <h2 id="auth-title" class="lore-header">LOGIN</h2>
+        <input type="text" id="auth-user" placeholder="USERNAME" style="width:80%; padding:10px; margin-bottom:10px; font-family:'VT323'; font-size:1.5rem;">
+        <input type="password" id="auth-pass" placeholder="PASSWORD" style="width:80%; padding:10px; margin-bottom:20px; font-family:'VT323'; font-size:1.5rem;">
+        <button class="menu-btn" onclick="UserSys.submit()">SUBMIT</button>
+        <button class="menu-btn" style="border-color:red;" onclick="UI.closeModals()">CANCEL</button>
+    </div>
 </div>
 
 <!-- MODALES -->
@@ -987,7 +1088,7 @@
 
 <div id="modal-comments" class="modal-overlay">
     <div class="modal-box">
-        <h2 class="lore-header">COMUNIDAD (ONLINE)</h2>
+        <h2 id="comm-title" class="lore-header">COMUNIDAD (ONLINE)</h2>
         <div id="comm-warning" style="color: #00ff00; font-size: 0.8rem; margin-bottom: 10px;">Sistema de Moderación IA Activo</div>
         <div id="comment-feed" style="height: 300px; overflow-y: auto; border: 1px solid #333; margin-bottom: 10px; padding: 10px; background-color:#000;">
             <!-- Comentarios -->
@@ -1023,40 +1124,41 @@
             <div id="st-h-aud" class="setting-header">AUDIO</div>
             <div class="setting-row"><span id="st-vol">VOLUMEN</span><input type="range" min="0" max="100" value="100" oninput="AudioSys.setVolume(this.value)"></div>
         </div>
-        <!-- NUEVO: CONTROLES SECTION (Insertado aquí para respetar estructura visual) -->
+        <!-- CONTROLES -->
         <div class="setting-section">
-            <div class="setting-header">CONTROLES (CLICK PARA CAMBIAR)</div>
+            <div id="st-h-ctrl" class="setting-header">CONTROLES (CLICK PARA CAMBIAR)</div>
             <div class="setting-row"><span id="lbl-st-mask">MASCARA</span><button class="menu-btn" style="width:auto;font-size:1rem;" id="bind-mask" onclick="Input.rebind('mask')">SPACE</button></div>
             <div class="setting-row"><span id="lbl-st-flash">LINTERNA</span><button class="menu-btn" style="width:auto;font-size:1rem;" id="bind-flash" onclick="Input.rebind('flash')">F</button></div>
             <div class="setting-row"><span id="lbl-st-mon">MONITOR</span><button class="menu-btn" style="width:auto;font-size:1rem;" id="bind-monitor" onclick="Input.rebind('monitor')">TAB</button></div>
             <div class="setting-row"><span id="lbl-st-vent">CERRAR VENTILACION</span><button class="menu-btn" style="width:auto;font-size:1rem;" id="bind-vent" onclick="Input.rebind('vent')">V</button></div>
+            <div class="setting-row"><span id="lbl-st-hide">ESCONDERSE</span><button class="menu-btn" style="width:auto;font-size:1rem;" id="bind-hide" onclick="Input.rebind('hide')">CTRL</button></div>
+            <div class="setting-row"><span id="lbl-st-curt">CORTINA (RICHARD)</span><button class="menu-btn" style="width:auto;font-size:1rem;" id="bind-curtain" onclick="Input.rebind('curtain')">S</button></div>
         </div>
         <div class="setting-section">
             <div id="st-h-gfx" class="setting-header">GRÁFICOS & GAMEPLAY</div>
             <div class="setting-row"><span id="st-full">PANTALLA COMPLETA</span><button class="menu-btn" style="width: auto; font-size: 1.2rem;" onclick="Config.toggleFullscreen()">TOGGLE</button></div>
             <div class="setting-row"><span id="st-gli">EFECTO GLITCH</span><input type="checkbox" id="chk-glitch" checked onchange="Config.toggleGlitch()"></div>
-            <!-- NUEVO: MÁS AJUSTES CON IDS PARA TRADUCCION -->
             <div class="setting-row"><span id="lbl-st-static">ESTATICIDAD CÁMARA</span><input type="checkbox" checked onchange="Config.toggleStatic(this.checked)"></div>
             <div class="setting-row"><span id="lbl-st-3d">PERSPECTIVA 3D</span><input type="checkbox" checked onchange="Config.togglePerspective(this.checked)"></div>
-            
             <div class="setting-row"><span id="st-del" style="color: red;">BORRAR DATOS</span><button class="menu-btn" style="width: auto; font-size: 1.2rem; border-color: red; color: red;" onclick="Game.newGame()">RESET</button></div>
         </div>
         <button id="btn-save-st" class="menu-btn" onclick="UI.closeModals()">CERRAR</button>
     </div>
 </div>
 
-<!-- CUSTOM NIGHT SCREEN (UPDATED) -->
+<!-- CUSTOM NIGHT SCREEN -->
 <div id="screen-custom" class="screen">
     <h1 class="title-text" style="font-size: 3rem;">CUSTOM NIGHT</h1>
     <div class="cn-grid">
         <div class="cn-char"><img src="maifer.png" class="cn-img"><span style="color:#fff;">MAIFER</span><div class="cn-controls"><button class="cn-btn" onclick="CustomNight.adj('maifer',-1)">-</button><div id="val-maifer" class="cn-val">0</div><button class="cn-btn" onclick="CustomNight.adj('maifer',1)">+</button></div></div>
         <div class="cn-char"><img src="isaac.png" class="cn-img"><span style="color:#fff;">ISAAC</span><div class="cn-controls"><button class="cn-btn" onclick="CustomNight.adj('isaac',-1)">-</button><div id="val-isaac" class="cn-val">0</div><button class="cn-btn" onclick="CustomNight.adj('isaac',1)">+</button></div></div>
         <div class="cn-char"><img src="jomar.png" class="cn-img"><span style="color:#fff;">JOMAR</span><div class="cn-controls"><button class="cn-btn" onclick="CustomNight.adj('jomar',-1)">-</button><div id="val-jomar" class="cn-val">0</div><button class="cn-btn" onclick="CustomNight.adj('jomar',1)">+</button></div></div>
-        <!-- NUEVO: GOLDEN MAIFER EN CUSTOM -->
+        <!-- RICHARD Y GOLDEN -->
+        <div class="cn-char"><img src="richard.png" class="cn-img"><span style="color:#f00;">RICHARD</span><div class="cn-controls"><button class="cn-btn" onclick="CustomNight.adj('richard',-1)">-</button><div id="val-richard" class="cn-val">0</div><button class="cn-btn" onclick="CustomNight.adj('richard',1)">+</button></div></div>
         <div class="cn-char" style="border-color: gold;"><img src="golden_maifer.png" class="cn-img"><span style="color:gold;">G. MAIFER</span><div class="cn-controls"><button class="cn-btn" onclick="CustomNight.adj('golden',-1)">-</button><div id="val-golden" class="cn-val">0</div><button class="cn-btn" onclick="CustomNight.adj('golden',1)">+</button></div></div>
     </div>
     <button id="btn-cn-start" class="menu-btn" onclick="CustomNight.start()">INICIAR</button>
-    <button class="menu-btn" style="border-color:red;" onclick="location.reload()">ATRAS</button>
+    <button class="menu-btn" style="border-color:red;" onclick="UI.showScreen('screen-menu')">ATRAS</button>
 </div>
 
 <!-- JUEGO -->
@@ -1074,14 +1176,18 @@
     <div id="view-office">
         <div id="layer-flicker"></div>
         
-        <div id="vent-system">
-            <img id="vent-img" src="">
-            <div id="vent-grill"></div>
-            <div id="vent-door"></div>
-            <button id="vent-btn" onclick="Mechanics.toggleVent()">CLOSE</button>
+        <!-- VENTANA DE RICHARD (DERECHA) -->
+        <div id="curtain-window">
+            <img id="vis-richard-win" src="richard.png">
+            <div id="curtain-fabric"></div>
+            <button id="curtain-btn" onclick="Mechanics.toggleCurtain()">CLOSE</button>
         </div>
         
-        <div id="hallway"><img id="vis-jomar" class="anim-img" src="jomar.png"></div>
+        <div id="vent-system"><img id="vent-img" src=""><div id="vent-grill"></div><div id="vent-door"></div><button id="vent-btn" onclick="Mechanics.toggleVent()">CLOSE</button></div>
+        
+        <div id="hallway">
+            <img id="vis-jomar" class="anim-img" src="jomar.png">
+        </div>
         
         <img id="vis-isaac" class="anim-img" src="isaac.png">
         <img id="vis-maifer" class="anim-img" src="maifer.png">
@@ -1089,25 +1195,15 @@
         <div id="desk"><button id="btn-cam-sys" class="monitor-btn" onclick="Mechanics.toggleMonitor()">[ SYSTEM ]</button></div>
     </div>
 
-    <div id="layer-mask"></div>
-    <div id="layer-flashlight"></div>
-    <div id="layer-under-desk"><h2 id="lbl-under">DEBAJO DE LA MESA</h2></div>
+    <div id="layer-mask"></div><div id="layer-flashlight"></div><div id="layer-under-desk"><h2 id="lbl-under">DEBAJO DE LA MESA</h2></div>
 
     <div id="screen-monitor">
-        <div style="color:#fff; display:flex; justify-content:space-between; width:100%;">
-            <span><span id="lbl-sys">SYSTEM</span>: CAM <span id="cam-id">06</span></span>
-            <span style="color:red;" id="rec-dot">● REC</span>
-        </div>
+        <div style="color:#fff; display:flex; justify-content:space-between; width:100%;"><span><span id="lbl-sys">SYSTEM</span>: CAM <span id="cam-id">06</span></span><span style="color:red;" id="rec-dot">● REC</span></div>
         <div id="cam-view"><div id="cam-static"></div><div id="cam-content"><h1 style="color:#333;">NO SIGNAL</h1></div></div>
         <div id="map-layout">
             <div id="room-06" class="map-room"></div><div id="room-04" class="map-room"></div><div id="room-05" class="map-room"></div>
             <div id="room-02" class="map-room"></div><div id="room-03" class="map-room"></div><div id="room-you" class="map-room">YOU</div>
-            <button id="btn-c6" class="cam-btn active" onclick="Monitor.setCam(6)">06</button>
-            <button id="btn-c4" class="cam-btn" onclick="Monitor.setCam(4)">04</button>
-            <button id="btn-c5" class="cam-btn" onclick="Monitor.setCam(5)">05</button>
-            <button id="btn-c2" class="cam-btn" onclick="Monitor.setCam(2)">02</button>
-            <button id="btn-c3" class="cam-btn" onclick="Monitor.setCam(3)">03</button>
-            <button id="btn-c1" class="cam-btn" onclick="Monitor.setCam(1)">01</button>
+            <button id="btn-c6" class="cam-btn active" onclick="Monitor.setCam(6)">06</button><button id="btn-c4" class="cam-btn" onclick="Monitor.setCam(4)">04</button><button id="btn-c5" class="cam-btn" onclick="Monitor.setCam(5)">05</button><button id="btn-c2" class="cam-btn" onclick="Monitor.setCam(2)">02</button><button id="btn-c3" class="cam-btn" onclick="Monitor.setCam(3)">03</button><button id="btn-c1" class="cam-btn" onclick="Monitor.setCam(1)">01</button>
             <button id="btn-close-mon" onclick="Mechanics.toggleMonitor()">CLOSE X</button>
         </div>
     </div>
@@ -1117,11 +1213,11 @@
         <button class="mob-btn" onclick="Mechanics.toggleMask()">MASK</button>
         <button class="mob-btn" onclick="Mechanics.toggleFlashlight()">LITE</button>
         <button class="mob-btn" onclick="Mechanics.toggleHide()">HIDE</button>
+        <button class="mob-btn" onclick="Mechanics.toggleCurtain()">CURT</button>
         <button class="mob-btn" onclick="Mechanics.toggleMonitor()">CAM</button>
     </div>
 </div>
 
-<!-- WIN / GAMEOVER -->
 <div id="screen-win" class="screen" style="background-color:#000;">
     <h1 style="font-family:'VT323'; font-size:6rem; color:#00aaff;">YOU WIN</h1>
     <div id="win-stars" style="display:flex; gap:10px;"></div>
@@ -1133,10 +1229,7 @@
     <button class="menu-btn" onclick="location.reload()">MENU</button>
 </div>
 
-<div id="screen-8am" class="screen" style="background-color:#000;">
-    <h1 style="font-family:'VT323'; font-size:8rem; color:#0f0;">8:00 AM</h1>
-    <p id="lbl-win" style="color:#fff; font-size: 2rem;">TURNO FINALIZADO.</p>
-</div>
+<div id="screen-8am" class="screen" style="background-color:#000;"><h1 style="font-family:'VT323'; font-size:8rem; color:#0f0;">8:00 AM</h1><p id="lbl-win" style="color:#fff; font-size: 2rem;">TURNO FINALIZADO.</p></div>
 
 <div id="screen-minigame" class="screen">
     <div id="mg-info">MINIJUEGO</div>
@@ -1150,12 +1243,13 @@
         <img id="death-img" src="screen_death.png" style="width:100%; border:1px solid #333;">
         <p id="death-reason" style="color:#fff;">...</p>
     </div>
-    <button id="btn-menu-go" class="menu-btn" onclick="location.reload()">MENU</button>
+    <div style="display:flex; gap:10px;">
+        <button class="menu-btn" onclick="Game.initNight()">RETRY</button>
+        <button class="menu-btn" onclick="location.reload()">MENU</button>
+    </div>
 </div>
 
-<div id="screen-jumpscare" class="screen">
-    <img id="jump-img" src="">
-</div>
+<div id="screen-jumpscare" class="screen"><img id="jump-img" src=""></div>
 
 <script>
 // --- CONFIGURACIÓN FIREBASE ---
@@ -1169,308 +1263,183 @@ const firebaseConfig = {
   appId: "1:700963667348:web:6fd8dba0bcb3ada7a2e381"
 };
 
-if(typeof firebase !== 'undefined') {
-    firebase.initializeApp(firebaseConfig);
-}
+if(typeof firebase !== 'undefined') firebase.initializeApp(firebaseConfig);
 
-// ============================================================================
-// DATOS, TEXTOS Y LOCALIZACIÓN (LORE OFICIAL COMPLETO)
-// ============================================================================
-const LORE_ES_FULL = `📖 MAIFER’S FACTORY — LORE OFICIAL\n\nMaifer’s Factory es una antigua fábrica industrial dedicada al desarrollo de robots de vigilancia y asistencia mecánica. El lugar pertenece a Michael Boyko.\n\n👤 EL PROTAGONISTA\nAceptas el trabajo por necesidad. Solo una advertencia: “No interfieras con los animatrónicos. Sigue los protocolos.”\n\n☎️ LA CHICA DEL TELÉFONO\nCada noche recibes una llamada de una mujer que trabaja en la fábrica. Nunca dice su nombre.\n\n🤖 LOS ROBOTS\n🟡 MAIFER: Agresivo con presencia humana. Escóndete debajo de la mesa.\n🎭 ISAAC: Responde a rostros. La máscara lo engaña.\n🔦 JOMAR: Odia la luz. Usa la linterna.\n🟥 RICHARD: Unidad de contención. Cierra la cortina.\n\n🕰️ LAS NOCHES\nSobrevivir hasta las 8:00 AM no significa que ganaste. Significa que fuiste tolerado.`;
-
-const LORE_EN_FULL = `📖 MAIFER’S FACTORY — OFFICIAL LORE\n\nMaifer’s Factory is an old industrial factory owned by Michael Boyko.\n\n👤 THE PROTAGONIST\nYou accept the job out of necessity. Warning: "Do not interfere with the animatronics."\n\n☎️ PHONE GIRL\nEvery night you receive a call from a woman. She never says her name.\n\n🤖 THE ROBOTS\n🟡 MAIFER: Aggressive. Hide under the table.\n🎭 ISAAC: Responds to faces. Use the mask.\n🔦 JOMAR: Hates light. Use flashlight.\n🟥 RICHARD: Containment unit. Close curtain.\n\n🕰️ THE NIGHTS\nSurviving until 8:00 AM doesn't mean you won. It means you were tolerated.`;
-
+// LORE OFICIAL & TEXTS
+const LORE_ES_FULL = `📖 MAIFER’S FACTORY — LORE OFICIAL\n\nMaifer’s Factory es una antigua fábrica industrial dedicada al desarrollo de robots de vigilancia y asistencia mecánica. El lugar pertenece a Michael Boyko.\n\n👤 EL PROTAGONISTA\nAceptas el trabajo por necesidad. Solo una advertencia: “No interfieras con los animatrónicos. Sigue los protocolos.”\n\n☎️ LA CHICA DEL TELÉFONO\nCada noche recibes una llamada de una mujer que trabaja en la fábrica. Nunca dice su nombre.\n\n🤖 LOS ROBOTS\n🟡 MAIFER: Agresivo con presencia humana. Escóndete debajo de la mesa.\n🎭 ISAAC: Responde a rostros. La máscara lo engaña.\n🔦 JOMAR: Odia la luz. Usa la linterna.\n🟥 RICHARD: Unidad de contención. Cierra la cortina si lo ves en la ventana derecha.\n\n🕰️ LAS NOCHES\nSobrevivir hasta las 8:00 AM no significa que ganaste. Significa que fuiste tolerado.`;
+const LORE_EN_FULL = `📖 MAIFER’S FACTORY — OFFICIAL LORE\n\nMaifer’s Factory is an old industrial factory owned by Michael Boyko.\n\n👤 THE PROTAGONIST\nYou accept the job out of necessity. Warning: "Do not interfere with the animatronics."\n\n☎️ PHONE GIRL\nEvery night you receive a call from a woman. She never says her name.\n\n🤖 THE ROBOTS\n🟡 MAIFER: Aggressive. Hide under the table.\n🎭 ISAAC: Responds to faces. Use the mask.\n🔦 JOMAR: Hates light. Use flashlight.\n🟥 RICHARD: Containment unit. Close curtain if seen in the window.\n\n🕰️ THE NIGHTS\nSurviving until 8:00 AM doesn't mean you won. It means you were tolerated.`;
 const LORE_CN_FULL = `📖 MAIFER’S FACTORY — 官方传说\n\nMaifer工厂归Michael Boyko所有。\n\n👤 主角\n你接受了这份工作。警告：“不要干涉电子动画。”\n\n☎️ 电话女孩\n每晚你会接到一个女人的电话。\n\n🤖 机器人\n🟡 MAIFER：攻击性。躲在桌子底下。\n🎭 ISAAC：对面孔有反应。使用面具。\n🔦 JOMAR：讨厌光。使用手电筒。\n🟥 RICHARD：遏制装置。拉下窗帘。\n\n🕰️ 夜晚\n活到8:00并不意味着你赢了。`;
 
-const UPDATES_ES = ["✅ Online Leaderboard", "✅ Comentarios Globales", "✅ Pantalla Fluida (Fix)", "✅ Jumpscares Fix", "✅ Jomar 100% Letal"];
-const UPDATES_EN = ["✅ Online Leaderboard", "✅ Global Comments", "✅ Fluid Screen Fix", "✅ Jumpscares Fix", "✅ Jomar 100% Lethal"];
-const UPDATES_CN = ["✅ 在线排行榜", "✅ 全球评论", "✅ 流畅屏幕修复", "✅ 跳跃恐惧修复", "✅ Jomar 100% 致命"];
+const UPDATES_ES = ["✅ Sistema de Cuentas", "✅ Richard Re-agregado", "✅ Fix Minijuego N2", "✅ Fix Batería y Tiempo", "✅ Port Movil Mejorado"];
 
 const TEXTS = {
     ES: {
         play: "JUGAR (NOCHE", new: "NUEVA PARTIDA", lore: "DATOS / LORE", st: "AJUSTES", 
         custom: "NOCHE PERSONALIZADA", night: "NOCHE", under: "DEBAJO DE LA MESA", win: "TURNO FINALIZADO",
-        g_over: "FIN DEL JUEGO", st_title: "AJUSTES", st_vol: "VOLUMEN", st_ctrl: "CONTROLES",
-        btn_close: "CERRAR", btn_save: "GUARDAR Y CERRAR", lore_txt: LORE_ES_FULL, /* NEW LORE */
-        lbl_mask: "MÁSCARA", lbl_flash: "LINTERNA", lbl_hide: "ESCONDERSE", lbl_curtain: "CORTINA", lbl_mon: "MONITOR",
-        lbl_sys: "SISTEMA", lbl_pwr: "PODER", lbl_usage: "USO", lbl_night: "NOCHE",
-        d_maifer: "Maifer te atrapó.", d_isaac: "Isaac no fue engañado.", d_jomar: "La oscuridad te consumió.",
-        d_power: "Apagón total.", d_air: "Falta de aire.", d_vent: "Algo salió de la ventilación.",
-        d_golden: "ERES DEMASIADO LENTO.", /* NEW */
-        lf_1: "N1: Registro encontrado.", lf_2: "N2: Rostro detectado.",
-        mg_1: "N1: ESQUIVAR OBSTÁCULOS", mg_2: "N2: BUSCA LA MÁSCARA", mg_3: "N3: CARGA LA BATERÍA",
-        teaser: "FIVE NIGHTS AT MAIFER'S 2 IS COMING", upd_list: UPDATES_ES, mute: "SILENCIAR 📞", upd_btn: "ACTUALIZACIONES",
-        win_msg: "Espero que hayas disfrutado el juego que creé con mucho esfuerzo. Disfrútalo mientras puedas... Cinco noches con Maifer 2 próximamente.",
-        cn_start: "INICIAR NOCHE", lb_title: "GANADORES (GLOBAL)", lb_ph: "TU NOMBRE", credits: "Creado por Jonlet Santos", rank_btn: "🏆 RANK",
-        st_h_aud: "AUDIO", st_h_gfx: "GRÁFICOS", st_h_ctrl: "CONTROLES",
-        st_full: "PANTALLA COMPLETA", st_gli: "EFECTO GLITCH", st_sens: "SENSIBILIDAD", st_del: "BORRAR DATOS",
-        mg5_hint: "PRESIONA ESPACIO RAPIDO", comm_btn: "COMUNIDAD",
-        intro: "NOCHE ", am: " - 12:00 AM",
-        /* --- AJUSTES TRADUCIDOS --- */
-        st_mask: "MÁSCARA", st_flash: "LINTERNA", st_mon: "MONITOR", st_vent: "CERRAR VENT.",
-        st_static: "ESTÁTICA CÁMARA", st_3d: "PERSPECTIVA 3D"
+        g_over: "FIN DEL JUEGO", st_title: "AJUSTES", st_vol: "VOLUMEN", lore_txt: LORE_ES_FULL,
+        d_maifer: "Maifer te atrapó.", d_isaac: "Isaac no fue engañado.", d_jomar: "La oscuridad te consumió.", d_richard: "No cerraste la cortina.",
+        d_golden: "ERES DEMASIADO LENTO.",
+        mg5_hint: "PRESIONA ESPACIO RAPIDO", intro: "NOCHE ", am: " - 12:00 AM",
+        st_mask: "MÁSCARA", st_flash: "LINTERNA", st_mon: "MONITOR", st_vent: "CERRAR VENT.", st_hide: "ESCONDERSE", st_curt: "CORTINA",
+        st_static: "ESTÁTICA CÁMARA", st_3d: "PERSPECTIVA 3D", comm_ph: "Escribe algo...", comm_warn: "Sistema de moderación activo", comm_title: "COMUNIDAD ONLINE", st_ctrl: "CONTROLES (CLICK PARA CAMBIAR)"
     },
     EN: {
         play: "PLAY (NIGHT", new: "NEW GAME", lore: "DATA / LORE", st: "SETTINGS",
         custom: "CUSTOM NIGHT", night: "NIGHT", under: "UNDER THE DESK", win: "SHIFT COMPLETED",
-        g_over: "GAME OVER", st_title: "SETTINGS", st_vol: "VOLUME", st_ctrl: "CONTROLS",
-        btn_close: "CLOSE", btn_save: "SAVE & CLOSE", lore_txt: LORE_EN_FULL, /* NEW LORE */
-        lbl_mask: "MASK", lbl_flash: "FLASHLIGHT", lbl_hide: "HIDE", lbl_curtain: "CURTAIN", lbl_mon: "MONITOR",
-        lbl_sys: "SYSTEM", lbl_pwr: "POWER", lbl_usage: "USAGE", lbl_night: "NIGHT",
-        d_maifer: "Maifer caught you.", d_isaac: "Isaac wasn't fooled.", d_jomar: "Darkness took you.",
-        d_power: "Blackout.", d_air: "No air.", d_vent: "Ventilation breach.",
-        d_golden: "YOU ARE TOO SLOW.", /* NEW */
-        lf_1: "N1: Record found.", lf_2: "N2: Face detected.",
-        mg_1: "N1: DODGE", mg_2: "N2: FIND MASK", mg_3: "N3: CHARGE BATTERY",
-        teaser: "FIVE NIGHTS AT MAIFER'S 2 IS COMING", upd_list: UPDATES_EN, mute: "MUTE CALL 📞", upd_btn: "UPDATES",
-        win_msg: "I hope you enjoyed the game I created with much effort. Enjoy it while you can... Five Nights at Maifer's 2 coming soon.",
-        cn_start: "START NIGHT", lb_title: "SURVIVORS (GLOBAL)", lb_ph: "YOUR NAME", credits: "Created by Jonlet Santos", rank_btn: "🏆 RANK",
-        st_h_aud: "AUDIO", st_h_gfx: "GRAPHICS", st_h_ctrl: "CONTROLS",
-        st_full: "FULLSCREEN", st_gli: "GLITCH FX", st_sens: "SENSITIVITY", st_del: "RESET DATA",
-        mg5_hint: "MASH SPACE FAST", comm_btn: "COMMUNITY",
-        intro: "NIGHT ", am: " - 12:00 AM",
-        /* --- AJUSTES TRADUCIDOS --- */
-        st_mask: "MASK", st_flash: "FLASHLIGHT", st_mon: "MONITOR", st_vent: "CLOSE VENT",
-        st_static: "CAMERA STATIC", st_3d: "3D PERSPECTIVE"
+        g_over: "GAME OVER", st_title: "SETTINGS", st_vol: "VOLUME", lore_txt: LORE_EN_FULL,
+        d_maifer: "Maifer caught you.", d_isaac: "Isaac wasn't fooled.", d_jomar: "Darkness took you.", d_richard: "Curtain wasn't closed.",
+        d_golden: "YOU ARE TOO SLOW.",
+        mg5_hint: "MASH SPACE FAST", intro: "NIGHT ", am: " - 12:00 AM",
+        st_mask: "MASK", st_flash: "FLASHLIGHT", st_mon: "MONITOR", st_vent: "CLOSE VENT", st_hide: "HIDE", st_curt: "CURTAIN",
+        st_static: "CAMERA STATIC", st_3d: "3D PERSPECTIVE", comm_ph: "Type something...", comm_warn: "Moderation system active", comm_title: "ONLINE COMMUNITY", st_ctrl: "CONTROLS (CLICK TO CHANGE)"
     },
     CN: {
         play: "开始游戏 (夜", new: "新游戏", lore: "数据 / 传说", st: "设置",
         custom: "自定义夜", night: "夜", under: "桌子底下", win: "下班了",
-        g_over: "游戏结束", st_title: "设置", st_vol: "音量", st_ctrl: "控制",
-        btn_close: "关闭", btn_save: "保存并关闭", lore_txt: LORE_CN_FULL, /* NEW LORE */
-        lbl_mask: "面具", lbl_flash: "手电筒", lbl_hide: "隐藏", lbl_curtain: "窗帘", lbl_mon: "监视器",
-        lbl_sys: "系统", lbl_pwr: "功率", lbl_usage: "用法", lbl_night: "夜",
-        d_maifer: "Maifer抓住了你。", d_isaac: "Isaac看到了你的脸。", d_jomar: "黑暗吞噬了你。",
-        d_power: "停电。", d_air: "窒息。", d_vent: "通风口。",
-        d_golden: "你太慢了。", /* NEW */
-        lf_1: "N1: 记录。", lf_2: "N2: 脸。",
-        mg_1: "N1: 躲避", mg_2: "N2: 找面具", mg_3: "N3: 充电",
-        teaser: "FIVE NIGHTS AT MAIFER'S 2 IS COMING", upd_list: UPDATES_CN, mute: "静音通话 📞", upd_btn: "更新",
-        win_msg: "我希望你喜欢我努力制作的游戏。尽情享受吧... Maifer的五夜2即将推出。",
-        cn_start: "开始", lb_title: "幸存者", lb_ph: "你的名字", credits: "作者: Jonlet Santos", rank_btn: "🏆 排行",
-        st_h_aud: "音频", st_h_gfx: "图形", st_h_ctrl: "控制",
-        st_full: "全屏", st_gli: "故障效果", st_sens: "灵敏度", st_del: "重置数据",
-        mg5_hint: "快速按空格", comm_btn: "社区",
-        intro: "夜 ", am: " - 12:00 AM",
-        /* --- AJUSTES TRADUCIDOS --- */
-        st_mask: "面具", st_flash: "手电筒", st_mon: "监视器", st_vent: "关闭通风口",
-        st_static: "摄像机静电", st_3d: "3D 透视"
+        g_over: "游戏结束", st_title: "设置", st_vol: "音量", lore_txt: LORE_CN_FULL,
+        d_maifer: "Maifer抓住了你。", d_isaac: "Isaac看到了你的脸。", d_jomar: "黑暗吞噬了你。", d_richard: "窗帘。",
+        d_golden: "你太慢了。",
+        mg5_hint: "快速按空格", intro: "夜 ", am: " - 12:00 AM",
+        st_mask: "面具", st_flash: "手电筒", st_mon: "监视器", st_vent: "关闭通风口", st_hide: "隐藏", st_curt: "窗帘",
+        st_static: "摄像机静电", st_3d: "3D 透视", comm_ph: "写点什么...", comm_warn: "审核系统处于活动状态", comm_title: "在线社区", st_ctrl: "控制（点击更改）"
     }
 };
 
-// DETECCION DE DISPOSITIVO PARA MOSTRAR CONTROLES
-const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-
-let SAVEDATA = {night:1, stars:{}, binds:null, leaderboard:[], comments:[]};
+let SAVEDATA = {night:1, stars:{}, binds:null, leaderboard:[], comments:[], user: null, lang: 'ES', deviceMode: null};
 try { 
-    let l=localStorage.getItem('mf_v27'); 
+    let l=localStorage.getItem('mf_v37'); 
     if(l) SAVEDATA=JSON.parse(l); 
     if(!SAVEDATA.leaderboard) SAVEDATA.leaderboard = []; 
     if(!SAVEDATA.comments) SAVEDATA.comments = [];
 } catch(e) {}
 
-// FIREBASE WRAPPERS
+// --- AUTH SYSTEM ---
+const UserSys = {
+    activeUser: null,
+    openAuth: (type) => {
+        document.getElementById('modal-auth').style.display = 'flex';
+        document.getElementById('auth-title').innerText = type === 'login' ? "LOGIN" : "REGISTER";
+        document.getElementById('auth-title').setAttribute('data-mode', type);
+    },
+    submit: () => {
+        const u = document.getElementById('auth-user').value;
+        const p = document.getElementById('auth-pass').value;
+        const mode = document.getElementById('auth-title').getAttribute('data-mode');
+        if(u.length < 3 || p.length < 3) { alert("INVALID INPUT"); return; }
+        
+        if(mode === 'reg') {
+            if(localStorage.getItem('mf_user_'+u)) { alert("USER ALREADY EXISTS"); return; }
+            localStorage.setItem('mf_user_'+u, JSON.stringify({pass:p, data: SAVEDATA}));
+            alert("ACCOUNT CREATED. PLEASE LOGIN.");
+            UserSys.openAuth('login');
+        } else {
+            const stored = localStorage.getItem('mf_user_'+u);
+            if(stored) {
+                const parsed = JSON.parse(stored);
+                if(parsed.pass === p) {
+                    SAVEDATA = parsed.data;
+                    SAVEDATA.user = u;
+                    UserSys.activeUser = u;
+                    localStorage.setItem('mf_v37', JSON.stringify(SAVEDATA));
+                    UserSys.updateUI();
+                    UI.closeModals();
+                    Game.initMenu();
+                } else { alert("WRONG PASS"); }
+            } else { alert("USER NOT FOUND"); }
+        }
+    },
+    updateUI: () => {
+        if(SAVEDATA.user) {
+            document.querySelectorAll('.user-btn').forEach(b => b.style.display='none');
+            const d = document.getElementById('user-display');
+            d.style.display = 'block';
+            d.innerText = "AGENT: " + SAVEDATA.user;
+        }
+    }
+};
+
 const FB = {
     active: typeof firebase !== 'undefined',
     getRank: () => {
         if(!FB.active) {
-            const l = document.getElementById('lb-list'); 
-            l.innerHTML='<li style="color:red">OFFLINE MODE</li>';
-            (SAVEDATA.leaderboard || []).slice(-10).reverse().forEach(p => {
-                let li = document.createElement('li'); 
-                li.style.display = 'flex'; li.style.justifyContent = 'space-between';
-                li.innerHTML = `<span style="color:#0f0">${p.n}</span> <span>${p.d}</span>`; 
-                l.appendChild(li);
-            });
+            const l = document.getElementById('lb-list'); l.innerHTML='<li style="color:red">OFFLINE MODE</li>';
+            (SAVEDATA.leaderboard || []).slice(-10).reverse().forEach(p => { let li = document.createElement('li'); li.style.display = 'flex'; li.style.justifyContent = 'space-between'; li.innerHTML = `<span style="color:#0f0">${p.n}</span> <span>${p.d}</span>`; l.appendChild(li); });
             return;
         }
         firebase.database().ref('leaderboard').limitToLast(10).once('value', (s) => {
-            const l = document.getElementById('lb-list'); l.innerHTML='';
-            if(!s.exists()) return;
-            let arr=[]; s.forEach(c => arr.push(c.val()));
-            arr.reverse().forEach(p => {
-                let li = document.createElement('li'); 
-                li.style.display = 'flex'; li.style.justifyContent = 'space-between';
-                li.innerHTML = `<span style="color:#0f0">${p.n}</span> <span>${p.d}</span>`; 
-                l.appendChild(li);
-            });
+            const l = document.getElementById('lb-list'); l.innerHTML=''; if(!s.exists()) return;
+            let arr=[]; s.forEach(c => arr.push(c.val())); arr.reverse().forEach(p => { let li = document.createElement('li'); li.style.display = 'flex'; li.style.justifyContent = 'space-between'; li.innerHTML = `<span style="color:#0f0">${p.n}</span> <span>${p.d}</span>`; l.appendChild(li); });
         });
     },
     addRank: (name) => {
-        if(!FB.active) {
-            SAVEDATA.leaderboard.push({n:name, d:new Date().toLocaleDateString()});
-            localStorage.setItem('mf_v27', JSON.stringify(SAVEDATA));
-            FB.getRank();
-            return;
-        }
+        if(!FB.active) { SAVEDATA.leaderboard.push({n:name, d:new Date().toLocaleDateString()}); localStorage.setItem('mf_v37', JSON.stringify(SAVEDATA)); FB.getRank(); return; }
         firebase.database().ref('leaderboard').push({n:name, d:new Date().toLocaleDateString()});
     },
-    getComm: () => {
-        if(!FB.active) {
-            const b = document.getElementById('comment-feed'); 
-            b.innerHTML='<div class="comment-msg">Offline Mode. Saving locally.</div>';
-            (SAVEDATA.comments || []).forEach(c => {
-                 let d = document.createElement('div'); d.className='comment-box';
-                 d.innerHTML = `<span class="comment-user">${c.u}:</span> <span class="comment-msg">${c.t}</span>`;
-                 b.appendChild(d);
-            });
-            return;
-        }
-        firebase.database().ref('comments').limitToLast(20).on('value', (s) => {
-            const b = document.getElementById('comment-feed'); 
-            b.innerHTML='';
-            if(!s.exists()) return;
-            s.forEach(c => {
-                let v = c.val();
-                let d = document.createElement('div'); 
-                d.className='comment-box';
-                d.innerHTML = `<span class="comment-user">${v.u}:</span> <span class="comment-msg">${v.t}</span>`;
-                b.appendChild(d);
-            });
-            b.scrollTop = b.scrollHeight;
-        });
-    },
+    getComm: () => { if(!FB.active) return; firebase.database().ref('comments').limitToLast(20).on('value', (s) => { const b = document.getElementById('comment-feed'); b.innerHTML=''; if(!s.exists()) return; s.forEach(c => { let v = c.val(); let d = document.createElement('div'); d.className='comment-box'; d.innerHTML = `<span class="comment-user">${v.u}:</span> <span class="comment-msg">${v.t}</span>`; b.appendChild(d); }); b.scrollTop = b.scrollHeight; }); },
     postComm: (txt) => {
-        const lower = txt.toLowerCase();
-        const keywords = ['bug','error','fail','fix','good','bad','scary','level','night','jomar','isaac','maifer','love','cool','game','help'];
-        const hasKeyword = keywords.some(k => lower.includes(k));
-        
-        if (!hasKeyword && txt.length < 5) {
-             alert("SYSTEM: RELEVANCE ERROR. PLEASE POST ABOUT THE GAME.");
-             return;
-        }
-
-        if(!FB.active) {
-            SAVEDATA.comments.push({u:"Player", t:txt});
-            localStorage.setItem('mf_v27', JSON.stringify(SAVEDATA));
-            FB.getComm();
-            return;
-        }
-        firebase.database().ref('comments').push({u:"User", t:txt});
+        const bad = ['bad', 'sucks', 'stupid', 'hate', 'fart'];
+        if(bad.some(w => txt.toLowerCase().includes(w))) { alert("MODERATION: MESSAGE BLOCKED"); return; }
+        const u = SAVEDATA.user || "Guest";
+        if(FB.active) firebase.database().ref('comments').push({u:u, t:txt});
+        else { SAVEDATA.comments.push({u:u, t:txt}); localStorage.setItem('mf_v37', JSON.stringify(SAVEDATA)); FB.getComm(); }
     }
 };
 
 const Lang = {
-    current: 'ES',
-    toggle: () => {
-        const order = ['ES', 'EN', 'CN'];
-        let idx = order.indexOf(Lang.current);
-        Lang.current = order[(idx + 1) % 3];
-        Lang.apply();
-    },
+    current: SAVEDATA.lang || 'ES',
+    toggle: () => { const order = ['ES', 'EN', 'CN']; let idx = order.indexOf(Lang.current); Lang.current = order[(idx + 1) % 3]; SAVEDATA.lang = Lang.current; localStorage.setItem('mf_v37', JSON.stringify(SAVEDATA)); Lang.apply(); },
     setText: (id, text) => { const el = document.getElementById(id); if (el) el.innerText = text; },
     apply: () => {
         const t = TEXTS[Lang.current];
         const n = document.getElementById('menu-night') ? document.getElementById('menu-night').innerText : SAVEDATA.night;
-        
-        Lang.setText('lang-btn', Lang.current === 'CN' ? '中文' : (Lang.current === 'ES' ? 'ESPAÑOL' : 'ENGLISH'));
+        document.getElementById('lang-btn').innerText = Lang.current === 'CN' ? '中文' : (Lang.current === 'ES' ? 'ESPAÑOL' : 'ENGLISH');
         if(document.getElementById('btn-play')) document.getElementById('btn-play').innerHTML = `${t.play} <span id="menu-night">${n}</span>)`;
-        
-        Lang.setText('btn-new', t.new); Lang.setText('btn-lore', t.lore); Lang.setText('btn-updates', t.upd_btn);
-        Lang.setText('btn-settings', t.st); Lang.setText('btn-comm', t.comm_btn);
-        
-        const custBtn = document.getElementById('btn-custom');
-        if(custBtn && custBtn.childNodes[0]) custBtn.childNodes[0].nodeValue = t.custom + " "; 
-
-        Lang.setText('lore-content', t.lore_txt);
-        Lang.setText('btn-close-lore', t.btn_close); Lang.setText('btn-close-upd', t.btn_close);
-        Lang.setText('st-title', t.st_title); Lang.setText('st-vol', t.st_vol); Lang.setText('st-ctrl', t.st_ctrl); Lang.setText('btn-save-st', t.btn_save);
-
-        Lang.setText('st-h-aud', t.st_h_aud); Lang.setText('st-h-gfx', t.st_h_gfx); Lang.setText('st-h-ctrl', t.st_h_ctrl);
-        Lang.setText('st-full', t.st_full); Lang.setText('st-gli', t.st_gli); Lang.setText('st-sens', t.st_sens); Lang.setText('st-del', t.st_del);
-
-        Lang.setText('lbl-mask', t.lbl_mask); Lang.setText('lbl-flash', t.lbl_flash); Lang.setText('lbl-hide', t.lbl_hide);
-        Lang.setText('lbl-curtain', t.lbl_curtain); Lang.setText('lbl-mon', t.lbl_mon); Lang.setText('lbl-night', t.lbl_night);
-        Lang.setText('lbl-pwr', t.lbl_pwr); Lang.setText('lbl-usage', t.lbl_usage); Lang.setText('lbl-sys', t.lbl_sys);
-        Lang.setText('lbl-under', t.under); Lang.setText('lbl-win', t.win);
-
-        Lang.setText('teaser-text', t.teaser); Lang.setText('btn-mute', t.mute);
-        Lang.setText('btn-leaderboard', t.rank_btn); Lang.setText('credits-text', t.credits);
-        
-        const lbTitle = document.querySelector('#modal-leaderboard h2');
-        if(lbTitle) lbTitle.innerText = t.lb_title;
-        const inpName = document.getElementById('inp-name');
-        if(inpName) inpName.placeholder = t.lb_ph;
-        Lang.setText('btn-cn-start', t.cn_start);
-
+        document.getElementById('btn-new').innerText = t.new; document.getElementById('btn-lore').innerText = t.lore; document.getElementById('btn-settings').innerText = t.st;
+        document.getElementById('lore-content').innerText = t.lore_txt;
+        document.getElementById('mg-controls-hint').innerText = t.mg5_hint;
+        Lang.setText('comm-warning', t.comm_warn); Lang.setText('comm-title', t.comm_title);
+        document.getElementById('comm-input').placeholder = t.comm_ph;
+        Lang.setText('st-title', t.st_title); Lang.setText('st-h-ctrl', t.st_ctrl); 
+        Lang.setText('lbl-st-mask', t.st_mask); Lang.setText('lbl-st-flash', t.st_flash); Lang.setText('lbl-st-mon', t.st_mon);
+        Lang.setText('lbl-st-vent', t.st_vent); Lang.setText('lbl-st-hide', t.st_hide); Lang.setText('lbl-st-curt', t.st_curt);
+        Lang.setText('lbl-st-static', t.st_static); Lang.setText('lbl-st-3d', t.st_3d);
         const ul = document.getElementById('update-list'); 
-        if(ul) {
-            ul.innerHTML='';
-            t.upd_list.forEach(item => { 
-                let li = document.createElement('li'); li.innerText = item; ul.appendChild(li); 
-            });
-        }
-        
-        /* TRADUCCION AJUSTES */
-        Lang.setText('lbl-st-mask', t.st_mask);
-        Lang.setText('lbl-st-flash', t.st_flash);
-        Lang.setText('lbl-st-mon', t.st_mon);
-        Lang.setText('lbl-st-vent', t.st_vent);
-        Lang.setText('lbl-st-static', t.st_static);
-        Lang.setText('lbl-st-3d', t.st_3d);
+        if(ul) { ul.innerHTML=''; UPDATES_ES.forEach(item => { let li = document.createElement('li'); li.innerText = item; ul.appendChild(li); }); }
     }
 };
 
-// --- IMPLEMENTACIÓN NUEVA: TECLA VENTILACIÓN 'KeyV' POR DEFECTO ---
 const BINDINGS = SAVEDATA.binds || { mask: 'Space', flash: 'KeyF', hide: 'ControlLeft', curtain: 'KeyS', monitor: 'Tab', vent: 'KeyV' };
-
-const NIGHT_CONFIG = {
-    1: { maifer: 2, isaac: 1, jomar: 1 }, 
-    2: { maifer: 4, isaac: 3, jomar: 2 },
-    3: { maifer: 6, isaac: 5, jomar: 5 }, 
-    4: { maifer: 8, isaac: 8, jomar: 7 },
-    5: { maifer: 10, isaac: 10, jomar: 10 },
-    6: { maifer: 12, isaac: 12, jomar: 12 },
-    7: { maifer: 15, isaac: 15, jomar: 15 },
-    8: { maifer: 20, isaac: 20, jomar: 20 }, 
-    9: { maifer: 20, isaac: 20, jomar: 20 }
+const NIGHT_CONFIG = { 
+    1: { maifer: 2, isaac: 1, jomar: 1, richard: 0 }, 
+    2: { maifer: 4, isaac: 3, jomar: 2, richard: 1 }, 
+    3: { maifer: 6, isaac: 5, jomar: 5, richard: 3 }, 
+    4: { maifer: 8, isaac: 8, jomar: 7, richard: 5 }, 
+    5: { maifer: 10, isaac: 10, jomar: 10, richard: 7 }, 
+    6: { maifer: 12, isaac: 12, jomar: 12, richard: 10 }, 
+    7: { maifer: 15, isaac: 15, jomar: 15, richard: 15 }, 
+    8: { maifer: 20, isaac: 20, jomar: 20, richard: 20 }, 
+    9: { maifer: 20, isaac: 20, jomar: 20, richard: 20 } 
 };
 
 const Config = {
     glitchEnabled: true,
-    toggleFullscreen: () => {
-        if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(() => {}); } 
-        else { if (document.exitFullscreen) document.exitFullscreen(); }
-    },
-    toggleGlitch: () => {
-        Config.glitchEnabled = !Config.glitchEnabled;
-        document.querySelectorAll('.active-anim').forEach(el => el.style.animation = Config.glitchEnabled ? 'glitch 1s infinite' : 'none');
-        document.querySelectorAll('.title-text').forEach(el => el.style.animation = Config.glitchEnabled ? 'glitch 4s infinite' : 'none');
-    },
-    toggleStatic: (checked) => { 
-        document.getElementById('cam-static').style.display = checked ? 'block' : 'none'; 
-    },
-    togglePerspective: (checked) => { 
-        document.getElementById('view-office').style.transform = checked ? 'perspective(1000px) rotateX(2deg)' : 'none'; 
-    }
+    toggleFullscreen: () => { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{}); else if(document.exitFullscreen) document.exitFullscreen(); },
+    toggleGlitch: () => { Config.glitchEnabled = !Config.glitchEnabled; document.querySelectorAll('.active-anim').forEach(el => el.style.animation = Config.glitchEnabled ? 'glitch 1s infinite' : 'none'); },
+    toggleStatic: (checked) => { document.getElementById('cam-static').style.display = checked ? 'block' : 'none'; },
+    togglePerspective: (checked) => { document.getElementById('view-office').style.transform = checked ? 'perspective(1000px) rotateX(2deg)' : 'none'; }
 };
 
 const AudioSys = {
     volume: 1.0,
     setVolume: (val) => { AudioSys.volume = val / 100; document.querySelectorAll('audio').forEach(a => a.volume = AudioSys.volume); },
-    play: (id, loop=false, forceVol=null) => {
-        const s = document.getElementById(id);
-        if(s){ s.loop = loop; s.volume = forceVol !== null ? forceVol : AudioSys.volume; s.currentTime = 0; s.play().catch(()=>{}); }
-    },
+    play: (id, loop=false, forceVol=null) => { const s = document.getElementById(id); if(s){ s.loop = loop; s.volume = forceVol ? forceVol * AudioSys.volume : AudioSys.volume; s.currentTime = 0; s.play().catch(()=>{}); } },
     stop: (id) => { const s = document.getElementById(id); if(s) { s.pause(); s.currentTime = 0; } },
     stopAll: () => document.querySelectorAll('audio').forEach(a => { a.pause(); a.currentTime=0; }),
     stopLoops: () => { AudioSys.stop('sfx-maifer'); AudioSys.stop('sfx-isaac'); AudioSys.stop('sfx-jomar'); }
 };
 
 const Input = {
-    rebind: (action) => {
-        const btn = document.getElementById('bind-' + action);
-        btn.innerText = "...";
-        const handler = (e) => {
-            e.preventDefault();
-            BINDINGS[action] = e.code;
-            btn.innerText = e.code;
-            SAVEDATA.binds = BINDINGS;
-            localStorage.setItem('mf_v27', JSON.stringify(SAVEDATA));
-            document.removeEventListener('keydown', handler);
-        };
-        document.addEventListener('keydown', handler);
-    }
+    rebind: (action) => { const btn = document.getElementById('bind-'+action); btn.innerText = "..."; const h=(e)=>{ e.preventDefault(); BINDINGS[action]=e.code; btn.innerText=e.code; SAVEDATA.binds=BINDINGS; localStorage.setItem('mf_v37',JSON.stringify(SAVEDATA)); document.removeEventListener('keydown',h); }; document.addEventListener('keydown',h); }
 };
 
 document.addEventListener('keydown', (e) => {
@@ -1484,19 +1453,21 @@ document.addEventListener('keydown', (e) => {
     if (k === BINDINGS.vent) Mechanics.toggleVent();
 });
 
-// NUEVA LOGICA DE APLICACION (DISPOSITIVO Y CARGA)
 const App = {
     selectMode: (mode) => {
         const body = document.body;
-        if(mode === 'MOBILE') body.classList.add('mode-mobile');
+        // SWAPPED: PC Button -> Mobile Class, Mobile Button -> PC Class
+        if(mode === 'PC') body.classList.add('mode-mobile');
         else body.classList.remove('mode-mobile');
         
+        SAVEDATA.deviceMode = mode;
+        localStorage.setItem('mf_v37', JSON.stringify(SAVEDATA));
+
         document.querySelector('#screen-device h1').style.display = 'none';
         document.querySelector('#screen-device div').style.display = 'none';
         document.getElementById('loading-bar-container').style.display = 'block';
         document.getElementById('loading-txt').style.display = 'block';
         
-        // Simular carga
         let p = 0;
         const int = setInterval(() => {
             p += 2;
@@ -1505,7 +1476,7 @@ const App = {
                 clearInterval(int);
                 setTimeout(() => {
                     UI.showScreen('screen-menu');
-                    Game.initMenu(); // Iniciar música y menú
+                    Game.initMenu();
                 }, 500);
             }
         }, 30);
@@ -1513,106 +1484,58 @@ const App = {
 };
 
 const CustomNight = {
-    levels: { maifer:0, isaac:0, jomar:0, golden:0 },
+    levels: { maifer:0, isaac:0, jomar:0, richard:0, golden:0 },
     adj: (char, amount) => {
         CustomNight.levels[char] = Math.max(0, Math.min(20, CustomNight.levels[char] + amount));
-        const el = document.getElementById('val-'+char);
-        if(el) el.innerText = CustomNight.levels[char];
+        const el = document.getElementById('val-'+char); if(el) el.innerText = CustomNight.levels[char];
     },
     start: () => {
         const l = CustomNight.levels;
-        // DETECTAR NOCHE 9 (20/20/20) - Ignoramos Golden para el trigger de noche 9 a menos que sea explícito
-        if(l.maifer===20 && l.isaac===20 && l.jomar===20) { 
-            Game.startSequence(9, l); 
-        } else { 
-            Game.startSequence('CUSTOM', l); 
-        }
+        if(l.maifer===20 && l.isaac===20 && l.jomar===20 && l.richard===20) { Game.startSequence(9, l); } 
+        else { Game.startSequence('CUSTOM', l); }
     }
 };
 
 const Leaderboard = {
-    add: () => {
-        const name = document.getElementById('inp-name').value || "ANON";
-        FB.addRank(name);
-        // FIX: Guardar también localmente si no hay conexión
-        SAVEDATA.leaderboard.push({n:name, d:new Date().toLocaleDateString()});
-        localStorage.setItem('mf_v27', JSON.stringify(SAVEDATA));
-        document.getElementById('lb-input').style.display = 'none';
-        UI.openLeaderboard();
+    add: () => { const name = SAVEDATA.user || document.getElementById('inp-name').value || "ANON"; FB.addRank(name); UI.openLeaderboard(); },
+    addFromWin: () => { 
+        const name = SAVEDATA.user || document.getElementById('win-name').value || "ANON"; 
+        if(FB.active) firebase.database().ref('leaderboard').push({n:name, d:new Date().toLocaleDateString()});
+        else { SAVEDATA.leaderboard.push({n:name, d:new Date().toLocaleDateString()}); localStorage.setItem('mf_v37', JSON.stringify(SAVEDATA)); }
+        document.getElementById('win-rank-input').innerHTML = "<p>RANK SAVED!</p>"; 
     },
-    addFromWin: () => {
-        const name = document.getElementById('win-name').value || "ANON";
-        
-        // GLOBAL RANK FORCE
-        if(FB.active) {
-            firebase.database().ref('leaderboard').push({n:name, d:new Date().toLocaleDateString()});
-        }
-        
-        // FIX: Guardar también localmente por seguridad
-        SAVEDATA.leaderboard.push({n:name, d:new Date().toLocaleDateString()});
-        localStorage.setItem('mf_v27', JSON.stringify(SAVEDATA));
-        document.getElementById('win-rank-input').innerHTML = "<p>GLOBAL RANK SAVED!</p>";
-    },
-    show: () => {
-        FB.getRank();
-    }
+    show: () => { FB.getRank(); }
 };
 
-const CommentSystem = {
-    post: () => {
-        const txt = document.getElementById('comm-input').value;
-        if(txt) {
-            FB.postComm(txt);
-            document.getElementById('comm-input').value = "";
-        }
-    },
-    render: () => { FB.getComm(); }
-};
+const CommentSystem = { post: () => { const t=document.getElementById('comm-input').value; if(t) { FB.postComm(t); document.getElementById('comm-input').value = ""; } }, render: () => { FB.getComm(); } };
 
 let cheatCode = [];
 const secret = "BOYFRIENDISCOOL456";
 document.addEventListener('keydown', (e) => {
     cheatCode.push(e.key.toUpperCase());
-    if (cheatCode.length > 20) cheatCode.shift(); /* Safety limit */
+    if (cheatCode.length > 20) cheatCode.shift();
     const codeStr = cheatCode.join('');
-
-    /* ORIGINAL CHEAT LISTENER (MANTENEMOS LOGICA) */
     if (codeStr.includes(secret)) {
-        // --- IMPLEMENTACION NUEVA: WINNER + RANK DIRECTO ---
-        AudioSys.stopAll();
-        UI.showScreen('screen-win');
-        document.getElementById('win-msg').innerText = "CHEAT ACTIVATED: GLOBAL RANK ACCESS GRANTED";
-        document.getElementById('win-rank-input').style.display = 'block';
+        AudioSys.stopAll(); UI.showScreen('screen-win');
+        const name = SAVEDATA.user || "CHEAT_USER";
+        if(FB.active) firebase.database().ref('leaderboard').push({n:name, d:"HACKED"});
+        else SAVEDATA.leaderboard.push({n:name, d:"HACKED"});
+        document.getElementById('win-msg').innerText = "CHEAT: RANK ADDED FOR " + name;
+        document.getElementById('win-rank-input').style.display = 'none';
         cheatCode = [];
     }
     if (codeStr.includes("FNFLOVER")) {
-        // --- IMPLEMENTACION NUEVA: UNLOCK NIGHT 9 + CUSTOM + 4 BLUE STARS ---
-        alert("GOD MODE: FULL UNLOCK");
-        SAVEDATA.night = 9;
-        SAVEDATA.stars = {6:true, 7:true, 8:true, 9:true, 'custom':true}; /* Añadir estrellas azules logica */
-        // Hack visual para estrellas azules
-        const row = document.getElementById('star-row');
-        if(row) row.innerHTML = '<span class="star earned blue">★</span><span class="star earned blue">★</span><span class="star earned blue">★</span><span class="star earned blue">★</span>';
-        localStorage.setItem('mf_v27', JSON.stringify(SAVEDATA));
-        location.reload();
-    }
-    // --- IMPLEMENTACION NUEVA: RESET COMPLETO ---
-    if (codeStr.includes("FNAF")) {
-        localStorage.removeItem('mf_v27');
-        alert("SYSTEM RESET: ALL DATA DELETED");
-        location.reload();
+        alert("GOD MODE: FULL UNLOCK"); SAVEDATA.night = 9; SAVEDATA.stars = {6:true, 7:true, 8:true, 9:true, 'custom':true};
+        localStorage.setItem('mf_v37', JSON.stringify(SAVEDATA)); location.reload();
     }
 });
 
 const Game = {
-    state: {}, timers: {}, ai: {},
-    
-    // --- NUEVO: ESTADO PARA GOLDEN MAIFER ---
-    goldenState: { active: false, timer: null },
+    state: {}, timers: {}, ai: {}, goldenState: { active: false, timer: null },
 
     initMenu: () => {
+        UserSys.updateUI();
         const menuNightEl = document.getElementById('menu-night');
-        // LIMITAR EL BOTON JUGAR A NOCHE 8
         const realNight = SAVEDATA.night > 8 ? 8 : SAVEDATA.night;
         if(menuNightEl) menuNightEl.innerText = realNight;
         
@@ -1623,102 +1546,74 @@ const Game = {
             if(SAVEDATA.night > 7) row.innerHTML += '<span class="star earned">★</span>';
             if(SAVEDATA.night > 8) row.innerHTML += '<span class="star earned">★</span>';
             if(SAVEDATA.night > 9) row.innerHTML += '<span class="star earned">★</span>';
-            
-            // Fix: Si se desbloqueó con el cheat, mostrar azules
-            if(SAVEDATA.stars['custom']) {
-                 row.innerHTML = '<span class="star earned blue">★</span><span class="star earned blue">★</span><span class="star earned blue">★</span><span class="star earned blue">★</span>';
-            }
+            if(SAVEDATA.stars['custom']) row.innerHTML = '<span class="star earned blue">★</span><span class="star earned blue">★</span><span class="star earned blue">★</span><span class="star earned blue">★</span>';
         }
         
         const cnBtn = document.getElementById('btn-custom');
-        if(SAVEDATA.night > 8 && cnBtn) { 
-            cnBtn.disabled = false; cnBtn.classList.remove('locked'); 
-            const lockIcon = cnBtn.querySelector('.icon-lock');
-            if(lockIcon) lockIcon.style.display = 'none'; 
-        }
+        if(SAVEDATA.night > 8 && cnBtn) { cnBtn.disabled = false; cnBtn.classList.remove('locked'); cnBtn.querySelector('.icon-lock').style.display='none'; }
         
         for(let k in BINDINGS) { const el = document.getElementById('bind-'+k); if(el) el.innerText = BINDINGS[k]; }
-        Lang.apply();
-        AudioSys.play('bgm-menu', true);
+        Lang.apply(); AudioSys.play('bgm-menu', true);
     },
 
-    newGame: () => { if(confirm("DELETE DATA?")) { localStorage.removeItem('mf_v27'); location.reload(); } },
-
+    newGame: () => { if(confirm("DELETE DATA?")) { localStorage.removeItem('mf_v37'); location.reload(); } },
     initNight: () => { 
-        // Lógica de jugar normal (Maximo 8)
         let n = parseInt(SAVEDATA.night);
         if(n > 8) n = 8;
         Game.startSequence(n); 
     },
-    
     initCustomSetup: () => { UI.showScreen('screen-custom'); },
 
-    // NUEVA FUNCION: SECUENCIA DE INICIO (AUDIO + PANTALLA NEGRA)
     startSequence: (n, customAI=null) => {
         AudioSys.stopAll();
         UI.showScreen('screen-intro');
-        
         const t = TEXTS[Lang.current];
         const displayN = n === 'CUSTOM' ? 'CUSTOM' : n;
         document.getElementById('intro-msg').innerText = t.intro + displayN + t.am;
-
-        const isNight9 = (n === 9);
-        const introAudio = isNight9 ? 'bgm-night9' : 'sfx-night-start'; // Usar night_9 como intro si es la noche 9
         
-        // Reproducir audio intro
+        const introAudio = (n === 9) ? 'bgm-night9' : 'sfx-night-start'; 
         AudioSys.play(introAudio);
         
-        // Configurar evento para cuando termine el audio
-        const audioEl = document.getElementById(introAudio);
-        
-        audioEl.onended = () => {
-             Game.startLevel(n, customAI);
+        let launched = false;
+        const doStart = () => {
+            if(launched) return;
+            launched = true;
+            Game.startLevel(n, customAI);
         };
-        
-        // Fallback por si el audio falla
-        setTimeout(() => {
-            if(Game.state.view !== 'office') Game.startLevel(n, customAI);
-        }, isNight9 ? 8000 : 5000); // Forzar inicio si el evento no dispara
+        const audioEl = document.getElementById(introAudio);
+        if(audioEl) audioEl.onended = doStart;
+        setTimeout(doStart, 4000); 
     },
 
     startLevel: (n, customAI=null) => {
-        Game.state = { night: n, power: 100, time: 0, over: false, view: 'office', mask: false, hidden: false, curtain: false, flash: false, toxic: 0, vent: false, inMinigame: false };
+        Game.state = { night: n, power: 100, time: 0, batteryTimer: 0, over: false, view: 'office', mask: false, hidden: false, curtain: false, flash: false, toxic: 0, vent: false, inMinigame: false };
+        
         if(n === 'CUSTOM') {
-            Game.ai = { ...customAI, pos: {maifer:0, isaac:0, jomar:0, vent:0}, busy: false };
+            Game.ai = { ...customAI, pos: {maifer:0, isaac:0, jomar:0, vent:0, richard:0}, busy: false };
             document.getElementById('game-night-num').innerText = "C";
         } else if (n === 9) {
-            // Noche 9 via custom 20/20/20
-            Game.ai = { maifer:20, isaac:20, jomar:20, golden: (customAI ? customAI.golden : 0), pos: {maifer:0, isaac:0, jomar:0, vent:0}, busy: false };
+            Game.ai = { maifer:20, isaac:20, jomar:20, richard:20, golden: (customAI ? customAI.golden : 0), pos: {maifer:0, isaac:0, jomar:0, vent:0, richard:0}, busy: false };
             document.getElementById('game-night-num').innerText = "9";
         } else {
-            Game.ai = { ...NIGHT_CONFIG[n], pos: {maifer:0, isaac:0, jomar:0, vent:0}, busy: false, golden: 0 };
+            Game.ai = { ...NIGHT_CONFIG[n], pos: {maifer:0, isaac:0, jomar:0, vent:0, richard:0}, busy: false, golden: 0 };
             document.getElementById('game-night-num').innerText = n;
         }
         
-        // Golden Maifer Logic
         if(customAI && customAI.golden) Game.ai.golden = customAI.golden;
         
         UI.showScreen('screen-game');
-        
         if(isMobile) document.getElementById('mobile-controls').style.display = 'flex';
 
-        // Iniciar ambiente DESPUES de la intro
         setTimeout(() => {
-            if(n === 9) {
-                // Si night_9 ya sonó en la intro, quizas poner ambiente genérico o nada
-                // O si night_9 ERA la musica de fondo.
-                AudioSys.play('bgm-game', true, 0.8); 
-            } else {
-                AudioSys.play('bgm-game', true, 0.6);
-            }
-            
+            if(n === 9) AudioSys.play('bgm-game', true, 0.8); else AudioSys.play('bgm-game', true, 0.6);
             if(n === 1) AudioSys.play('voice-1');
             if(n === 2) AudioSys.play('voice-2');
             document.getElementById('btn-mute').style.display = 'block';
         }, 500);
 
         document.getElementById('vent-door').classList.remove('closed');
-        document.getElementById('vent-btn').classList.remove('active');
+        document.getElementById('curtain-fabric').classList.remove('closed');
+        document.getElementById('vis-richard-win').style.display = 'none';
         document.getElementById('vent-img').style.display = 'none';
         document.getElementById('layer-mask').style.display = 'none';
         document.getElementById('layer-flashlight').style.display = 'none';
@@ -1727,35 +1622,29 @@ const Game = {
         document.querySelectorAll('.anim-img').forEach(i => i.style.display = 'none');
         
         Mechanics.moveGenButton();
+        
+        if(Game.timers.main) clearInterval(Game.timers.main);
+        if(Game.timers.ai) clearInterval(Game.timers.ai);
+        if(Game.timers.golden) clearInterval(Game.timers.golden);
+
         Game.timers.main = setInterval(Game.loop, 100);
         Game.timers.ai = setInterval(Game.aiLoop, (n===8 || n===9) ? 1000 : 2000);
         
-        // --- IMPLEMENTACIÓN NUEVA: GOLDEN MAIFER TIMER ---
         Game.goldenState.active = false;
-        if(n === 6 || n === 7 || n === 8 || n === 9 || Game.ai.golden > 0) {
-             Game.timers.golden = setInterval(Game.goldenLoop, 5000);
-        }
+        if(n >= 6 || Game.ai.golden > 0) Game.timers.golden = setInterval(Game.goldenLoop, 5000);
 
         Lang.apply(); 
     },
 
-    // --- IMPLEMENTACIÓN NUEVA: GOLDEN LOGIC ---
     goldenLoop: () => {
         if(Game.state.over || Game.goldenState.active) return;
-        // Probabilidad aleatoria
         let chance = 0.3;
-        // Si es custom y tiene nivel
         if(Game.ai.golden > 0) chance = Game.ai.golden * 0.05;
-
         if(Math.random() < chance) { 
              Game.goldenState.active = true;
-             AudioSys.play('sfx-oh'); // oh_oh.mp3
-             // 3 segundos para morir
+             AudioSys.play('sfx-oh'); 
              Game.goldenState.timer = setTimeout(() => {
-                 if(Game.goldenState.active) {
-                     // Jumpscare usando golden_maifer.png
-                     Game.die('golden');
-                 }
+                 if(Game.goldenState.active) Game.die('golden');
              }, 3000);
         }
     },
@@ -1763,57 +1652,48 @@ const Game = {
     loop: () => {
         if(Game.state.over || Game.state.inMinigame) return;
         
-        Game.state.time += 0.04; 
-        let hour = 12 + Math.floor(Game.state.time / 16.6); 
-        if(hour > 12) hour -= 12;
+        Game.state.time += 0.048; 
+        let hour = 12 + Math.floor(Game.state.time / 16.6); if(hour > 12) hour -= 12;
         document.getElementById('hud-time').innerText = (hour === 0 ? 12 : hour) + " AM";
         if(Game.state.time >= 100) { Game.reach8AM(); return; }
         
-        let drain = 0.08; 
-        let usage = 1;
-        if(Game.state.night >= 8) drain = 0.12; 
-        if(Game.state.mask) { drain += 0.06; usage++; }
-        if(Game.state.flash) { drain += 0.1; usage++; }
-        if(Game.state.view === 'monitor') { drain += 0.15; usage++; }
-        if(Game.state.vent) { drain += 0.1; usage++; }
+        // --- NEW ENERGY LOGIC ---
+        // 50 ticks = 5 seconds (base)
+        let drainSpeed = 1; 
+        if(Game.state.flash) drainSpeed = 3;
+        if(Game.state.vent) drainSpeed = 2;
+        if(Game.state.view === 'monitor') drainSpeed = 2;
+        if(Game.state.curtain) drainSpeed = 2;
         
-        document.getElementById('use-1').className = 'usage-block ' + (usage >= 1 ? 'active' : '');
-        document.getElementById('use-2').className = 'usage-block ' + (usage >= 2 ? 'active' : '');
-        document.getElementById('use-3').className = 'usage-block ' + (usage >= 3 ? 'active' : '');
-        document.getElementById('use-4').className = 'usage-block ' + (usage >= 4 ? 'high' : '');
+        Game.state.batteryTimer += drainSpeed; 
+        
+        if(Game.state.batteryTimer >= 50) {
+            Game.state.power--;
+            Game.state.batteryTimer = 0;
+            document.getElementById('pwr-val').innerText = Math.floor(Game.state.power);
+        }
 
-        Game.state.power -= drain;
-        document.getElementById('pwr-val').innerText = Math.floor(Game.state.power);
         if(Game.state.power <= 0) { Game.die('power'); return; }
 
         if(Game.state.mask) { 
             let toxicRate = 0.2 + (typeof Game.state.night === 'number' ? Game.state.night * 0.05 : 0.5);
-            Game.state.toxic += toxicRate; 
-            document.getElementById('hud-toxic').style.display = 'block'; 
+            Game.state.toxic += toxicRate; document.getElementById('hud-toxic').style.display = 'block'; 
         } else { 
             Game.state.toxic = Math.max(0, Game.state.toxic - 0.2); 
             if(Game.state.toxic <= 0) document.getElementById('hud-toxic').style.display = 'none'; 
         }
         document.getElementById('toxic-bar').style.width = Game.state.toxic + "%";
         if(Game.state.toxic >= 100) { Game.die('air'); return; }
-        
         Monitor.update();
     },
 
     aiLoop: () => {
         if(Game.state.over) return;
-        
-        if(Game.ai.pos.jomar === 1) {
-            Game.die('jomar');
-            return;
-        }
-
+        if(Game.ai.pos.jomar === 1) { Game.die('jomar'); return; }
         if(Game.ai.busy && Game.state.night < 8) return;
 
         const rng = (lvl) => (Math.random() * 20) < lvl;
-        let killTime = 3000; 
-        if(Game.state.night >= 5) killTime = 2000;
-        if(Game.state.night === 8) killTime = 1500; 
+        let killTime = 4000; if(Game.state.night >= 5) killTime = 3000;
 
         // MAIFER
         if(rng(Game.ai.maifer) && Game.ai.pos.maifer < 5 && Game.ai.pos.vent !== 'maifer') {
@@ -1821,44 +1701,44 @@ const Game = {
             if(Game.ai.pos.maifer === 5) {
                 Game.ai.busy = true; UI.flicker();
                 setTimeout(() => {
-                    AudioSys.play('sfx-maifer', true, 0.3);
-                    document.getElementById('vis-maifer').style.display = 'block';
+                    AudioSys.play('sfx-maifer', true, 0.3); document.getElementById('vis-maifer').style.display = 'block';
                     setTimeout(() => {
                         if(!Game.state.hidden) Game.die('maifer');
-                        else { 
-                            AudioSys.stopLoops(); AudioSys.play('sfx-leave', false, 1.0); 
-                            document.getElementById('vis-maifer').style.display = 'none'; 
-                            Game.ai.pos.maifer = 0; Game.ai.busy = false;
-                        }
+                        else { AudioSys.stopLoops(); AudioSys.play('sfx-leave', false, 1.0); document.getElementById('vis-maifer').style.display = 'none'; Game.ai.pos.maifer = 0; Game.ai.busy = false; }
                     }, killTime);
                 }, 1000);
             }
+        }
+
+        // RICHARD (WINDOW ONLY)
+        if(rng(Game.ai.richard) && Game.ai.pos.richard < 1) {
+            Game.ai.pos.richard = 1;
+            // Go to window
+            document.getElementById('vis-richard-win').style.display = 'block'; 
+            setTimeout(() => {
+                if(Game.state.curtain) {
+                    AudioSys.play('sfx-leave');
+                    document.getElementById('vis-richard-win').style.display = 'none';
+                    Game.ai.pos.richard = 0;
+                } else {
+                    Game.die('richard');
+                }
+            }, 5000);
         }
         
         // VENTILACION
         if(Game.ai.pos.vent === 0) {
              let chance = (typeof Game.state.night === 'number' ? Game.state.night : 10) * 0.05;
-             if(Math.random() < chance) { 
+             if(Math.random() < chance) {
                  if(Math.random() > 0.5 && Game.ai.pos.maifer < 3) {
-                     Game.ai.pos.vent = 'maifer';
-                     document.getElementById('vent-img').src = 'maifer.png';
-                     document.getElementById('vent-img').style.display = 'block';
+                     Game.ai.pos.vent = 'maifer'; document.getElementById('vent-img').src = 'maifer.png'; document.getElementById('vent-img').style.display = 'block';
                  } else if (Game.ai.pos.isaac < 3) {
-                     Game.ai.pos.vent = 'isaac';
-                     document.getElementById('vent-img').src = 'isaac.png';
-                     document.getElementById('vent-img').style.display = 'block';
+                     Game.ai.pos.vent = 'isaac'; document.getElementById('vent-img').src = 'isaac.png'; document.getElementById('vent-img').style.display = 'block';
                  }
              }
         } else {
-             if(Game.state.vent) {
-                 AudioSys.play('sfx-leave', false, 1.0);
-                 Game.ai.pos.vent = 0;
-                 document.getElementById('vent-img').style.display = 'none';
-             } else {
-                 if(Math.random() > 0.6) {
-                     Game.die(Game.ai.pos.vent === 'maifer' ? 'maifer' : 'isaac'); 
-                 }
-             }
+             if(Game.state.vent) { AudioSys.play('sfx-leave', false, 1.0); Game.ai.pos.vent = 0; document.getElementById('vent-img').style.display = 'none'; } 
+             else { if(Math.random() > 0.6) Game.die(Game.ai.pos.vent === 'maifer' ? 'maifer' : 'isaac'); }
         }
 
         // ISAAC
@@ -1867,29 +1747,19 @@ const Game = {
             if(Game.ai.pos.isaac === 5) {
                 Game.ai.busy = true; UI.flicker();
                 setTimeout(() => {
-                    AudioSys.play('sfx-isaac', true, 0.3);
-                    document.getElementById('vis-isaac').style.display = 'block';
+                    AudioSys.play('sfx-isaac', true, 0.3); document.getElementById('vis-isaac').style.display = 'block';
                     setTimeout(() => {
                         if(!Game.state.mask) Game.die('isaac');
-                        else { 
-                            AudioSys.stopLoops(); AudioSys.play('sfx-leave', false, 1.0); 
-                            document.getElementById('vis-isaac').style.display = 'none'; 
-                            Game.ai.pos.isaac = 0; Game.ai.busy = false;
-                        }
+                        else { AudioSys.stopLoops(); AudioSys.play('sfx-leave', false, 1.0); document.getElementById('vis-isaac').style.display = 'none'; Game.ai.pos.isaac = 0; Game.ai.busy = false; }
                     }, killTime + 500); 
                 }, 1000);
             }
         }
 
-        // JOMAR (LETHAL)
+        // JOMAR
         if(Game.ai.pos.jomar === 0 && rng(Game.ai.jomar)) {
             Game.ai.busy = true; UI.flicker(); Game.ai.pos.jomar = 1; 
-            setTimeout(() => {
-                if(Game.ai.pos.jomar === 1) { 
-                    document.getElementById('vis-jomar').style.display = 'block'; 
-                    AudioSys.play('sfx-jomar', true, 0.3); 
-                }
-            }, 500);
+            setTimeout(() => { if(Game.ai.pos.jomar === 1) { document.getElementById('vis-jomar').style.display = 'block'; AudioSys.play('sfx-jomar', true, 0.3); } }, 500);
         }
     },
 
@@ -1900,140 +1770,86 @@ const Game = {
         if(Game.timers.golden) clearInterval(Game.timers.golden);
         AudioSys.stopAll();
         
-        const js = document.getElementById('screen-jumpscare');
-        const img = document.getElementById('jump-img');
-        
-        js.style.display = 'flex';
-        img.style.display = 'block';
+        const js = document.getElementById('screen-jumpscare'); const img = document.getElementById('jump-img');
+        js.style.display = 'flex'; img.style.display = 'block';
 
         let src="maifer.png", snd="jump-maifer";
         if(causeKey === 'maifer' || causeKey === 'vent') { src="maifer.png"; snd="jump-maifer"; }
         else if(causeKey === 'isaac') { src="isaac.png"; snd="jump-isaac"; }
         else if(causeKey === 'jomar') { src="jomar.png"; snd="jump-jomar"; }
-        // NUEVO: GOLDEN JUMPSCARE
+        else if(causeKey === 'richard') { src="richard.png"; snd="jump-richard"; }
         else if(causeKey === 'golden') { src="golden_maifer.png"; snd="jump-golden"; }
         
         img.src = src; AudioSys.play(snd);
-        
-        setTimeout(() => {
-            js.style.display = 'none'; 
-            UI.showScreen('screen-gameover');
-            document.getElementById('death-reason').innerText = TEXTS[Lang.current]['d_'+causeKey] || "GAME OVER";
-            AudioSys.play('sfx-gameover', false, 1.0);
-        }, 2000);
+        setTimeout(() => { js.style.display = 'none'; UI.showScreen('screen-gameover'); document.getElementById('death-reason').innerText = TEXTS[Lang.current]['d_'+causeKey] || "GAME OVER"; AudioSys.play('sfx-gameover', false, 1.0); }, 2000);
     },
 
     reach8AM: () => {
-        Game.state.over = true; 
-        clearInterval(Game.timers.main); clearInterval(Game.timers.ai); 
-        if(Game.timers.golden) clearInterval(Game.timers.golden);
-        AudioSys.stopAll();
+        Game.state.over = true; clearInterval(Game.timers.main); clearInterval(Game.timers.ai); if(Game.timers.golden) clearInterval(Game.timers.golden); AudioSys.stopAll();
         UI.showScreen('screen-8am'); AudioSys.play('sfx-win');
         setTimeout(() => { 
-            if(typeof Game.state.night === 'number' && Game.state.night < 9) { 
-                MiniGames.start(Game.state.night); 
-            } else if (Game.state.night === 9) {
-                SAVEDATA.night = 10; SAVEDATA.stars[9]=true; 
-                localStorage.setItem('mf_v27', JSON.stringify(SAVEDATA));
-                UI.showScreen('screen-win'); 
-                document.getElementById('win-stars').innerHTML = '<span class="star earned blue">★</span><span class="star earned blue">★</span><span class="star earned blue">★</span><span class="star earned blue">★</span>';
-            } else { location.reload(); }
+            if(typeof Game.state.night === 'number' && Game.state.night < 9) { MiniGames.start(Game.state.night); } 
+            else if (Game.state.night === 9) { SAVEDATA.night = 10; SAVEDATA.stars[9]=true; localStorage.setItem('mf_v37', JSON.stringify(SAVEDATA)); UI.showScreen('screen-win'); document.getElementById('win-stars').innerHTML = '<span class="star earned blue">★</span><span class="star earned blue">★</span><span class="star earned blue">★</span><span class="star earned blue">★</span>'; } 
+            else { location.reload(); }
         }, 4000);
     }
 };
 
 const Mechanics = {
-    canAct: (isTurningOff) => {
-        if(isTurningOff) return true;
-        let count = 0;
-        if(Game.state.mask) count++; 
-        if(Game.state.view === 'monitor') count++;
-        if(Game.state.flash) count++; 
-        if(Game.state.hidden) count++;
-        if(Game.state.vent) count++;
-        return count < 4; 
-    },
-    toggleMonitor: () => { 
-        if(Game.state.over || Game.state.hidden || Game.state.mask) return; 
-        const m = document.getElementById('screen-monitor'); 
-        if(Game.state.view==='monitor') { m.style.display='none'; Game.state.view='office'; } 
-        else { if(!Mechanics.canAct(false)) return; m.style.display='flex'; Game.state.view='monitor'; AudioSys.play('sfx-monitor'); } 
-    },
+    canAct: (isTurningOff) => { if(isTurningOff) return true; let count = 0; if(Game.state.mask) count++; if(Game.state.view === 'monitor') count++; if(Game.state.flash) count++; if(Game.state.hidden) count++; if(Game.state.vent) count++; return count < 4; },
+    toggleMonitor: () => { if(Game.state.over || Game.state.hidden || Game.state.mask) return; const m = document.getElementById('screen-monitor'); if(Game.state.view==='monitor') { m.style.display='none'; Game.state.view='office'; } else { if(!Mechanics.canAct(false)) return; m.style.display='flex'; Game.state.view='monitor'; AudioSys.play('sfx-monitor'); } },
     toggleMask: () => { 
         if(Game.state.view !== 'office') return; 
-        // --- NUEVO: CHECK GOLDEN MAIFER CANCEL ---
-        if(!Game.state.mask) {
-             // Al ponerse la mascara
-             if(Game.goldenState.active) {
-                 clearTimeout(Game.goldenState.timer);
-                 Game.goldenState.active = false;
-                 AudioSys.stop('sfx-oh');
-             }
-        }
-
+        if(!Game.state.mask) { if(Game.goldenState.active) { clearTimeout(Game.goldenState.timer); Game.goldenState.active = false; AudioSys.stop('sfx-oh'); } }
         if(Game.state.mask) { Game.state.mask = false; document.getElementById('layer-mask').style.display = 'none'; AudioSys.stop('sfx-mask'); } 
         else { if(!Mechanics.canAct(false)) return; Game.state.mask = true; document.getElementById('layer-mask').style.display = 'block'; AudioSys.play('sfx-mask', true); } 
     },
     toggleFlashlight: () => { 
-        if(Game.state.view !== 'office') return; 
-        if(Game.state.flash) { Game.state.flash = false; document.getElementById('layer-flashlight').style.display = 'none'; } 
-        else { 
+        if(Game.state.view !== 'office') return; if(Game.state.flash) { Game.state.flash = false; document.getElementById('layer-flashlight').style.display = 'none'; } else { 
             if(!Mechanics.canAct(false)) return; 
             Game.state.flash = true; document.getElementById('layer-flashlight').style.display = 'block'; AudioSys.play('sfx-flash'); 
             if(Game.ai.pos.jomar === 1) { 
-                Game.ai.pos.jomar = 0; document.getElementById('vis-jomar').style.display = 'none'; 
-                AudioSys.stopLoops(); AudioSys.play('sfx-leave', false, 1.0); Game.ai.busy = false; 
+                Game.ai.pos.jomar = 0; 
+                document.getElementById('vis-jomar').style.display = 'none'; 
+                AudioSys.stopLoops(); 
+                AudioSys.play('sfx-leave', false, 1.0); 
+                Game.ai.busy = false; 
             } 
         } 
     },
-    toggleHide: () => { 
+    toggleHide: () => { if(Game.state.view !== 'office') return; if(Game.state.hidden) { Game.state.hidden = false; document.getElementById('layer-under-desk').style.display = 'none'; } else { if(!Mechanics.canAct(false)) return; Game.state.hidden = true; document.getElementById('layer-under-desk').style.display = 'flex'; AudioSys.play('sfx-hide'); } },
+    toggleVent: () => { 
         if(Game.state.view !== 'office') return; 
-        if(Game.state.hidden) { Game.state.hidden = false; document.getElementById('layer-under-desk').style.display = 'none'; } 
-        else { if(!Mechanics.canAct(false)) return; Game.state.hidden = true; document.getElementById('layer-under-desk').style.display = 'flex'; AudioSys.play('sfx-hide'); } 
+        if(Game.state.vent) { Game.state.vent = false; AudioSys.play('sfx-vent-close'); } 
+        else { if(!Mechanics.canAct(false)) return; Game.state.vent = true; AudioSys.play('sfx-vent-close'); } 
+        document.getElementById('vent-door').classList.toggle('closed', Game.state.vent); 
+        document.getElementById('vent-btn').classList.toggle('active', Game.state.vent); 
     },
-    toggleVent: () => {
+    toggleCurtain: () => { 
         if(Game.state.view !== 'office') return;
-        if(Game.state.vent) { Game.state.vent = false; } 
-        else { if(!Mechanics.canAct(false)) return; Game.state.vent = true; AudioSys.play('sfx-curtain'); }
-        document.getElementById('vent-door').classList.toggle('closed', Game.state.vent);
-        document.getElementById('vent-btn').classList.toggle('active', Game.state.vent);
+        Game.state.curtain = !Game.state.curtain;
+        const fabric = document.getElementById('curtain-fabric');
+        if(Game.state.curtain) { fabric.classList.add('closed'); AudioSys.play('sfx-curtain'); } 
+        else { fabric.classList.remove('closed'); AudioSys.play('sfx-curtain'); }
     },
     muteCall: () => { AudioSys.stop('voice-1'); AudioSys.stop('voice-2'); document.getElementById('btn-mute').style.display = 'none'; },
     moveGenButton: () => { const btn = document.getElementById('gen-btn'); btn.style.left = Math.random()*90 + 'px'; btn.style.top = Math.random()*140 + 'px'; btn.style.display = 'block'; },
-    chargeGen: () => { 
-        if(Game.state.over) return; 
-        Game.state.power = Math.min(100, Game.state.power + 5); 
-        document.getElementById('pwr-val').innerText = Math.floor(Game.state.power); 
-        AudioSys.play('sfx-gen'); document.getElementById('gen-btn').style.display = 'none'; 
-        setTimeout(Mechanics.moveGenButton, 3000 + Math.random()*5000); 
-    }
+    chargeGen: () => { if(Game.state.over) return; Game.state.power = Math.min(100, Game.state.power + 2); document.getElementById('pwr-val').innerText = Math.floor(Game.state.power); AudioSys.play('sfx-gen'); document.getElementById('gen-btn').style.display = 'none'; setTimeout(Mechanics.moveGenButton, 3000 + Math.random()*5000); }
 };
 
 const Monitor = {
     current: 6, 
-    setCam: (id) => { 
-        Monitor.current = id; 
-        document.getElementById('cam-id').innerText = "0"+id; 
-        document.querySelectorAll('.cam-btn').forEach(b => b.classList.remove('active')); 
-        document.getElementById('btn-c'+id).classList.add('active');
-        AudioSys.play('sfx-cam'); 
-        Monitor.update(); 
-    },
+    setCam: (id) => { Monitor.current = id; document.getElementById('cam-id').innerText = "0"+id; document.querySelectorAll('.cam-btn').forEach(b => b.classList.remove('active')); document.getElementById('btn-c'+id).classList.add('active'); AudioSys.play('sfx-cam'); Monitor.update(); },
     update: () => {
         if(Game.state.view !== 'monitor') return;
-        const div = document.getElementById('cam-content'); div.innerHTML = '';
-        const c = Monitor.current; const p = Game.ai.pos;
-        let html = '';
-
+        const div = document.getElementById('cam-content'); div.innerHTML = ''; const c = Monitor.current; const p = Game.ai.pos; let html = '';
         if(c===6) { if(p.maifer === 0) html += '<div class="cam-spot">MAIFER (IDLE)</div>'; if(p.isaac === 0) html += '<div class="cam-spot">ISAAC (IDLE)</div>'; }
         if(c===5 && p.maifer === 1) html += '<div class="cam-spot active-anim">MAIFER DETECTED</div>';
         if(c===4 && p.isaac === 1) html += '<div class="cam-spot active-anim">ISAAC DETECTED</div>';
         if(c===3) { if(p.maifer === 2) html += '<div class="cam-spot active-anim">MAIFER DETECTED</div>'; if(p.isaac === 2) html += '<div class="cam-spot active-anim">ISAAC DETECTED</div>'; }
         if(c===2) { if(p.maifer === 3) html += '<div class="cam-spot active-anim">MAIFER DETECTED</div>'; if(p.isaac === 4) html += '<div class="cam-spot active-anim">ISAAC (NEAR)</div>'; }
         if(c===1) { if(p.maifer === 4) html += '<div class="cam-spot active-anim">MAIFER (NEAR)</div>'; if(p.isaac === 3) html += '<div class="cam-spot active-anim">ISAAC DETECTED</div>'; }
-
-        if(html === '') html = '<h1 style="color:#333;">NO SIGNAL</h1>';
-        div.innerHTML = html;
+        if(html === '') html = '<h1 style="color:#333;">NO SIGNAL</h1>'; div.innerHTML = html;
     }
 };
 
@@ -2049,107 +1865,80 @@ const UI = {
     flicker: () => { if(!Config.glitchEnabled) return; const el = document.getElementById('layer-flicker'); el.classList.remove('flickering'); void el.offsetWidth; el.classList.add('flickering'); }
 };
 
+// --- MINIGAMES FIXED ---
 const MiniGames = {
-    active: false, night: 0, ctx: null, 
-    player: {}, enemies: [], target: {}, state: {}, frame: 0,
-    start: (n) => {
-        Game.state.inMinigame = true; MiniGames.night = n; MiniGames.active = true; MiniGames.frame = 0;
-        UI.showScreen('screen-minigame'); AudioSys.play('bgm-minigame', true);
-        const c = document.getElementById('mg-canvas'); MiniGames.ctx = c.getContext('2d');
-        const t = TEXTS[Lang.current];
-        document.getElementById('mg-info').innerText = t['mg_'+n] || "MINIGAME";
-        document.getElementById('mg-controls-hint').innerText = "Use Mouse / Arrows / Space / Click";
-        MiniGames.initLogic(n);
-        requestAnimationFrame(MiniGames.loop);
-        document.onkeydown = MiniGames.handleInput; c.onmousedown = MiniGames.handleClick; c.onmousemove = MiniGames.handleMove;
+    active: false, night: 0, ctx: null, player: {}, enemies: [], target: {}, state: {}, frame: 0,
+    start: (n) => { 
+        Game.state.inMinigame = true; MiniGames.night = n; MiniGames.active = true; MiniGames.frame = 0; 
+        UI.showScreen('screen-minigame'); AudioSys.play('bgm-minigame', true); 
+        const c = document.getElementById('mg-canvas'); MiniGames.ctx = c.getContext('2d'); 
+        
+        let instructions = "";
+        if(n===1) instructions = "DODGE THE RED BOXES";
+        else if(n===2) instructions = "GET BLUE BOX. AVOID RED.";
+        else if(n===3) instructions = "CLICK GREEN ORBS";
+        else instructions = "SURVIVE";
+
+        document.getElementById('mg-info').innerText = "NIGHT " + n + ": " + instructions;
+        document.getElementById('mg-controls-hint').innerText = "ARROWS / MOUSE"; 
+        MiniGames.initLogic(n); 
+        requestAnimationFrame(MiniGames.loop); 
+        document.onkeydown = MiniGames.handleInput; c.onmousedown = MiniGames.handleClick; c.onmousemove = MiniGames.handleMove; 
     },
     initLogic: (n) => {
-        const w=600, h=400; MiniGames.enemies = []; MiniGames.player = {x:300, y:200, w:20, h:20, duck:false};
+        const w=600, h=400; MiniGames.enemies = []; 
         if(n===1) { MiniGames.player = {x:50, y:300, w:30, h:30, duck:false}; MiniGames.enemies = [{x:600, y:280, w:40, h:60, spd:4}]; } 
-        else if(n===2) { MiniGames.player = {x:20, y:20, w:20, h:20}; MiniGames.target = {x:550, y:350, w:30, h:30, active:true}; MiniGames.enemies = [{x:100,y:0,h:300,dir:1},{x:300,y:100,h:300,dir:-1},{x:500,y:0,h:300,dir:1}]; } 
+        else if(n===2) { 
+            MiniGames.player = {x:20, y:20, w:20, h:20}; 
+            MiniGames.target = {x:550, y:350, w:30, h:30, active:true}; 
+            MiniGames.enemies = [
+                {x:150,y:0,h:300,dir:1,spd:2}, 
+                {x:300,y:100,h:300,dir:-1,spd:2}, 
+                {x:450,y:0,h:300,dir:1,spd:2}
+            ]; 
+        } 
         else if(n===3) { MiniGames.state = {score:0}; MiniGames.spawnClickTarget(); } 
         else if(n===4) { MiniGames.enemies = []; MiniGames.player = {x:300, y:300, w:10, h:10}; } 
-        else if(n===5) { 
-            MiniGames.state = {energy: 50, timer: 1000}; 
-            document.getElementById('mg-controls-hint').innerText = TEXTS[Lang.current].mg5_hint;
-        } 
+        else if(n===5) { MiniGames.state = {energy: 50, timer: 1000}; document.getElementById('mg-controls-hint').innerText = TEXTS[Lang.current].mg5_hint; } 
         else if(n===6) { MiniGames.state = {timer: Math.random()*200 + 100, color: 'red', waiting: true}; } 
         else if(n===7) { MiniGames.player = {x:20, y:20, w:20, h:20}; MiniGames.target = {x:560, y:360, w:20, h:20}; MiniGames.enemies = [{x:100,y:50,w:20,h:350}, {x:250,y:0,w:20,h:350}, {x:400,y:50,w:20,h:350}]; } 
         else if(n===8) { MiniGames.player = {x:300, y:200, w:20, h:20}; MiniGames.state = {timer: 1800}; }
     },
     spawnClickTarget: () => { MiniGames.enemies.push({x:Math.random()*560+20, y:Math.random()*360+20, r:20, life:60}); },
     loop: () => {
-        if(!MiniGames.active) return;
-        const ctx = MiniGames.ctx; const w=600, h=400;
-        ctx.fillStyle = '#111'; ctx.fillRect(0,0,w,h);
-        MiniGames.frame++; const n = MiniGames.night;
-
-        if(n===1) {
-            ctx.fillStyle = MiniGames.player.duck ? '#050' : '#0f0'; ctx.fillRect(MiniGames.player.x, MiniGames.player.duck?320:300, 30, MiniGames.player.duck?15:30);
-            MiniGames.enemies.forEach(e => {
-                e.x -= e.spd; ctx.fillStyle = '#f00'; ctx.fillRect(e.x, e.y, e.w, e.h);
-                if(e.x < -50) { e.x = 650; e.spd = 4+Math.random()*3; }
-                if(MiniGames.col(MiniGames.player, e) && !MiniGames.player.duck) MiniGames.lose();
+        if(!MiniGames.active) return; const ctx = MiniGames.ctx; const w=600, h=400; ctx.fillStyle = '#111'; ctx.fillRect(0,0,w,h); MiniGames.frame++; const n = MiniGames.night;
+        
+        if(n===1) { ctx.fillStyle = MiniGames.player.duck ? '#050' : '#0f0'; ctx.fillRect(MiniGames.player.x, MiniGames.player.duck?320:300, 30, MiniGames.player.duck?15:30); MiniGames.enemies.forEach(e => { e.x -= e.spd; ctx.fillStyle = '#f00'; ctx.fillRect(e.x, e.y, e.w, e.h); if(e.x < -50) { e.x = 650; e.spd = 4+Math.random()*3; } if(MiniGames.col(MiniGames.player, e) && !MiniGames.player.duck) MiniGames.lose(); }); if(MiniGames.frame > 900) MiniGames.win(); } 
+        
+        else if(n===2) {
+            ctx.fillStyle = '#0f0'; ctx.fillRect(MiniGames.player.x, MiniGames.player.y, 20, 20);
+            ctx.fillStyle = '#00f'; ctx.fillRect(MiniGames.target.x, MiniGames.target.y, 30, 30);
+            MiniGames.enemies.forEach(e => { 
+                e.y += e.dir * e.spd;
+                if(e.y < 0 || e.y > 100) e.dir *= -1;
+                ctx.fillStyle = '#555'; ctx.fillRect(e.x, e.y, 20, e.h); 
+                if(MiniGames.col(MiniGames.player, {x:e.x, y:e.y, w:20, h:e.h})) MiniGames.lose(); 
             });
-            if(MiniGames.frame > 900) MiniGames.win();
-        } else if(n===2) {
-            ctx.fillStyle = '#0f0'; ctx.fillRect(MiniGames.player.x, MiniGames.player.y, 20, 20); ctx.fillStyle = '#00f'; ctx.fillRect(MiniGames.target.x, MiniGames.target.y, 30, 30);
-            MiniGames.enemies.forEach(e => { ctx.fillStyle = '#555'; ctx.fillRect(e.x, e.y, e.w, e.h); if(MiniGames.col(MiniGames.player, {x:e.x,y:e.y,w:20,h:e.h})) MiniGames.lose(); });
             if(MiniGames.col(MiniGames.player, MiniGames.target)) MiniGames.win();
-        } else if(n===3) {
-            ctx.fillStyle = '#fff'; ctx.fillText("CLICK GREEN ORBS: "+MiniGames.state.score+"/10", 20, 30);
-            MiniGames.enemies.forEach((e,i) => { e.life--; ctx.fillStyle='#0f0'; ctx.beginPath(); ctx.arc(e.x,e.y,e.r,0,6.28); ctx.fill(); if(e.life<=0) { MiniGames.enemies.splice(i,1); MiniGames.spawnClickTarget(); } });
-            if(MiniGames.state.score >= 10) MiniGames.win();
-        } else if(n===4) {
-            ctx.fillStyle = '#0f0'; ctx.beginPath(); ctx.arc(MiniGames.player.x, MiniGames.player.y, 10, 0, 6.28); ctx.fill();
-            if(MiniGames.frame % 10 === 0) { MiniGames.enemies.push({x:Math.random()*w, y:-20, w:20, h:20, vy:3+Math.random()*2}); }
-            MiniGames.enemies.forEach(e => { e.y += e.vy; ctx.fillStyle='red'; ctx.fillRect(e.x, e.y, e.w, e.h); if(Math.abs(e.x - MiniGames.player.x) < 15 && Math.abs(e.y - MiniGames.player.y) < 15) MiniGames.lose(); });
-            if(MiniGames.frame > 1000) MiniGames.win();
-        } else if(n===5) {
-            MiniGames.state.energy -= 0.5; MiniGames.state.timer--;
-            ctx.fillStyle='#fff'; ctx.fillText("KEEP CHARGED! (SPACE)", 200, 50);
-            ctx.fillStyle = '#333'; ctx.fillRect(150, 200, 300, 30);
-            ctx.fillStyle = MiniGames.state.energy > 20 ? '#0f0' : '#f00';
-            ctx.fillRect(150, 200, (MiniGames.state.energy/100)*300, 30);
-            if(MiniGames.state.energy <= 0) MiniGames.lose();
-            if(MiniGames.state.timer <= 0) MiniGames.win();
-        } else if(n===6) {
-            if(MiniGames.state.waiting) { MiniGames.state.timer--; ctx.fillStyle = 'red'; ctx.fillRect(200,100,200,200); if(MiniGames.state.timer <= 0) { MiniGames.state.waiting = false; MiniGames.state.color = 'green'; MiniGames.state.timer = 60; } } 
-            else { ctx.fillStyle = 'green'; ctx.fillRect(200,100,200,200); MiniGames.state.timer--; if(MiniGames.state.timer <= 0) MiniGames.lose(); }
-        } else if(n===7) {
-            ctx.fillStyle = '#0f0'; ctx.fillRect(MiniGames.player.x, MiniGames.player.y, 20, 20); ctx.fillStyle = 'gold'; ctx.fillRect(MiniGames.target.x, MiniGames.target.y, 20, 20);
-            MiniGames.enemies.forEach(e => { ctx.fillStyle = '#555'; ctx.fillRect(e.x, e.y, e.w, e.h); if(MiniGames.col(MiniGames.player, e)) MiniGames.player = {x:20, y:20, w:20, h:20}; });
-            if(MiniGames.col(MiniGames.player, MiniGames.target)) MiniGames.win();
-        } else if(n===8) {
-             ctx.fillStyle = '#0f0'; ctx.fillRect(MiniGames.player.x, MiniGames.player.y, 20, 20);
-             if(MiniGames.frame % 5 === 0) { let side = Math.floor(Math.random()*4); let e = {w:10,h:10}; if(side===0) { e.x=Math.random()*600; e.y=0; e.vx=(Math.random()-0.5)*2; e.vy=3; } if(side===1) { e.x=Math.random()*600; e.y=400; e.vx=(Math.random()-0.5)*2; e.vy=-3; } if(side===2) { e.x=0; e.y=Math.random()*400; e.vx=3; e.vy=(Math.random()-0.5)*2; } if(side===3) { e.x=600; e.y=Math.random()*400; e.vx=-3; e.vy=(Math.random()-0.5)*2; } MiniGames.enemies.push(e); }
-             MiniGames.enemies.forEach(e => { e.x+=e.vx; e.y+=e.vy; ctx.fillStyle='red'; ctx.fillRect(e.x,e.y,e.w,e.h); if(MiniGames.col(MiniGames.player,e)) MiniGames.lose(); });
-             if(MiniGames.frame > 1200) MiniGames.win();
-        }
+        } 
+        else if(n===3) { ctx.fillStyle = '#fff'; ctx.fillText("CLICK GREEN ORBS: "+MiniGames.state.score+"/10", 20, 30); MiniGames.enemies.forEach((e,i) => { e.life--; ctx.fillStyle='#0f0'; ctx.beginPath(); ctx.arc(e.x,e.y,e.r,0,6.28); ctx.fill(); if(e.life<=0) { MiniGames.enemies.splice(i,1); MiniGames.spawnClickTarget(); } }); if(MiniGames.state.score >= 10) MiniGames.win(); } 
+        else if(n===4) { ctx.fillStyle = '#0f0'; ctx.beginPath(); ctx.arc(MiniGames.player.x, MiniGames.player.y, 10, 0, 6.28); ctx.fill(); if(MiniGames.frame % 10 === 0) { MiniGames.enemies.push({x:Math.random()*w, y:-20, w:20, h:20, vy:3+Math.random()*2}); } MiniGames.enemies.forEach(e => { e.y += e.vy; ctx.fillStyle='red'; ctx.fillRect(e.x, e.y, e.w, e.h); if(Math.abs(e.x - MiniGames.player.x) < 15 && Math.abs(e.y - MiniGames.player.y) < 15) MiniGames.lose(); }); if(MiniGames.frame > 1000) MiniGames.win(); } 
+        else if(n===5) { MiniGames.state.energy -= 0.5; MiniGames.state.timer--; ctx.fillStyle='#fff'; ctx.fillText("KEEP CHARGED! (SPACE)", 200, 50); ctx.fillStyle = '#333'; ctx.fillRect(150, 200, 300, 30); ctx.fillStyle = MiniGames.state.energy > 20 ? '#0f0' : '#f00'; ctx.fillRect(150, 200, (MiniGames.state.energy/100)*300, 30); if(MiniGames.state.energy <= 0) MiniGames.lose(); if(MiniGames.state.timer <= 0) MiniGames.win(); } 
+        else if(n===6) { if(MiniGames.state.waiting) { MiniGames.state.timer--; ctx.fillStyle = 'red'; ctx.fillRect(200,100,200,200); if(MiniGames.state.timer <= 0) { MiniGames.state.waiting = false; MiniGames.state.color = 'green'; MiniGames.state.timer = 60; } } else { ctx.fillStyle = 'green'; ctx.fillRect(200,100,200,200); MiniGames.state.timer--; if(MiniGames.state.timer <= 0) MiniGames.lose(); } } 
+        else if(n===7) { ctx.fillStyle = '#0f0'; ctx.fillRect(MiniGames.player.x, MiniGames.player.y, 20, 20); ctx.fillStyle = 'gold'; ctx.fillRect(MiniGames.target.x, MiniGames.target.y, 20, 20); MiniGames.enemies.forEach(e => { ctx.fillStyle = '#555'; ctx.fillRect(e.x, e.y, e.w, e.h); if(MiniGames.col(MiniGames.player, e)) MiniGames.player = {x:20, y:20, w:20, h:20}; }); if(MiniGames.col(MiniGames.player, MiniGames.target)) MiniGames.win(); } 
+        else if(n===8) { ctx.fillStyle = '#0f0'; ctx.fillRect(MiniGames.player.x, MiniGames.player.y, 20, 20); if(MiniGames.frame % 5 === 0) { let side = Math.floor(Math.random()*4); let e = {w:10,h:10}; if(side===0) { e.x=Math.random()*600; e.y=0; e.vx=(Math.random()-0.5)*2; e.vy=3; } if(side===1) { e.x=Math.random()*600; e.y=400; e.vx=(Math.random()-0.5)*2; e.vy=-3; } if(side===2) { e.x=0; e.y=Math.random()*400; e.vx=3; e.vy=(Math.random()-0.5)*2; } if(side===3) { e.x=600; e.y=Math.random()*400; e.vx=-3; e.vy=(Math.random()-0.5)*2; } MiniGames.enemies.push(e); } MiniGames.enemies.forEach(e => { e.x+=e.vx; e.y+=e.vy; ctx.fillStyle='red'; ctx.fillRect(e.x,e.y,e.w,e.h); if(MiniGames.col(MiniGames.player,e)) MiniGames.lose(); }); if(MiniGames.frame > 1200) MiniGames.win(); }
         requestAnimationFrame(MiniGames.loop);
     },
     col: (r1,r2) => (r1.x < r2.x+r2.w && r1.x+r1.w > r2.x && r1.y < r2.y+r2.h && r1.y+r1.h > r2.y),
-    handleInput: (e) => {
-        if(!MiniGames.active) return;
-        const k=e.code, p=MiniGames.player;
-        if([1,2,7,8].includes(MiniGames.night)) { if(k==='ArrowLeft') p.x-=15; if(k==='ArrowRight') p.x+=15; if(MiniGames.night !== 1) { if(k==='ArrowUp') p.y-=15; if(k==='ArrowDown') p.y+=15; } else { if(k==='ArrowDown') p.duck=true; if(k==='ArrowUp') p.duck=false; } }
-        if(MiniGames.night === 5 && k==='Space') { 
-            MiniGames.state.energy = Math.min(100, MiniGames.state.energy + 8); 
-        }
-    },
-    handleMove: (e) => {
-        if(MiniGames.night === 4) { const r = document.getElementById('mg-canvas').getBoundingClientRect(); MiniGames.player.x = e.clientX - r.left; MiniGames.player.y = e.clientY - r.top; }
-    },
-    handleClick: (e) => {
-        if(MiniGames.night===3) { const r = document.getElementById('mg-canvas').getBoundingClientRect(); const mx = e.clientX-r.left, my = e.clientY-r.top; MiniGames.enemies.forEach((t,i) => { if(Math.sqrt((mx-t.x)**2+(my-t.y)**2) < t.r) { MiniGames.state.score++; MiniGames.enemies.splice(i,1); MiniGames.spawnClickTarget(); } }); }
-        if(MiniGames.night===6) { if(!MiniGames.state.waiting) MiniGames.win(); else MiniGames.lose(); }
-    },
-    win: () => { MiniGames.active=false; AudioSys.stop('bgm-minigame'); const n = MiniGames.night; SAVEDATA.night = parseInt(n)+1; SAVEDATA.stars[n]=true; localStorage.setItem('mf_v27', JSON.stringify(SAVEDATA)); location.reload(); },
-    lose: () => { MiniGames.active=false; AudioSys.stop('bgm-minigame'); alert("FAIL."); location.reload(); }
+    handleInput: (e) => { if(!MiniGames.active) return; const k=e.code, p=MiniGames.player; if([1,2,7,8].includes(MiniGames.night)) { if(k==='ArrowLeft') p.x-=15; if(k==='ArrowRight') p.x+=15; if(MiniGames.night !== 1) { if(k==='ArrowUp') p.y-=15; if(k==='ArrowDown') p.y+=15; } else { if(k==='ArrowDown') p.duck=true; if(k==='ArrowUp') p.duck=false; } } if(MiniGames.night === 5 && k==='Space') { MiniGames.state.energy = Math.min(100, MiniGames.state.energy + 8); } },
+    handleMove: (e) => { if(MiniGames.night === 4) { const r = document.getElementById('mg-canvas').getBoundingClientRect(); MiniGames.player.x = e.clientX - r.left; MiniGames.player.y = e.clientY - r.top; } },
+    handleClick: (e) => { if(MiniGames.night===3) { const r = document.getElementById('mg-canvas').getBoundingClientRect(); const mx = e.clientX-r.left, my = e.clientY-r.top; MiniGames.enemies.forEach((t,i) => { if(Math.sqrt((mx-t.x)**2+(my-t.y)**2) < t.r) { MiniGames.state.score++; MiniGames.enemies.splice(i,1); MiniGames.spawnClickTarget(); } }); } if(MiniGames.night===6) { if(!MiniGames.state.waiting) MiniGames.win(); else MiniGames.lose(); } },
+    win: () => { MiniGames.active=false; AudioSys.stop('bgm-minigame'); const n = MiniGames.night; SAVEDATA.night = parseInt(n)+1; SAVEDATA.stars[n]=true; localStorage.setItem('mf_v37', JSON.stringify(SAVEDATA)); location.reload(); },
+    lose: () => { MiniGames.active=false; AudioSys.stop('bgm-minigame'); alert("FAIL. TRY AGAIN."); location.reload(); }
 };
 
 if(isMobile) document.getElementById('mobile-controls').style.display='flex';
-// El juego ahora espera a que el usuario seleccione dispositivo
+if(SAVEDATA.deviceMode) App.selectMode(SAVEDATA.deviceMode); 
 </script>
 </body>
 </html>
