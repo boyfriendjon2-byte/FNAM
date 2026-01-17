@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Maifer's Factory: Ultimate v46.0 (School Account Fix)</title>
+    <title>Maifer's Factory: Ultimate v47.0 (Creator Mode & DB Fix)</title>
     
-    <!-- LIBRERÍAS DE FIREBASE (Esenciales para el guardado en la nube) -->
+    <!-- LIBRERÍAS DE FIREBASE -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 
     <style>
         /* ==========================================================================
-           1. ESTILOS VISUALES (NO TOCAR - ROBUSTOS)
+           1. ESTILOS VISUALES (ROBUSTOS)
            ========================================================================== */
         @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Nosifer&display=swap');
@@ -238,7 +238,7 @@
 </head>
 <body>
 
-<!-- AUDIO: ARCHIVOS DEFINIDOS PARA EL SISTEMA DE LLAMADAS -->
+<!-- AUDIO -->
 <div id="audio-container">
     <!-- ESPAÑOL -->
     <audio id="voice-es-1" src="noche_1.mp3"></audio>
@@ -330,7 +330,7 @@
         <button id="btn-settings" class="menu-btn" onclick="UI.openSettings()">AJUSTES</button>
     </div>
     
-    <p style="position: absolute; bottom: 10px; font-size: 0.8rem; color: #444;">v46.0 - Robust Sync & Moderation</p>
+    <p style="position: absolute; bottom: 10px; font-size: 0.8rem; color: #444;">v47.0 - Creator Code & DB Fix</p>
     <p id="credits-text">Creado por Jonlet Santos</p>
 </div>
 
@@ -524,32 +524,29 @@
 
 <script>
 // ============================================================================
-// VARIABLES & FIREBASE (VERSION v46 PARA ASEGURAR CUENTAS)
+// VARIABLES & FIREBASE (VERSION v47)
 // ============================================================================
 const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 const firebaseConfig = { apiKey: "AIzaSyC6whCq_9B-yeqzHvLWbswadJwCXRnqmt0", authDomain: "maifer-factory.firebaseapp.com", databaseURL: "https://maifer-factory-default-rtdb.firebaseio.com", projectId: "maifer-factory", storageBucket: "maifer-factory.firebasestorage.app", messagingSenderId: "700963667348", appId: "1:700963667348:web:6fd8dba0bcb3ada7a2e381" };
 if(typeof firebase !== 'undefined') firebase.initializeApp(firebaseConfig);
 
-// USAMOS "v46" PARA EMPEZAR DESDE CERO Y EVITAR CONFLICTOS
-const DB_PATH = { users: 'users_v46', rank: 'leaderboard_v46', comm: 'comments_v46' };
+const DB_PATH = { users: 'users_v47', rank: 'leaderboard_v47', comm: 'comments_v47' };
 
 let SAVEDATA = { night: 1, stars: {}, binds: null, leaderboard: [], comments: [], user: null, lang: 'ES', audioWarn: false };
 
 try {
-    let l = localStorage.getItem('mf_v46');
+    let l = localStorage.getItem('mf_v47');
     if(l) SAVEDATA = JSON.parse(l);
 } catch(e) {}
 
 const SaveManager = {
     save: () => {
-        // Guardar Localmente
         try {
-            localStorage.setItem('mf_v46', JSON.stringify(SAVEDATA));
+            localStorage.setItem('mf_v47', JSON.stringify(SAVEDATA));
         } catch(e) { console.error("Local Save Error:", e); }
 
-        // Guardar en la Nube (Si hay usuario)
         if(SAVEDATA.user && typeof firebase !== 'undefined') {
-            const cleanUser = SAVEDATA.user.toLowerCase().replace('.', '_'); // Evitar caracteres ilegales
+            const cleanUser = SAVEDATA.user.toLowerCase().replace('.', '_');
             firebase.database().ref(DB_PATH.users + '/' + cleanUser + '/data').set(SAVEDATA)
                 .then(() => console.log("Cloud Save Success"))
                 .catch(err => console.error("Cloud Save Error:", err));
@@ -557,9 +554,6 @@ const SaveManager = {
     }
 };
 
-// ============================================================================
-// DICCIONARIO COMPLETO (STRICT TRANSLATION)
-// ============================================================================
 const TEXTS = {
     ES: {
         play: "JUGAR (NOCHE", new: "NUEVA PARTIDA", lore: "DATOS / LORE", st: "AJUSTES", custom: "NOCHE PERSONALIZADA",
@@ -590,7 +584,7 @@ const TEXTS = {
         warn_t: "⚠ ADVERTENCIA DE AUDIO ⚠", warn_d: "Juego con audio 3D y ruidos fuertes. Usa audífonos.", warn_ok: "ACEPTAR", warn_no: "NO MOSTRAR MAS",
         
         upd_title: "REGISTRO DE CAMBIOS",
-        updates_log: ["✅ FIX: Cuentas 100% Funcionales", "✅ NUEVO: Audio Noches 1-8 (Español/Inglés)", "✅ MECANICA: Juego pausado durante llamada", "✅ Traducción Custom Night", "✅ Moderación IA Mejorada"],
+        updates_log: ["✅ FIX: Error 'DB undefined' reparado", "✅ NEW: Modo Creador (Secreto)", "✅ FIX: Cuentas 100% Funcionales", "✅ NUEVO: Audio Noches 1-8", "✅ MECANICA: Pausa en llamada"],
         
         mg_inst: "FLECHAS / MOUSE / ESPACIO",
         mg1: "ESQUIVA LOS OBSTACULOS", mg2: "ENCUENTRA LA CAJA AZUL", mg3: "CLICK EN ORBES VERDES",
@@ -632,7 +626,7 @@ const TEXTS = {
         warn_t: "⚠ AUDIO WARNING ⚠", warn_d: "3D Audio & Loud Noises. Headphones recommended.", warn_ok: "ACCEPT", warn_no: "DON'T SHOW AGAIN",
         
         upd_title: "CHANGE LOG",
-        updates_log: ["✅ FIX: Accounts 100% Working (v46)", "✅ NEW: Audio Nights 1-8 (Spanish/English)", "✅ MECH: Game Paused during call", "✅ Custom Night Translation", "✅ AI Moderation Improved"],
+        updates_log: ["✅ FIX: 'DB undefined' error fixed", "✅ NEW: Creator Mode (Secret)", "✅ FIX: Accounts 100% Working", "✅ NEW: Audio Nights 1-8", "✅ MECH: Game Paused during call"],
         
         mg_inst: "ARROWS / MOUSE / SPACE",
         mg1: "DODGE OBSTACLES", mg2: "FIND BLUE BOX", mg3: "CLICK GREEN ORBS",
@@ -674,7 +668,7 @@ const TEXTS = {
         warn_t: "⚠ 音频警告 ⚠", warn_d: "3D 音频和巨响。推荐耳机。", warn_ok: "接受", warn_no: "不再显示",
         
         upd_title: "更新日志",
-        updates_log: ["✅ 修复：登录/注册 (v46)", "✅ 新增：音频 1-8 夜 (西班牙语/英语)", "✅ 机制：通话期间游戏暂停", "✅ 自定义夜翻译", "✅ AI 审核改进"],
+        updates_log: ["✅ 修复：'DB undefined' 错误", "✅ 新增：创作者模式（秘密）", "✅ 修复：登录/注册", "✅ 新增：音频 1-8 夜", "✅ 机制：通话期间游戏暂停"],
         
         mg_inst: "箭头 / 鼠标 / 空格",
         mg1: "躲避障碍", mg2: "找到蓝盒子", mg3: "点击绿色球",
@@ -704,8 +698,6 @@ const Lang = {
     },
     apply: () => {
         const t = TEXTS[Lang.current];
-        
-        // MAIN MENU
         document.getElementById('lang-btn').innerText = Lang.current === 'CN' ? '中文' : (Lang.current === 'ES' ? 'ESPAÑOL' : 'ENGLISH');
         let nDisplay = SAVEDATA.night > 8 ? 8 : SAVEDATA.night;
         let nightStr = Lang.current === 'CN' ? (" " + nDisplay + " 夜") : (" " + nDisplay);
@@ -715,18 +707,15 @@ const Lang = {
         Lang.setText('btn-comm', t.comm); Lang.setText('btn-settings', t.st); Lang.setText('credits-text', t.created);
         Lang.setText('btn-leaderboard', "🏆 " + t.rank); Lang.setText('btn-login', t.login); Lang.setText('btn-reg', t.reg);
         
-        // AUTH MODAL
         const authMode = document.getElementById('auth-title').getAttribute('data-mode');
         Lang.setText('auth-title', authMode === 'login' ? t.auth_login_t : t.auth_reg_t);
         document.getElementById('auth-user').placeholder = t.auth_user_ph; document.getElementById('auth-pass').placeholder = t.auth_pass_ph;
         Lang.setText('auth-submit-btn', t.auth_submit); Lang.setText('auth-cancel-btn', t.auth_cancel);
         
-        // CUSTOM NIGHT
         Lang.setText('cn-title', t.cn_title); Lang.setText('lbl-cn-maifer', t.char_maifer); Lang.setText('lbl-cn-isaac', t.char_isaac);
         Lang.setText('lbl-cn-jomar', t.char_jomar); Lang.setText('lbl-cn-richard', t.char_richard); Lang.setText('lbl-cn-golden', t.char_golden);
         Lang.setText('btn-cn-start', t.cn_start); Lang.setText('btn-cn-back', t.cn_back);
         
-        // SETTINGS
         Lang.setText('st-title', t.st_title); Lang.setText('st-h-aud', t.audio); Lang.setText('st-vol', t.vol);
         Lang.setText('st-h-ctrl', t.st_h_ctrl); Lang.setText('st-h-gfx', t.gfx); Lang.setText('st-full', t.full);
         Lang.setText('st-gli', t.glitch); Lang.setText('st-del', t.del_data); Lang.setText('btn-fs-toggle', t.toggle);
@@ -736,26 +725,21 @@ const Lang = {
         Lang.setText('lbl-st-sens', t.st_sens); Lang.setText('lbl-st-shake', t.st_shake); Lang.setText('lbl-st-qual', t.st_qual);
         Lang.setText('btn-quality', Config.particlesHigh ? t.st_qual_high : t.st_qual_low);
         
-        // UPDATES
         Lang.setText('upd-title', t.upd_title); Lang.setText('btn-close-upd', t.close);
         const ul = document.getElementById('update-list'); if(ul) ul.innerHTML = t.updates_log.map(u => `<li>${u}</li>`).join('');
         
-        // MODALS
         Lang.setText('btn-close-lore', t.close); Lang.setText('lore-content', t.lore_txt);
         Lang.setText('comm-title', t.comm_title); Lang.setText('comm-warning', t.comm_warn); document.getElementById('comm-input').placeholder = t.comm_ph;
         Lang.setText('btn-send-comm', t.send); Lang.setText('btn-close-comm', t.close); Lang.setText('lb-title', t.lb_title); Lang.setText('btn-close-lb', t.close);
         
-        // WARNING
         Lang.setText('warn-title', t.warn_t); Lang.setText('warn-txt', t.warn_d); Lang.setText('btn-warn-ok', t.warn_ok); Lang.setText('btn-warn-stop', t.warn_no);
         
-        // IN GAME
         Lang.setText('lbl-night', t.night_p); Lang.setText('lbl-pwr', t.pwr); Lang.setText('lbl-usage', t.use);
         Lang.setText('lbl-sys', t.sys); Lang.setText('lbl-under', t.under); Lang.setText('lbl-win', t.win_turn);
         Lang.setText('go-title', t.g_over); Lang.setText('btn-retry', t.retry); Lang.setText('btn-go-menu', t.close); 
         Lang.setText('room-you', t.you); Lang.setText('rec-dot', "● " + t.rec); Lang.setText('btn-close-mon', t.close_x);
         Lang.setText('btn-mute', t.mute + " 📞");
         
-        // MINIGAME
         Lang.setText('mg-info', t['mg'+MiniGames.night] || "MINIGAME"); Lang.setText('mg-controls-hint', t.mg_inst);
         if(SAVEDATA.user) Lang.setText('user-display', t.agent + ": " + SAVEDATA.user);
     }
@@ -768,10 +752,16 @@ const Game = {
         UserSys.updateUI();
         const row = document.getElementById('star-row');
         row.innerHTML = '';
+        
+        // CORRECCIÓN DEFENSIVA: Verifica que SAVEDATA.stars exista antes de leer
+        if(!SAVEDATA.stars) SAVEDATA.stars = {};
+
         if(SAVEDATA.night > 6) row.innerHTML += '<span class="star earned">★</span>';
         if(SAVEDATA.night > 7) row.innerHTML += '<span class="star earned">★</span>';
         if(SAVEDATA.night > 8) row.innerHTML += '<span class="star earned">★</span>';
         if(SAVEDATA.night > 9) row.innerHTML += '<span class="star earned">★</span>';
+        
+        // Uso seguro de la propiedad 'custom'
         if(SAVEDATA.stars['custom']) row.innerHTML = '<span class="star earned blue">★</span><span class="star earned blue">★</span><span class="star earned blue">★</span><span class="star earned blue">★</span>';
         
         if(SAVEDATA.night > 8) document.getElementById('btn-custom').classList.remove('locked');
@@ -815,7 +805,6 @@ const Game = {
         
         Mechanics.resetVisuals();
         
-        // --- LOGICA DE AUDIO DIFERIDO (PAUSA EL JUEGO HASTA QUE TERMINE) ---
         let voiceID = null;
         if(typeof n === 'number' && n >= 1 && n <= 8) {
             if(Lang.current === 'ES') voiceID = 'voice-es-' + n;
@@ -823,18 +812,16 @@ const Game = {
         }
 
         if(voiceID) {
-            Game.state.frozen = true; // CONGELAR JUEGO
+            Game.state.frozen = true; 
             document.getElementById('btn-mute').style.display = 'block';
             AudioSys.play(voiceID);
             
-            // Cuando termina el audio
             document.getElementById(voiceID).onended = () => { 
                 Game.state.frozen = false; 
                 document.getElementById('btn-mute').style.display = 'none';
                 if(n!==9) AudioSys.play('bgm-game', true, 0.6); 
             };
 
-            // Botón Mute
             document.getElementById('btn-mute').onclick = () => {
                 AudioSys.stop(voiceID);
                 Game.state.frozen = false;
@@ -842,7 +829,6 @@ const Game = {
                 if(n!==9) AudioSys.play('bgm-game', true, 0.6);
             };
         } else {
-            // Sin audio (Chino o Custom) -> Iniciar ya
             Game.state.frozen = false;
             document.getElementById('btn-mute').style.display = 'none';
             if(n!==9) AudioSys.play('bgm-game', true, 0.6); 
@@ -962,7 +948,6 @@ const Game = {
         Game.state.over = true; AudioSys.stopAll(); clearInterval(Game.timers.main); clearInterval(Game.timers.ai); if(Game.timers.golden) clearInterval(Game.timers.golden);
         UI.showScreen('screen-8am'); AudioSys.play('sfx-win');
         
-        // Guardado de emergencia al ganar
         setTimeout(() => {
             if(typeof Game.state.night==='number' && Game.state.night<9) MiniGames.start(Game.state.night);
             else if(Game.state.night===9) { SAVEDATA.night=10; SAVEDATA.stars[9]=true; SaveManager.save(); UI.showScreen('screen-win'); }
@@ -1021,7 +1006,7 @@ const Mechanics = {
         document.getElementById('curtain-fabric').classList.toggle('closed', Game.state.curtain);
         AudioSys.play('sfx-curtain');
     },
-    muteCall: () => { /* Manejado en startLevel dinámicamente */ },
+    muteCall: () => { },
     chargeGen: () => { Game.state.power=Math.min(100, Game.state.power+2); AudioSys.play('sfx-gen'); document.getElementById('gen-btn').style.display='none'; setTimeout(Mechanics.moveGenButton, 3000+Math.random()*5000); },
     moveGenButton: () => { const b=document.getElementById('gen-btn'); b.style.left=Math.random()*90+'px'; b.style.top=Math.random()*140+'px'; b.style.display='block'; }
 };
@@ -1085,7 +1070,7 @@ const UI = {
 };
 
 // ============================================================================
-// SISTEMA DE CUENTAS (REPARADO Y NORMALIZADO)
+// SISTEMA DE CUENTAS (REPARADO - CORRECCIÓN DE ERROR DB)
 // ============================================================================
 const UserSys = {
     openAuth: (type) => {
@@ -1094,20 +1079,20 @@ const UserSys = {
         Lang.apply();
     },
     submit: () => {
-        const u = document.getElementById('auth-user').value.trim().toLowerCase(); // NORMALIZAR PARA EVITAR DUPLICADOS "Admin" vs "admin"
+        const u = document.getElementById('auth-user').value.trim().toLowerCase();
         const p = document.getElementById('auth-pass').value.trim();
         const mode = document.getElementById('auth-title').getAttribute('data-mode');
         
         if(u.length < 3) return alert("User too short / Usuario muy corto (Min 3)");
         
-        const ref = firebase.database().ref(DB_PATH.users + '/' + u.replace('.', '_')); // SANITIZAR KEY
+        const ref = firebase.database().ref(DB_PATH.users + '/' + u.replace('.', '_'));
         
         ref.once('value').then(s => {
             if(mode === 'reg') {
                 if(s.exists()) {
                     alert("USER ALREADY EXISTS / USUARIO YA EXISTE");
                 } else {
-                    ref.set({pass:p, data: SAVEDATA}) // Guardar datos actuales al registrar
+                    ref.set({pass:p, data: SAVEDATA})
                     .then(() => {
                         alert("REGISTERED. PLEASE LOGIN."); 
                         UserSys.openAuth('login');
@@ -1118,8 +1103,12 @@ const UserSys = {
                     if(s.val().pass === p) {
                         // EXITO LOGIN
                         if(s.val().data) SAVEDATA = s.val().data;
+                        
+                        // CORRECCION CRITICA: Asegurar que SAVEDATA.stars existe
+                        if(!SAVEDATA.stars) SAVEDATA.stars = {};
+                        
                         SAVEDATA.user = u;
-                        SaveManager.save(); // Sincronizar Inmediatamente
+                        SaveManager.save();
                         UserSys.updateUI();
                         UI.closeModals();
                         Game.initMenu();
@@ -1209,22 +1198,14 @@ const FB = {
     }
 };
 
-// ============================================================================
-// IA DE MODERACIÓN MEJORADA (FILTRO POSITIVO)
-// ============================================================================
 const ModSystem = {
-    // Palabras prohibidas
     badWords: ['idiot','stupid','tonto','mierda','puto','fck','shit','ass','bitch','crap','noob','manco','basura','fuck','pene','sex','tonta'],
-    // Palabras REQUERIDAS (El mensaje DEBE tener al menos una para ser considerado relevante al juego)
     requiredContext: ['bug','error','glitch','idea','add','game','juego','noche','night','maifer','isaac','jomar','richard','buen','good','cool','ayuda','help','fix','pantalla','screen','audio','sound'],
     
     check: (txt) => {
         const lower = txt.toLowerCase();
-        // 1. Check Bad Words
         if(ModSystem.badWords.some(w => lower.includes(w))) return false;
-        // 2. Check Context (Must contain game terms)
         if(!ModSystem.requiredContext.some(w => lower.includes(w))) return false;
-        
         return true;
     }
 };
@@ -1300,7 +1281,26 @@ document.addEventListener('keydown', (e) => {
     if(k===b.monitor) Mechanics.toggleMonitor(); if(k===b.vent) Mechanics.toggleVent();
 });
 
-let c=[]; document.addEventListener('keydown', e=>{c.push(e.key);if(c.length>20)c.shift();if(c.join('').includes("BOYFRIEND"))alert("CHEAT ACTIVATED");});
+let cheatCode = [];
+document.addEventListener('keydown', (e) => {
+    if(e.target.tagName === 'INPUT') return;
+    cheatCode.push(e.key.toLowerCase());
+    if(cheatCode.length > 20) cheatCode.shift();
+    const str = cheatCode.join('');
+    
+    // CREATOR CHEAT CODE: boyfriendisthebest
+    if(str.includes("boyfriendisthebest")) {
+        cheatCode = [];
+        AudioSys.play('sfx-win');
+        alert("CREATOR MODE ACTIVATED: UNLOCKING EVERYTHING (TEMPORARY)");
+        
+        // Modificar solo RAM (No guarda en DB para no arruinar la cuenta real)
+        SAVEDATA.night = 9;
+        SAVEDATA.stars = {1:true, 2:true, 3:true, 4:true, 5:true, 6:true, 7:true, 8:true, 9:true, 'custom':true};
+        
+        Game.initMenu(); // Refrescar UI
+    }
+});
 
 </script>
 </body>
