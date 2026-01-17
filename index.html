@@ -3,23 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Maifer's Factory: Ultimate v41.0 (Strict AI Logic Fix)</title>
+    <title>Maifer's Factory: Ultimate v46.0 (School Account Fix)</title>
     
-    <!-- LIBRERÍAS DE FIREBASE -->
+    <!-- LIBRERÍAS DE FIREBASE (Esenciales para el guardado en la nube) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 
     <style>
         /* ==========================================================================
-           1. FUENTES TIPOGRÁFICAS
+           1. ESTILOS VISUALES (NO TOCAR - ROBUSTOS)
            ========================================================================== */
         @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Nosifer&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 
-        /* ==========================================================================
-           2. VARIABLES Y RESET GENERAL
-           ========================================================================== */
         :root { 
             --primary-color: #ff0000; 
             --secondary-color: #00ff00;
@@ -29,907 +27,159 @@
             --text-color: #cccccc;
         }
 
-        * { 
-            box-sizing: border-box; 
-            user-select: none; 
-            touch-action: none; 
-            cursor: crosshair; 
-            -webkit-tap-highlight-color: transparent; 
-        }
+        * { box-sizing: border-box; user-select: none; touch-action: none; cursor: crosshair; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; background-color: var(--background-dark); color: var(--text-color); font-family: 'Share Tech Mono', monospace; overflow: hidden; }
 
-        html, body { 
-            margin: 0; 
-            padding: 0; 
-            width: 100%; 
-            height: 100%; 
-            background-color: var(--background-dark); 
-            color: var(--text-color); 
-            font-family: 'Share Tech Mono', monospace; 
-            overflow: hidden; 
-        }
+        /* MODO MÓVIL */
+        body.mode-mobile .hud-container { transform: scale(0.7); transform-origin: top left; }
+        body.mode-mobile .menu-container { display: flex; flex-direction: column; align-items: center; overflow-y: auto; max-height: 60vh; width: 100%; padding-bottom: 50px; }
+        body.mode-mobile .menu-btn { padding: 15px; font-size: 1.5rem; width: 80%; margin: 10px 0; flex-shrink: 0; }
+        body.mode-mobile .title-text { font-size: 3rem; }
+        body.mode-mobile #mobile-controls { height: 15vh; display: flex; }
+        body.mode-mobile .mob-btn { font-size: 1rem; }
+        body.mode-mobile #star-row { transform: scale(0.8); }
+        body.mode-mobile .cam-btn { width: 15%; height: 12%; font-size: 1rem; pointer-events: auto; }
 
-        /* ==========================================================================
-           3. ADAPTACIÓN DE DISPOSITIVOS (PC VS MÓVIL)
-           ========================================================================== */
+        /* MODO PC */
+        body:not(.mode-mobile) .menu-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; justify-items: center; align-content: center; width: 80%; max-width: 900px; height: auto; max-height: 60vh; overflow: hidden; margin: 0 auto; padding-bottom: 0; }
+        body:not(.mode-mobile) .menu-btn { width: 100%; font-size: 1.8rem; padding: 10px; margin: 0; }
+        body:not(.mode-mobile) #mobile-controls { display: none !important; }
+
+        /* PANTALLAS */
+        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; align-items: center; justify-content: center; background-color: #000; z-index: 10; }
+        .screen.active { display: flex; }
+
+        /* DEVICE SELECTION */
+        #screen-device { z-index: 9999; background: #050505; }
+        #loading-bar-container { width: 80%; height: 20px; border: 2px solid #333; margin-top: 20px; display: none; }
+        #loading-bar { width: 0%; height: 100%; background: #0f0; transition: width 0.2s; }
+
+        /* INTRO */
+        #screen-intro { z-index: 5000; background: #000; color: #fff; font-family: 'VT323'; text-align: center; }
+        .intro-text { font-size: 4rem; opacity: 0; animation: fadeInOut 4s forwards; }
+        @keyframes fadeInOut { 0% { opacity: 0; } 20% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; } }
+
+        /* MENU */
+        #screen-menu { background: url('start_screen.png') no-repeat center center fixed; background-size: cover; position: relative; overflow: hidden; }
+        #screen-menu::before { content: " "; display: block; position: absolute; inset: 0; pointer-events: none; z-index: 2; background: radial-gradient(circle, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.8) 80%, rgba(0,0,0,1) 100%); background-size: 100% 100%; }
+        #screen-menu::after { content: " "; display: block; position: absolute; inset: 0; pointer-events: none; z-index: 3; background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.1) 50%); background-size: 100% 4px; }
+
+        .title-text { font-family: 'Nosifer'; font-size: clamp(3.5rem, 12vw, 7rem); color: var(--primary-color); text-shadow: 0 0 10px #500, 0 0 20px #f00; text-align: center; animation: glitch 4s infinite, pulseTitle 3s infinite alternate; margin-bottom: 30px; z-index: 5; width: 90%; }
+        @keyframes pulseTitle { from { text-shadow: 0 0 10px #500, 0 0 20px #f00; transform: scale(1); } to { text-shadow: 0 0 20px #800, 0 0 40px #f00; transform: scale(1.02); } }
+
+        .menu-btn { background-color: rgba(0, 0, 0, 0.7); border: 2px solid #440000; color: #cccccc; margin: 8px; cursor: pointer; text-transform: uppercase; transition: all 0.2s ease; position: relative; z-index: 10; box-shadow: 0 0 5px rgba(0,0,0,0.8); backdrop-filter: blur(2px); font-family: 'Share Tech Mono'; }
+        .menu-btn:hover:not(.locked) { border-color: #ff0000; color: #ffffff; background-color: rgba(50, 0, 0, 0.9); transform: scale(1.05); box-shadow: 0 0 15px rgba(255, 0, 0, 0.4); text-shadow: 0 0 5px #fff; }
+        .menu-btn.locked { opacity: 0.5; cursor: not-allowed; border-color: #333333; filter: grayscale(100%); }
+        .icon-lock { position: absolute; right: 15px; }
+
+        /* USER UI */
+        #user-panel { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 25; display: flex; gap: 10px; }
+        .user-btn { background: #001100; border: 1px solid #00ff00; color: #00ff00; font-family: 'Share Tech Mono'; cursor: pointer; padding: 5px 10px; }
+        #lang-btn { position: absolute; top: 20px; left: 20px; width: auto; font-family: 'VT323'; font-size: 1.5rem; z-index: 20; border: 1px solid #444; background: rgba(0,0,0,0.8); color: #fff; padding: 5px 10px; cursor: pointer; }
+        #btn-leaderboard { position: absolute; top: 20px; right: 20px; width: auto; font-family: 'VT323'; font-size: 1.5rem; z-index: 20; background-color: rgba(0, 34, 68, 0.8); border: 1px solid #0088ff; color: #0088ff; padding: 5px 10px; cursor: pointer; }
+        #credits-text { position: absolute; bottom: 5px; right: 10px; z-index: 20; font-family: 'Share Tech Mono'; font-size: 0.9rem; color: #00aaff; text-shadow: 0 0 5px #00aaff; }
+
+        /* STARS */
+        #star-row { display: flex; gap: 15px; margin-bottom: 30px; height: 50px; z-index: 5; }
+        .star { font-size: 3rem; color: #222222; transition: transform 0.3s; }
+        .star.earned { color: gold; text-shadow: 0 0 15px gold; }
+        .star.blue { color: #0088ff; text-shadow: 0 0 20px #0088ff; }
+
+        /* MODALS */
+        .modal-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,0.98); z-index: 6000; display: none; align-items: center; justify-content: center; }
+        .modal-box { background-color: #0b0b0b; border: 2px solid var(--primary-color); width: 90%; max-width: 800px; max-height: 90%; overflow-y: auto; padding: 30px; color: #ffffff; box-shadow: 0 0 50px rgba(255,0,0,0.2); border-radius: 8px; }
+        .lore-text { font-family: 'Share Tech Mono'; white-space: pre-wrap; text-align: left; line-height: 1.6; color: #00ff00; font-size: 1rem; }
+        .lore-header { color: var(--primary-color); font-family: 'Nosifer'; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 25px; text-align: center; font-size: 1.8rem; }
+        .update-list { text-align: left; font-family: 'VT323'; color: #cccccc; padding-left: 20px; }
+        .update-list li { margin-bottom: 8px; font-size: 1.2rem; list-style-type: square; }
+        .teaser-text { color: red; font-family: 'Nosifer'; text-align: center; margin-top: 30px; animation: glitch 2s infinite; font-size: 1.2rem; }
+
+        /* SETTINGS UI */
+        .setting-section { border: 1px solid #333; background-color: rgba(255,255,255,0.02); padding: 15px; margin-bottom: 15px; }
+        .setting-header { color: #aaaaaa; font-family: 'Nosifer'; font-size: 1.2rem; margin-bottom: 10px; border-bottom: 1px solid #333; }
+        .setting-row { margin: 15px 0; display: flex; align-items: center; justify-content: space-between; width: 100%; font-family: 'VT323'; font-size: 1.4rem; }
+        input[type=range] { width: 50%; cursor: pointer; accent-color: var(--primary-color); }
+        input[type=checkbox] { transform: scale(1.5); cursor: pointer; accent-color: var(--primary-color); }
+
+        /* COMMUNITY */
+        .comment-box { border-bottom: 1px solid #333; padding: 10px; font-family: 'Share Tech Mono'; background-color: #080808; margin-bottom: 5px; font-size: 1rem; }
+        .comment-user { color: #0088ff; font-weight: bold; }
+        .comment-msg { display: block; margin-top: 5px; color: #cccccc; }
+
+        /* CUSTOM NIGHT UI */
+        #screen-custom { background-color: #111; overflow-y: auto; padding: 20px; padding-top: 50px; }
+        .cn-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; width: 100%; max-width: 900px; justify-items: center; }
+        .cn-char { background-color: #000; border: 2px solid #444; padding: 10px; display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 250px; }
+        .cn-img { width: 70px; height: 70px; object-fit: contain; margin-bottom: 10px; border: 1px solid #333; }
+        .cn-controls { display: flex; align-items: center; gap: 10px; }
+        .cn-btn { width: 35px; height: 35px; background-color: #333; color: #fff; border: 1px solid #666; cursor: pointer; font-size: 1.2rem; }
+        .cn-val { font-family: 'VT323'; font-size: 2rem; color: #fff; width: 40px; text-align: center; }
+
+        /* GAME ENVIRONMENT */
+        #view-office { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: #111; background-image: radial-gradient(circle at center, transparent 30%, #000 130%), url('https://www.transparenttextures.com/patterns/dark-concrete.png'); background-size: cover; background-position: center; overflow: hidden; }
+        #layer-flicker { position: fixed; inset: 0; background-color: #000; opacity: 0; pointer-events: none; z-index: 80; }
         
-        /* MODO MÓVIL: Scroll vertical, botones grandes, HUD escalado */
-        body.mode-mobile .hud-container { 
-            transform: scale(0.7); 
-            transform-origin: top left; 
-        }
-        
-        body.mode-mobile .menu-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            overflow-y: auto; 
-            max-height: 60vh;
-            width: 100%;
-            padding-bottom: 50px;
-        }
-        
-        body.mode-mobile .menu-btn { 
-            padding: 15px; 
-            font-size: 1.5rem; 
-            width: 80%; 
-            margin: 10px 0;
-            flex-shrink: 0;
-        }
-        
-        body.mode-mobile .title-text { 
-            font-size: 3rem; 
-        }
-        
-        body.mode-mobile #mobile-controls { 
-            height: 15vh; 
-            display: flex; 
-        }
-        
-        body.mode-mobile .mob-btn { 
-            font-size: 1rem; 
-        }
-        
-        body.mode-mobile #star-row { 
-            transform: scale(0.8); 
-        }
-        
-        body.mode-mobile .cam-btn {
-            width: 15%;
-            height: 12%;
-            font-size: 1rem;
-            pointer-events: auto;
-        }
+        #hallway { position: absolute; top: 15%; left: 50%; transform: translateX(-50%); width: 45vw; max-width: 400px; height: 70vh; background-color: #000; border: 20px solid #1a1a1a; border-image: linear-gradient(to right, #111, #333, #555, #222) 1; box-shadow: inset 0 0 50px #000; overflow: hidden; }
 
-        /* MODO PC: Grid, sin scroll, botones compactos */
-        body:not(.mode-mobile) .menu-container {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr); 
-            gap: 15px;
-            justify-items: center;
-            align-content: center;
-            width: 80%;
-            max-width: 900px;
-            height: auto;
-            max-height: 60vh;
-            overflow: hidden; 
-            margin: 0 auto;
-            padding-bottom: 0;
-        }
+        /* CURTAIN */
+        #curtain-window { position: absolute; top: 15%; right: 5%; width: 18vw; max-width: 150px; height: 30vh; background-color: #050505; border: 5px solid #222; box-shadow: inset 0 0 20px #000; z-index: 25; overflow: hidden; }
+        #curtain-fabric { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: repeating-linear-gradient(90deg, #500, #400 10px, #300 10px, #300 20px); transform: translateY(-100%); transition: transform 0.3s ease-out; z-index: 5; }
+        #curtain-fabric.closed { transform: translateY(0); }
+        #vis-richard-win { position: absolute; top: 10%; left: 10%; width: 80%; height: 80%; object-fit: contain; display: none; z-index: 2; filter: brightness(0.7); }
+        #curtain-btn { position: absolute; bottom: 0; width: 100%; height: 20%; background: #800; color: #fff; border: none; border-top: 3px solid #a00; cursor: pointer; font-family: 'VT323'; z-index: 6; }
 
-        body:not(.mode-mobile) .menu-btn {
-            width: 100%;
-            font-size: 1.8rem;
-            padding: 10px;
-            margin: 0;
-        }
-
-        body:not(.mode-mobile) #mobile-controls {
-            display: none !important;
-        }
-
-        /* ==========================================================================
-           4. SISTEMA DE PANTALLAS (FULL SCREEN FLUIDO)
-           ========================================================================== */
-        .screen { 
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            display: none; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            background-color: #000; 
-            z-index: 10; 
-        }
-
-        .screen.active { 
-            display: flex; 
-        }
-
-        /* PANTALLA DE SELECCION DE DISPOSITIVO */
-        #screen-device { 
-            z-index: 9999; 
-            background: #050505; 
-        }
-        
-        #loading-bar-container { 
-            width: 80%; 
-            height: 20px; 
-            border: 2px solid #333; 
-            margin-top: 20px; 
-            display: none; 
-        }
-        
-        #loading-bar { 
-            width: 0%; 
-            height: 100%; 
-            background: #0f0; 
-            transition: width 0.2s; 
-        }
-
-        /* PANTALLA DE INTRO (NOCHE X - 12 AM) */
-        #screen-intro { 
-            z-index: 5000; 
-            background: #000; 
-            color: #fff; 
-            font-family: 'VT323'; 
-            text-align: center; 
-        }
-        
-        .intro-text { 
-            font-size: 4rem; 
-            opacity: 0; 
-            animation: fadeInOut 4s forwards; 
-        }
-
-        @keyframes fadeInOut { 
-            0% { opacity: 0; } 
-            20% { opacity: 1; } 
-            80% { opacity: 1; } 
-            100% { opacity: 0; } 
-        }
-
-        /* ==========================================================================
-           5. MENÚ PRINCIPAL
-           ========================================================================== */
-        #screen-menu { 
-            background: url('start_screen.png') no-repeat center center fixed; 
-            background-size: cover;
-            position: relative; 
-            overflow: hidden;
-        }
-
-        #screen-menu::before {
-            content: " "; 
-            display: block; 
-            position: absolute; 
-            inset: 0; 
-            pointer-events: none; 
-            z-index: 2;
-            background: radial-gradient(
-                circle, 
-                rgba(0,0,0,0.1) 0%, 
-                rgba(0,0,0,0.8) 80%, 
-                rgba(0,0,0,1) 100%
-            );
-            background-size: 100% 100%;
-        }
-        
-        #screen-menu::after {
-            content: " ";
-            display: block;
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            z-index: 3;
-            background: linear-gradient(
-                rgba(18,16,16,0) 50%, 
-                rgba(0,0,0,0.1) 50%
-            );
-            background-size: 100% 4px;
-        }
-
-        .title-text { 
-            font-family: 'Nosifer'; 
-            font-size: clamp(3.5rem, 12vw, 7rem); 
-            color: var(--primary-color); 
-            text-shadow: 0 0 10px #500, 0 0 20px #f00; 
-            text-align: center; 
-            animation: glitch 4s infinite, pulseTitle 3s infinite alternate; 
-            margin-bottom: 30px; 
-            z-index: 5; 
-            width: 90%;
-        }
-        
-        @keyframes pulseTitle {
-            from { text-shadow: 0 0 10px #500, 0 0 20px #f00; transform: scale(1); }
-            to { text-shadow: 0 0 20px #800, 0 0 40px #f00; transform: scale(1.02); }
-        }
-
-        .menu-btn {
-            background-color: rgba(0, 0, 0, 0.7); 
-            border: 2px solid #440000; 
-            color: #cccccc;
-            /* Font size controlled by media queries */
-            margin: 8px;
-            cursor: pointer; 
-            text-transform: uppercase; 
-            transition: all 0.2s ease; 
-            position: relative; 
-            z-index: 10; 
-            box-shadow: 0 0 5px rgba(0,0,0,0.8);
-            backdrop-filter: blur(2px);
-        }
-
-        .menu-btn:hover:not(.locked) { 
-            border-color: #ff0000; 
-            color: #ffffff; 
-            background-color: rgba(50, 0, 0, 0.9); 
-            transform: scale(1.05); 
-            box-shadow: 0 0 15px rgba(255, 0, 0, 0.4);
-            text-shadow: 0 0 5px #fff;
-        }
-
-        .menu-btn.locked { 
-            opacity: 0.5; 
-            cursor: not-allowed; 
-            border-color: #333333; 
-            filter: grayscale(100%); 
-        }
-
-        .icon-lock { 
-            position: absolute; 
-            right: 15px; 
-        }
-
-        /* --- USER SYSTEM UI --- */
-        #user-panel {
-            position: absolute;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 25;
-            display: flex;
-            gap: 10px;
-        }
-
-        .user-btn {
-            background: #001100;
-            border: 1px solid #00ff00;
-            color: #00ff00;
-            font-family: 'Share Tech Mono';
-            cursor: pointer;
-            padding: 5px 10px;
-        }
-        
-        #lang-btn { 
-            position: absolute; 
-            top: 20px; 
-            left: 20px; 
-            width: auto; 
-            font-family: 'VT323'; 
-            font-size: 1.5rem; 
-            z-index: 20; 
-            border: 1px solid #444; 
-            background: rgba(0,0,0,0.8); 
-            color: #fff; 
-            padding: 5px 10px; 
-            cursor: pointer;
-        }
-        
-        #lang-btn:hover { background: #222; border-color: #888; }
-
-        #btn-leaderboard { 
-            position: absolute; 
-            top: 20px; 
-            right: 20px; 
-            width: auto; 
-            font-family: 'VT323'; 
-            font-size: 1.5rem; 
-            z-index: 20; 
-            background-color: rgba(0, 34, 68, 0.8); 
-            border: 1px solid #0088ff; 
-            color: #0088ff; 
-            padding: 5px 10px; 
-            cursor: pointer;
-        }
-        
-        #btn-leaderboard:hover { background-color: #004488; color: #fff; }
-
-        #credits-text { 
-            position: absolute; 
-            bottom: 5px; 
-            right: 10px; 
-            z-index: 20; 
-            font-family: 'Share Tech Mono'; 
-            font-size: 0.9rem; 
-            color: #00aaff; 
-            text-shadow: 0 0 5px #00aaff; 
-        }
-
-        /* ESTRELLAS */
-        #star-row { 
-            display: flex; 
-            gap: 15px; 
-            margin-bottom: 30px; 
-            height: 50px; 
-            z-index: 5; 
-        }
-
-        .star { 
-            font-size: 3rem; 
-            color: #222222; 
-            transition: transform 0.3s;
-        }
-        
-        .star:hover { transform: scale(1.2) rotate(10deg); }
-
-        .star.earned { 
-            color: gold; 
-            text-shadow: 0 0 15px gold; 
-        }
-
-        .star.blue { 
-            color: #0088ff; 
-            text-shadow: 0 0 20px #0088ff; 
-        }
-
-        /* ==========================================================================
-           6. MODALES Y VENTANAS EMERGENTES (RESPONSIVE)
-           ========================================================================== */
-        .modal-overlay { 
-            position: fixed; 
-            inset: 0; 
-            background-color: rgba(0,0,0,0.98); 
-            z-index: 6000; 
-            display: none; 
-            align-items: center; 
-            justify-content: center; 
-        }
-
-        .modal-box { 
-            background-color: #0b0b0b; 
-            border: 2px solid var(--primary-color); 
-            width: 90%; 
-            max-width: 800px; 
-            max-height: 90%; 
-            overflow-y: auto; 
-            padding: 30px; 
-            color: #ffffff; 
-            box-shadow: 0 0 50px rgba(255,0,0,0.2); 
-            border-radius: 8px;
-        }
-
-        .lore-text { 
-            font-family: 'Share Tech Mono'; 
-            white-space: pre-wrap; 
-            text-align: left; 
-            line-height: 1.6; 
-            color: #00ff00; 
-            font-size: 1rem; 
-        }
-
-        .lore-header { 
-            color: var(--primary-color); 
-            font-family: 'Nosifer'; 
-            border-bottom: 1px solid #333; 
-            padding-bottom: 15px; 
-            margin-bottom: 25px; 
-            text-align: center; 
-            font-size: 1.8rem;
-        }
-
-        .update-list { 
-            text-align: left; 
-            font-family: 'VT323'; 
-            color: #cccccc; 
-            padding-left: 20px; 
-        }
-
-        .update-list li { 
-            margin-bottom: 8px; 
-            font-size: 1.2rem; 
-            list-style-type: square; 
-        }
-
-        .teaser-text { 
-            color: red; 
-            font-family: 'Nosifer'; 
-            text-align: center; 
-            margin-top: 30px; 
-            animation: glitch 2s infinite; 
-            font-size: 1.2rem; 
-        }
-
-        /* AJUSTES UI */
-        .setting-section { 
-            border: 1px solid #333; 
-            background-color: rgba(255,255,255,0.02); 
-            padding: 15px; 
-            margin-bottom: 15px; 
-        }
-        
-        .setting-header { 
-            color: #aaaaaa; 
-            font-family: 'Nosifer'; 
-            font-size: 1.2rem; 
-            margin-bottom: 10px; 
-            border-bottom: 1px solid #333; 
-        }
-
-        .setting-row { 
-            margin: 15px 0; 
-            display: flex; 
-            align-items: center; 
-            justify-content: space-between; 
-            width: 100%; 
-            font-family: 'VT323'; 
-            font-size: 1.4rem; 
-        }
-
-        input[type=range] { 
-            width: 50%; 
-            cursor: pointer; 
-            accent-color: var(--primary-color); 
-        }
-
-        input[type=checkbox] { 
-            transform: scale(1.5); 
-            cursor: pointer; 
-            accent-color: var(--primary-color); 
-        }
-
-        /* COMUNIDAD */
-        .comment-box { 
-            border-bottom: 1px solid #333; 
-            padding: 10px; 
-            font-family: 'Share Tech Mono'; 
-            background-color: #080808; 
-            margin-bottom: 5px; 
-            font-size: 1rem;
-        }
-        
-        .comment-user { 
-            color: #0088ff; 
-            font-weight: bold; 
-        }
-        
-        .comment-msg { 
-            display: block; 
-            margin-top: 5px; 
-            color: #cccccc; 
-        }
-
-        /* ==========================================================================
-           6. CUSTOM NIGHT UI
-           ========================================================================== */
-        #screen-custom { 
-            background-color: #111; 
-            overflow-y: auto; 
-            padding: 20px; 
-            padding-top: 50px;
-        }
-
-        .cn-grid { 
-            display: grid; 
-            grid-template-columns: repeat(2, 1fr); 
-            gap: 15px; 
-            width: 100%; 
-            max-width: 900px; 
-            justify-items: center;
-        }
-        
-        .cn-char { 
-            background-color: #000; 
-            border: 2px solid #444; 
-            padding: 10px; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            width: 100%;
-            max-width: 250px;
-        }
-
-        .cn-img { 
-            width: 70px; 
-            height: 70px; 
-            object-fit: contain; 
-            margin-bottom: 10px; 
-            border: 1px solid #333; 
-        }
-
-        .cn-controls { 
-            display: flex; 
-            align-items: center; 
-            gap: 10px; 
-        }
-
-        .cn-btn { 
-            width: 35px; 
-            height: 35px; 
-            background-color: #333; 
-            color: #fff; 
-            border: 1px solid #666; 
-            cursor: pointer; 
-            font-size: 1.2rem; 
-        }
-
-        .cn-val { 
-            font-family: 'VT323'; 
-            font-size: 2rem; 
-            color: #fff; 
-            width: 40px; 
-            text-align: center; 
-        }
-
-        /* ==========================================================================
-           7. JUEGO - ENTORNO 3D SIMULADO (FLUIDO)
-           ========================================================================== */
-        #view-office { 
-            position: absolute; 
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #111;
-            background-image: 
-                radial-gradient(circle at center, transparent 30%, #000 130%), 
-                url('https://www.transparenttextures.com/patterns/dark-concrete.png');
-            background-size: cover;
-            background-position: center;
-            overflow: hidden; 
-        }
-
-        #layer-flicker { 
-            position: fixed; 
-            inset: 0; 
-            background-color: #000; 
-            opacity: 0; 
-            pointer-events: none; 
-            z-index: 80; 
-        }
-        
-        /* PASILLO CENTRADO (PORCENTAJES) */
-        #hallway { 
-            position: absolute; 
-            top: 15%; 
-            left: 50%; 
-            transform: translateX(-50%); 
-            width: 45vw; 
-            max-width: 400px; 
-            height: 70vh; 
-            background-color: #000; 
-            border: 20px solid #1a1a1a; 
-            border-image: linear-gradient(to right, #111, #333, #555, #222) 1;
-            box-shadow: inset 0 0 50px #000; 
-            overflow: hidden; 
-        }
-
-        /* --- NUEVA CORTINA (VENTANA EN LA PARED) --- */
-        #curtain-window {
-            position: absolute;
-            top: 15%;
-            right: 5%; /* Pared derecha */
-            width: 18vw;
-            max-width: 150px;
-            height: 30vh;
-            background-color: #050505; 
-            border: 5px solid #222;
-            box-shadow: inset 0 0 20px #000;
-            z-index: 25;
-            overflow: hidden;
-        }
-
-        #curtain-fabric {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: repeating-linear-gradient(90deg, #500, #400 10px, #300 10px, #300 20px);
-            transform: translateY(-100%); /* Abierta por defecto */
-            transition: transform 0.3s ease-out;
-            z-index: 5;
-        }
-
-        #curtain-fabric.closed {
-            transform: translateY(0);
-        }
-
-        /* Richard en la ventana */
-        #vis-richard-win {
-            position: absolute;
-            top: 10%;
-            left: 10%;
-            width: 80%;
-            height: 80%;
-            object-fit: contain;
-            display: none; /* JS activa */
-            z-index: 2;
-            filter: brightness(0.7);
-        }
-
-        #curtain-btn {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            height: 20%;
-            background: #800;
-            color: #fff;
-            border: none;
-            border-top: 3px solid #a00;
-            cursor: pointer;
-            font-family: 'VT323';
-            z-index: 6;
-        }
-
-        /* ANIMATRONICOS */
-        .anim-img { 
-            position: absolute; 
-            pointer-events: none; 
-            display: none; 
-            z-index: 20; 
-            filter: brightness(0.6); 
-        }
-
+        /* ANIMATRONICS */
+        .anim-img { position: absolute; pointer-events: none; display: none; z-index: 20; filter: brightness(0.6); }
         #vis-maifer { right: 0; bottom: 0; height: 90%; max-height: 100vh; }
         #vis-isaac { left: 0; bottom: 0; height: 95%; max-height: 100vh; }
         #vis-jomar { left: 50%; bottom: 0; transform: translateX(-50%); height: 80%; z-index: 4; }
-        #vis-richard { top: 20%; left: 50%; transform: translateX(-50%); width: 40%; z-index: 6; display: none; }
 
-        /* VENTILACIÓN (IZQUIERDA) */
-        #vent-system {
-            position: absolute; 
-            top: 25%; 
-            left: 0; 
-            width: 25vw; 
-            max-width: 200px;
-            height: 30vh; 
-            background-color: #0a0a0a; 
-            border: 5px solid #222; 
-            border-left: none;
-            box-shadow: 5px 5px 15px #000; 
-            z-index: 35; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: flex-end;
-        }
+        /* VENT */
+        #vent-system { position: absolute; top: 25%; left: 0; width: 25vw; max-width: 200px; height: 30vh; background-color: #0a0a0a; border: 5px solid #222; border-left: none; box-shadow: 5px 5px 15px #000; z-index: 35; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
+        #vent-grill { width: 100%; height: 100%; background: repeating-linear-gradient(45deg, rgba(20,20,20,0.9) 10px, transparent 10px, transparent 18px); position: relative; z-index: 4; pointer-events: none; border: 2px solid #111; }
+        #vent-door { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: #2a2a2a; transform: translateY(-100%); transition: transform 0.2s; border-bottom: 5px solid #444; z-index: 5; background-image: repeating-linear-gradient(0deg, transparent, transparent 10px, rgba(0,0,0,0.2) 10px, rgba(0,0,0,0.2) 20px); }
+        #vent-door.closed { transform: translateY(0); }
+        #vent-img { position: absolute; top: 10%; left: 10%; width: 80%; height: 80%; z-index: 1; display: none; filter: brightness(0.5); object-fit: contain; }
+        #vent-btn { width: 100%; height: 25%; background-color: #600; color: #fff; border: none; font-family: 'VT323'; cursor: pointer; z-index: 6; border-top: 4px solid #800; font-size: 1.2rem; }
+        #vent-btn.active { background-color: #006600; border-top: 4px solid #008800; }
 
-        #vent-grill { 
-            width: 100%; 
-            height: 100%; 
-            background: repeating-linear-gradient(45deg, rgba(20,20,20,0.9) 10px, transparent 10px, transparent 18px); 
-            position: relative; 
-            z-index: 4; 
-            pointer-events: none; 
-            border: 2px solid #111; 
-        }
+        /* GENERATOR */
+        #gen-panel { position: absolute; bottom: 20%; left: 20%; width: 15vh; height: 20vh; background-color: #1a1a1a; border: 4px solid #333; z-index: 40; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        #gen-fan { width: 70%; height: auto; aspect-ratio: 1/1; border-radius: 50%; border: 4px dashed #555; animation: spin 4s linear infinite; margin-bottom: 10px; background-color: #000; }
+        #gen-btn { width: 40%; aspect-ratio: 1/1; background: radial-gradient(circle, #ff5555, #990000); border: 2px solid #fff; border-radius: 50%; cursor: pointer; box-shadow: 0 0 10px red; }
 
-        #vent-door {
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            background-color: #2a2a2a; 
-            transform: translateY(-100%);
-            transition: transform 0.2s; 
-            border-bottom: 5px solid #444; 
-            z-index: 5;
-            background-image: repeating-linear-gradient(0deg, transparent, transparent 10px, rgba(0,0,0,0.2) 10px, rgba(0,0,0,0.2) 20px);
-        }
+        /* DESK */
+        #desk { position: absolute; bottom: 0; width: 100%; height: 15vh; background: linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0.9)), url('https://www.transparenttextures.com/patterns/wood-pattern.png'), #2d2d2d; z-index: 30; display: flex; justify-content: center; align-items: flex-end; border-top: 5px solid #333; box-shadow: inset 0 20px 30px rgba(0,0,0,0.8); }
+        .monitor-btn { width: 80%; max-width: 600px; height: 100%; background-color: #111; color: #0f0; border: 2px solid #0f0; border-bottom: 0; font-family: 'VT323'; font-size: clamp(1.5rem, 5vw, 3rem); cursor: pointer; }
+        .monitor-btn:hover { background-color: #002200; }
 
-        #vent-door.closed { 
-            transform: translateY(0); 
-        }
-
-        #vent-img { 
-            position: absolute; 
-            top: 10%; 
-            left: 10%; 
-            width: 80%; 
-            height: 80%; 
-            z-index: 1; 
-            display: none; 
-            filter: brightness(0.5); 
-            object-fit: contain; 
-        }
-
-        #vent-btn { 
-            width: 100%; 
-            height: 25%; 
-            background-color: #600; 
-            color: #fff; 
-            border: none; 
-            font-family: 'VT323'; 
-            cursor: pointer; 
-            z-index: 6; 
-            border-top: 4px solid #800; 
-            font-size: 1.2rem; 
-        }
-
-        #vent-btn.active { 
-            background-color: #006600; 
-            border-top: 4px solid #008800; 
-        }
-
-        /* GENERADOR (IZQUIERDA - ABAJO) */
-        #gen-panel { 
-            position: absolute; 
-            bottom: 20%; 
-            left: 20%; 
-            width: 15vh; 
-            height: 20vh; 
-            background-color: #1a1a1a; 
-            border: 4px solid #333; 
-            z-index: 40; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-        }
-
-        #gen-fan { 
-            width: 70%; 
-            height: auto; 
-            aspect-ratio: 1/1; 
-            border-radius: 50%; 
-            border: 4px dashed #555; 
-            animation: spin 4s linear infinite; 
-            margin-bottom: 10px; 
-            background-color: #000; 
-        }
-
-        #gen-btn { 
-            width: 40%; 
-            aspect-ratio: 1/1; 
-            background: radial-gradient(circle, #ff5555, #990000); 
-            border: 2px solid #fff; 
-            border-radius: 50%; 
-            cursor: pointer; 
-            box-shadow: 0 0 10px red; 
-        }
-
-        /* MESA (FONDO) */
-        #desk { 
-            position: absolute; 
-            bottom: 0; 
-            width: 100%; 
-            height: 15vh; 
-            background: linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0.9)), url('https://www.transparenttextures.com/patterns/wood-pattern.png'), #2d2d2d;
-            z-index: 30; 
-            display: flex; 
-            justify-content: center; 
-            align-items: flex-end; 
-            border-top: 5px solid #333; 
-            box-shadow: inset 0 20px 30px rgba(0,0,0,0.8);
-        }
-
-        .monitor-btn { 
-            width: 80%; 
-            max-width: 600px;
-            height: 100%;
-            background-color: #111; 
-            color: #0f0; 
-            border: 2px solid #0f0; 
-            border-bottom: 0; 
-            font-family: 'VT323'; 
-            font-size: clamp(1.5rem, 5vw, 3rem); 
-            cursor: pointer; 
-        }
-
-        .monitor-btn:hover { 
-            background-color: #002200; 
-        }
-
-        /* ==========================================================================
-           8. HUD (INTERFAZ FLOTANTE)
-           ========================================================================== */
-        .hud-container { 
-            position: absolute; 
-            background-color: var(--hud-bg); 
-            border: 2px solid var(--hud-border); 
-            padding: 5px 15px; 
-            color: #fff; 
-            font-family: 'VT323'; 
-            z-index: 900; 
-            border-radius: 4px; 
-            backdrop-filter: blur(2px); 
-            pointer-events: none; /* Click through */
-        }
-
-        #hud-time-box { 
-            top: 20px; 
-            right: 20px; 
-            text-align: right; 
-        }
-
-        #hud-time { 
-            font-size: clamp(2rem, 8vw, 4rem); 
-            line-height: 0.9; 
-            color: #eeffee; 
-            text-shadow: 0 0 10px #0f0; 
-        }
-
-        #hud-night { 
-            font-size: clamp(1rem, 4vw, 2rem); 
-            color: #aaccaa; 
-        }
-
-        #hud-power-box { 
-            bottom: 140px; 
-            left: 20px; 
-            width: auto; 
-        }
-
-        #hud-power-text { 
-            font-size: clamp(1.5rem, 5vw, 2.5rem); 
-            margin-bottom: 5px; 
-            color: #eeffee; 
-        }
-
-        #hud-usage { 
-            display: flex; 
-            gap: 5px; 
-            align-items: center; 
-            font-size: 1.2rem; 
-            color: #aaccaa; 
-        }
-
-        .usage-block { 
-            width: 20px; 
-            height: 10px; 
-            background-color: #222; 
-            border: 1px solid #444; 
-        }
-
+        /* HUD */
+        .hud-container { position: absolute; background-color: var(--hud-bg); border: 2px solid var(--hud-border); padding: 5px 15px; color: #fff; font-family: 'VT323'; z-index: 900; border-radius: 4px; backdrop-filter: blur(2px); pointer-events: none; }
+        #hud-time-box { top: 20px; right: 20px; text-align: right; }
+        #hud-time { font-size: clamp(2rem, 8vw, 4rem); line-height: 0.9; color: #eeffee; text-shadow: 0 0 10px #0f0; }
+        #hud-night { font-size: clamp(1rem, 4vw, 2rem); color: #aaccaa; }
+        #hud-power-box { bottom: 140px; left: 20px; width: auto; }
+        #hud-power-text { font-size: clamp(1.5rem, 5vw, 2.5rem); margin-bottom: 5px; color: #eeffee; }
+        #hud-usage { display: flex; gap: 5px; align-items: center; font-size: 1.2rem; color: #aaccaa; }
+        .usage-block { width: 20px; height: 10px; background-color: #222; border: 1px solid #444; }
         .usage-block.active { background-color: #0f0; box-shadow: 0 0 5px #0f0; }
         .usage-block.high { background-color: #ff0000; box-shadow: 0 0 5px #ff0000; }
-
-        #hud-toxic { 
-            position: absolute; top: 20px; left: 20px; width: 30%; height: 20px; 
-            border: 2px solid #004400; background-color: #001100; z-index: 900; display: none; 
-        }
+        #hud-toxic { position: absolute; top: 20px; left: 20px; width: 30%; height: 20px; border: 2px solid #004400; background-color: #001100; z-index: 900; display: none; }
         #toxic-bar { height: 100%; background-color: #0f0; width: 0%; box-shadow: 0 0 10px #0f0; }
-
-        #btn-mute { 
-            position: absolute; top: 80px; left: 20px; 
-            background-color: #222; color: #fff; border: 1px solid #555; 
-            font-family: 'VT323'; cursor: pointer; z-index: 950; padding: 5px; 
-            pointer-events: auto; /* Clickable */
-        }
+        #btn-mute { position: absolute; top: 80px; left: 20px; background-color: #222; color: #fff; border: 1px solid #555; font-family: 'VT323'; cursor: pointer; z-index: 950; padding: 5px; pointer-events: auto; }
 
         /* CONTROLES MÓVILES */
-        #mobile-controls {
-            position: fixed; bottom: 0; left: 0; width: 100%; height: 12vh;
-            background-color: rgba(0,0,0,0.95); z-index: 1000; 
-            display: none; /* JS activa */
-            justify-content: space-around; align-items: center; 
-            border-top: 2px solid #333;
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-
-        .mob-btn {
-            width: 18%; height: 80%; background-color: #222; border: 2px solid #555;
-            color: #fff; font-family: 'VT323'; font-size: clamp(1rem, 4vw, 1.5rem); 
-            border-radius: 8px; touch-action: manipulation;
-        }
+        #mobile-controls { position: fixed; bottom: 0; left: 0; width: 100%; height: 12vh; background-color: rgba(0,0,0,0.95); z-index: 1000; display: none; justify-content: space-around; align-items: center; border-top: 2px solid #333; padding-bottom: env(safe-area-inset-bottom); }
+        .mob-btn { width: 18%; height: 80%; background-color: #222; border: 2px solid #555; color: #fff; font-family: 'VT323'; font-size: clamp(1rem, 4vw, 1.5rem); border-radius: 8px; touch-action: manipulation; }
         .mob-btn:active, .mob-btn.active { background-color: #555; border-color: var(--primary-color); }
 
-        /* ==========================================================================
-           9. CAPAS FX
-           ========================================================================== */
+        /* FX LAYERS */
         #layer-mask { position: absolute; inset: 0; z-index: 100; display: none; pointer-events: none; background: radial-gradient(circle at center, transparent 30%, rgba(0,20,0,0.8) 60%, #000 95%); }
         #layer-flashlight { position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.7) 0%, transparent 60%); z-index: 50; display: none; mix-blend-mode: overlay; pointer-events: none; opacity: 0.85 !important; }
         #layer-under-desk { position: absolute; inset: 0; z-index: 90; display: none; align-items: center; justify-content: center; background: radial-gradient(circle, transparent 20%, rgba(0,0,0,0.9) 60%, #000 95%); }
         #layer-under-desk h2 { font-family: 'Share Tech Mono'; color: #444; background: #000; padding: 10px; border: 1px solid #333; margin-top: 40%; }
-        
-        /* ==========================================================================
-           10. MONITOR
-           ========================================================================== */
+
+        /* MONITOR */
         #screen-monitor { position: absolute; inset: 0; background-color: #111; z-index: 200; display: none; flex-direction: column; padding: 2vh; }
         #cam-view { flex: 2; background-color: #000; border: 4px solid #333; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 10px; }
         #cam-static { position: absolute; inset: 0; opacity: 0.15; background: url('https://media.giphy.com/media/oEI9uBYSzLpBK/giphy.gif'); pointer-events: none; z-index: 5; }
@@ -937,22 +187,12 @@
         .cam-spot { font-family: 'Share Tech Mono'; color: #fff; font-size: 1.5rem; border: 2px solid #fff; background: rgba(0,0,0,0.5); padding: 10px; text-align: center; }
         .cam-spot.active-anim { color: #f00; border-color: #f00; background: rgba(50,0,0,0.5); animation: glitch 1s infinite; }
         
-        /* MAPA */
-        #map-layout { 
-            height: 35vh; background: #051505; border: 2px solid #0f0; 
-            position: relative; flex-shrink: 0; box-shadow: inset 0 0 30px #020; 
-        }
+        #map-layout { height: 35vh; background: #051505; border: 2px solid #0f0; position: relative; flex-shrink: 0; box-shadow: inset 0 0 30px #020; }
         .map-room { position: absolute; border: 2px solid #004400; background: rgba(0, 50, 0, 0.3); }
-        .cam-btn { 
-            position: absolute; width: 12%; height: 15%; 
-            background-color: #002200; border: 1px solid #0f0; color: #0f0; 
-            font-family: 'VT323'; font-size: clamp(0.8rem, 3vw, 1.2rem); 
-            cursor: pointer; z-index: 10; display: flex; justify-content: center; align-items: center;
-        }
+        .cam-btn { position: absolute; width: 12%; height: 15%; background-color: #002200; border: 1px solid #0f0; color: #0f0; font-family: 'VT323'; font-size: clamp(0.8rem, 3vw, 1.2rem); cursor: pointer; z-index: 10; display: flex; justify-content: center; align-items: center; }
         .cam-btn:hover { background-color: #004400; }
         .cam-btn.active { background-color: #0f0; color: #000; animation: blink 1s infinite; }
         
-        /* Coordenadas en Porcentaje (%) */
         #room-06 { top: 5%; left: 35%; width: 30%; height: 20%; }
         #room-04 { top: 30%; left: 10%; width: 35%; height: 25%; }
         #room-05 { top: 30%; right: 10%; width: 35%; height: 25%; }
@@ -967,24 +207,13 @@
         #btn-c3 { top: 65%; right: 26%; }
         #btn-c1 { bottom: 5%; left: 44%; }
         
-        #btn-close-mon { 
-            position: absolute; bottom: 5px; right: 5px; 
-            background-color: #f00; color: #fff; border: 2px solid #fff; 
-            padding: 5px 15px; font-family: 'VT323'; cursor: pointer; font-size: 1.2rem;
-        }
+        #btn-close-mon { position: absolute; bottom: 5px; right: 5px; background-color: #f00; color: #fff; border: 2px solid #fff; padding: 5px 15px; font-family: 'VT323'; cursor: pointer; font-size: 1.2rem; }
 
-        /* ==========================================================================
-           12. EXTRAS (WIN, GAME OVER)
-           ========================================================================== */
+        /* EXTRAS */
         #screen-win { background-color: #000; text-align: center; }
         #win-msg { color: #00aaff; font-family: 'Share Tech Mono'; font-size: 1.5rem; max-width: 80%; margin: 20px; line-height: 1.5; }
         
-        #screen-gameover { 
-            z-index: 9500; background: #050000; 
-            flex-direction: row; gap: 30px; flex-wrap: wrap;
-            background-image: url('https://media.giphy.com/media/oEI9uBYSzLpBK/giphy.gif'); 
-            background-blend-mode: overlay; background-size: cover; 
-        }
+        #screen-gameover { z-index: 9500; background: #050000; flex-direction: row; gap: 30px; flex-wrap: wrap; background-image: url('https://media.giphy.com/media/oEI9uBYSzLpBK/giphy.gif'); background-blend-mode: overlay; background-size: cover; }
         #death-card { width: 90%; max-width: 500px; border: 4px solid #500; background: #100; padding: 20px; text-align: center; transform: rotate(-2deg); }
         #death-card h1 { font-size: 3rem; margin: 0 0 20px 0; text-shadow: 2px 2px #000; animation: glitch 1s infinite; }
         #death-img { border: 2px solid #300; filter: contrast(1.2) sepia(0.5); width: 100%; }
@@ -1000,19 +229,38 @@
         @keyframes flickerAnim { 0% { opacity: 0; } 10% { opacity: 0.95; background:#000; } 50% { opacity: 0.8; } 100% { opacity: 0; } }
         .flickering { animation: flickerAnim 0.8s linear; }
 
-        /* Media Queries para Tablets/Móviles */
         @media (max-width: 768px) {
             #screen-gameover { flex-direction: column; }
             .lore-text { font-size: 0.9rem; }
-            #hud-power-box { bottom: 100px; } /* Ajuste para no tapar controles */
+            #hud-power-box { bottom: 100px; }
         }
-
     </style>
 </head>
 <body>
 
-<!-- AUDIO -->
+<!-- AUDIO: ARCHIVOS DEFINIDOS PARA EL SISTEMA DE LLAMADAS -->
 <div id="audio-container">
+    <!-- ESPAÑOL -->
+    <audio id="voice-es-1" src="noche_1.mp3"></audio>
+    <audio id="voice-es-2" src="noche_2.mp3"></audio>
+    <audio id="voice-es-3" src="noche_3.mp3"></audio>
+    <audio id="voice-es-4" src="noche_4.mp3"></audio>
+    <audio id="voice-es-5" src="noche_5.mp3"></audio>
+    <audio id="voice-es-6" src="noche_6.mp3"></audio>
+    <audio id="voice-es-7" src="noche_7.mp3"></audio>
+    <audio id="voice-es-8" src="noche_8.mp3"></audio>
+    
+    <!-- ENGLISH -->
+    <audio id="voice-en-1" src="night_1.mp3"></audio>
+    <audio id="voice-en-2" src="night_2.mp3"></audio>
+    <audio id="voice-en-3" src="night_3.mp3"></audio>
+    <audio id="voice-en-4" src="night_4.mp3"></audio>
+    <audio id="voice-en-5" src="night_5.mp3"></audio>
+    <audio id="voice-en-6" src="night_6.mp3"></audio>
+    <audio id="voice-en-7" src="night_7.mp3"></audio>
+    <audio id="voice-en-8" src="night_8.mp3"></audio>
+
+    <!-- SFX -->
     <audio id="bgm-menu" src="start_song.mp3" loop></audio>
     <audio id="bgm-game" src="abandoned_factory.mp3" loop></audio>
     <audio id="bgm-minigame" src="mini_juego.mp3" loop></audio>
@@ -1025,8 +273,6 @@
     <audio id="sfx-mask" src="mask_breathing.mp3" loop></audio>
     <audio id="sfx-hide" src="moving_to_hide_under.mp3"></audio>
     <audio id="sfx-flash" src="turn_on_the_flashlig.mp3"></audio>
-    <audio id="voice-1" src="phone_girl.mp3"></audio>
-    <audio id="voice-2" src="phone_girl2.mp3"></audio>
     <audio id="sfx-maifer" src="maifer_aparece.mp3" loop></audio>
     <audio id="sfx-isaac" src="isaac_aparece.mp3" loop></audio>
     <audio id="sfx-jomar" src="jomar_aparece.mp3" loop></audio>
@@ -1036,19 +282,13 @@
     <audio id="jump-maifer" src="maifer_mata.mp3"></audio>
     <audio id="sfx-gen" src="turn_on_the_light.mp3"></audio>
     <audio id="sfx-gameover" src="game_over.mp3"></audio>
-    
-    <!-- NUEVO: AUDIO GOLDEN MAIFER -->
     <audio id="sfx-oh" src="oh_oh.mp3"></audio>
     <audio id="jump-golden" src="golden_maifer_jumpscare.mp3"></audio>
-    
-    <!-- NUEVO: SONIDO INICIO NOCHE -->
     <audio id="sfx-night-start" src="night_shift_start.mp3"></audio>
-
-    <!-- NUEVO: SONIDO VENTILACION -->
     <audio id="sfx-vent-close" src="ventilation_closing.mp3"></audio>
 </div>
 
-<!-- DEVICE SELECTION SCREEN (LOADER) -->
+<!-- DEVICE SELECTION -->
 <div id="screen-device" class="screen active">
     <h1 class="title-text" style="font-size: 3rem;">SELECT DEVICE / DISPOSITIVO</h1>
     <div style="display:flex; gap:20px;">
@@ -1061,7 +301,7 @@
     <p id="loading-txt" style="margin-top:10px; font-family:'VT323'; color:#0f0; display:none;">INITIALIZING SYSTEMS...</p>
 </div>
 
-<!-- INTRO SEQUENCE SCREEN -->
+<!-- INTRO SEQUENCE -->
 <div id="screen-intro" class="screen">
     <div id="intro-msg" class="intro-text"></div>
 </div>
@@ -1069,8 +309,8 @@
 <!-- MENU -->
 <div id="screen-menu" class="screen">
     <div id="user-panel">
-        <button class="user-btn" onclick="UserSys.openAuth('login')">LOGIN</button>
-        <button class="user-btn" onclick="UserSys.openAuth('reg')">REGISTER</button>
+        <button id="btn-login" class="user-btn" onclick="UserSys.openAuth('login')">LOGIN</button>
+        <button id="btn-reg" class="user-btn" onclick="UserSys.openAuth('reg')">REGISTER</button>
         <span id="user-display" style="color:#0f0; font-family:'VT323'; font-size:1.5rem; display:none;"></span>
     </div>
     
@@ -1090,7 +330,7 @@
         <button id="btn-settings" class="menu-btn" onclick="UI.openSettings()">AJUSTES</button>
     </div>
     
-    <p style="position: absolute; bottom: 10px; font-size: 0.8rem; color: #444;">v41.0 - Ultimate Fixes & Accounts</p>
+    <p style="position: absolute; bottom: 10px; font-size: 0.8rem; color: #444;">v46.0 - Robust Sync & Moderation</p>
     <p id="credits-text">Creado por Jonlet Santos</p>
 </div>
 
@@ -1100,56 +340,50 @@
         <h2 id="auth-title" class="lore-header">LOGIN</h2>
         <input type="text" id="auth-user" placeholder="USERNAME" style="width:80%; padding:10px; margin-bottom:10px; font-family:'VT323'; font-size:1.5rem;">
         <input type="password" id="auth-pass" placeholder="PASSWORD" style="width:80%; padding:10px; margin-bottom:20px; font-family:'VT323'; font-size:1.5rem;">
-        <button class="menu-btn" onclick="UserSys.submit()">SUBMIT</button>
-        <button class="menu-btn" style="border-color:red;" onclick="UI.closeModals()">CANCEL</button>
+        <button id="auth-submit-btn" class="menu-btn" onclick="UserSys.submit()">SUBMIT</button>
+        <button id="auth-cancel-btn" class="menu-btn" style="border-color:red;" onclick="UI.closeModals()">CANCEL</button>
     </div>
 </div>
 
-<!-- MODALES -->
+<!-- LORE MODAL -->
 <div id="modal-lore" class="modal-overlay">
     <div class="modal-box">
-        <h2 id="lore-title" class="lore-header">MAIFER'S FACTORY — LORE OFICIAL</h2>
+        <h2 id="lore-title" class="lore-header">MAIFER'S FACTORY — LORE</h2>
         <div id="lore-content" class="lore-text"></div>
         <button id="btn-close-lore" class="menu-btn" onclick="UI.closeModals()">CERRAR</button>
     </div>
 </div>
 
+<!-- UPDATES MODAL -->
 <div id="modal-updates" class="modal-overlay">
     <div class="modal-box">
-        <h2 class="lore-header">UPDATES LOG</h2>
+        <h2 class="lore-header" id="upd-title">UPDATES LOG</h2>
         <ul id="update-list" class="update-list"></ul>
         <h2 id="teaser-text" class="teaser-text"></h2>
         <button id="btn-close-upd" class="menu-btn" onclick="UI.closeModals()">CERRAR</button>
     </div>
 </div>
 
+<!-- COMMENTS MODAL -->
 <div id="modal-comments" class="modal-overlay">
     <div class="modal-box">
         <h2 id="comm-title" class="lore-header">COMUNIDAD (ONLINE)</h2>
         <div id="comm-warning" style="color: #00ff00; font-size: 0.8rem; margin-bottom: 10px;">Sistema de Moderación IA Activo</div>
-        <div id="comment-feed" style="height: 300px; overflow-y: auto; border: 1px solid #333; margin-bottom: 10px; padding: 10px; background-color:#000;">
-            <!-- Comentarios -->
-        </div>
+        <div id="comment-feed" style="height: 300px; overflow-y: auto; border: 1px solid #333; margin-bottom: 10px; padding: 10px; background-color:#000;"></div>
         <div style="display:flex; gap:10px;">
             <input type="text" id="comm-input" placeholder="Escribe algo..." style="flex:1; font-family:'VT323'; font-size:1.5rem; padding:5px;">
-            <button class="menu-btn" style="width:auto;" onclick="CommentSystem.post()">ENVIAR</button>
+            <button id="btn-send-comm" class="menu-btn" style="width:auto;" onclick="CommentSystem.post()">ENVIAR</button>
         </div>
-        <button class="menu-btn" onclick="UI.closeModals()">CERRAR</button>
+        <button id="btn-close-comm" class="menu-btn" onclick="UI.closeModals()">CERRAR</button>
     </div>
 </div>
 
+<!-- LEADERBOARD MODAL -->
 <div id="modal-leaderboard" class="modal-overlay">
     <div class="modal-box">
         <h2 id="lb-title" class="lore-header">TOP SURVIVORS</h2>
-        <ul id="lb-list" class="update-list" style="list-style: none;">
-            <!-- Ranks -->
-        </ul>
-        <div id="lb-input" style="display:none; margin-top:20px; text-align: center;">
-            <p>¡NOCHE 8 COMPLETADA!</p>
-            <input type="text" id="inp-name" placeholder="YOUR NAME" style="font-family:'VT323'; font-size:1.5rem; width:200px;">
-            <button class="menu-btn" style="width:auto;" onclick="Leaderboard.add()">SAVE</button>
-        </div>
-        <button class="menu-btn" onclick="UI.closeModals()">CERRAR</button>
+        <ul id="lb-list" class="update-list" style="list-style: none;"></ul>
+        <button id="btn-close-lb" class="menu-btn" onclick="UI.closeModals()">CERRAR</button>
     </div>
 </div>
 
@@ -1161,23 +395,25 @@
             <div id="st-h-aud" class="setting-header">AUDIO</div>
             <div class="setting-row"><span id="st-vol">VOLUMEN</span><input type="range" min="0" max="100" value="100" oninput="AudioSys.setVolume(this.value)"></div>
         </div>
-        <!-- CONTROLES -->
         <div class="setting-section">
-            <div id="st-h-ctrl" class="setting-header">CONTROLES (CLICK PARA CAMBIAR)</div>
+            <div id="st-h-ctrl" class="setting-header">CONTROLES</div>
             <div class="setting-row"><span id="lbl-st-mask">MASCARA</span><button class="menu-btn" style="width:auto;font-size:1rem;" id="bind-mask" onclick="Input.rebind('mask')">SPACE</button></div>
             <div class="setting-row"><span id="lbl-st-flash">LINTERNA</span><button class="menu-btn" style="width:auto;font-size:1rem;" id="bind-flash" onclick="Input.rebind('flash')">F</button></div>
             <div class="setting-row"><span id="lbl-st-mon">MONITOR</span><button class="menu-btn" style="width:auto;font-size:1rem;" id="bind-monitor" onclick="Input.rebind('monitor')">TAB</button></div>
             <div class="setting-row"><span id="lbl-st-vent">CERRAR VENTILACION</span><button class="menu-btn" style="width:auto;font-size:1rem;" id="bind-vent" onclick="Input.rebind('vent')">V</button></div>
             <div class="setting-row"><span id="lbl-st-hide">ESCONDERSE</span><button class="menu-btn" style="width:auto;font-size:1rem;" id="bind-hide" onclick="Input.rebind('hide')">CTRL</button></div>
-            <div class="setting-row"><span id="lbl-st-curt">CORTINA (RICHARD)</span><button class="menu-btn" style="width:auto;font-size:1rem;" id="bind-curtain" onclick="Input.rebind('curtain')">S</button></div>
+            <div class="setting-row"><span id="lbl-st-curt">CORTINA</span><button class="menu-btn" style="width:auto;font-size:1rem;" id="bind-curtain" onclick="Input.rebind('curtain')">S</button></div>
+            <div class="setting-row"><span id="lbl-st-sens">SENSIBILIDAD</span><input type="range" min="1" max="10" value="5" oninput="Config.setSens(this.value)"></div>
         </div>
         <div class="setting-section">
             <div id="st-h-gfx" class="setting-header">GRÁFICOS & GAMEPLAY</div>
-            <div class="setting-row"><span id="st-full">PANTALLA COMPLETA</span><button class="menu-btn" style="width: auto; font-size: 1.2rem;" onclick="Config.toggleFullscreen()">TOGGLE</button></div>
+            <div class="setting-row"><span id="st-full">PANTALLA COMPLETA</span><button id="btn-fs-toggle" class="menu-btn" style="width: auto; font-size: 1.2rem;" onclick="Config.toggleFullscreen()">TOGGLE</button></div>
             <div class="setting-row"><span id="st-gli">EFECTO GLITCH</span><input type="checkbox" id="chk-glitch" checked onchange="Config.toggleGlitch()"></div>
             <div class="setting-row"><span id="lbl-st-static">ESTATICIDAD CÁMARA</span><input type="checkbox" checked onchange="Config.toggleStatic(this.checked)"></div>
             <div class="setting-row"><span id="lbl-st-3d">PERSPECTIVA 3D</span><input type="checkbox" checked onchange="Config.togglePerspective(this.checked)"></div>
-            <div class="setting-row"><span id="st-del" style="color: red;">BORRAR DATOS</span><button class="menu-btn" style="width: auto; font-size: 1.2rem; border-color: red; color: red;" onclick="Game.newGame()">RESET</button></div>
+            <div class="setting-row"><span id="lbl-st-shake">TEMBLOR PANTALLA</span><input type="checkbox" checked onchange="Config.toggleShake(this.checked)"></div>
+            <div class="setting-row"><span id="lbl-st-qual">CALIDAD PARTICULAS</span><button class="menu-btn" style="width:auto; font-size:1rem;" id="btn-quality" onclick="Config.toggleQuality()">HIGH</button></div>
+            <div class="setting-row"><span id="st-del" style="color: red;">BORRAR DATOS</span><button id="btn-del-data" class="menu-btn" style="width: auto; font-size: 1.2rem; border-color: red; color: red;" onclick="Game.hardReset()">RESET</button></div>
         </div>
         <button id="btn-save-st" class="menu-btn" onclick="UI.closeModals()">CERRAR</button>
     </div>
@@ -1185,17 +421,16 @@
 
 <!-- CUSTOM NIGHT SCREEN -->
 <div id="screen-custom" class="screen">
-    <h1 class="title-text" style="font-size: 3rem;">CUSTOM NIGHT</h1>
+    <h1 id="cn-title" class="title-text" style="font-size: 3rem;">CUSTOM NIGHT</h1>
     <div class="cn-grid">
-        <div class="cn-char"><img src="maifer.png" class="cn-img"><span style="color:#fff;">MAIFER</span><div class="cn-controls"><button class="cn-btn" onclick="CustomNight.adj('maifer',-1)">-</button><div id="val-maifer" class="cn-val">0</div><button class="cn-btn" onclick="CustomNight.adj('maifer',1)">+</button></div></div>
-        <div class="cn-char"><img src="isaac.png" class="cn-img"><span style="color:#fff;">ISAAC</span><div class="cn-controls"><button class="cn-btn" onclick="CustomNight.adj('isaac',-1)">-</button><div id="val-isaac" class="cn-val">0</div><button class="cn-btn" onclick="CustomNight.adj('isaac',1)">+</button></div></div>
-        <div class="cn-char"><img src="jomar.png" class="cn-img"><span style="color:#fff;">JOMAR</span><div class="cn-controls"><button class="cn-btn" onclick="CustomNight.adj('jomar',-1)">-</button><div id="val-jomar" class="cn-val">0</div><button class="cn-btn" onclick="CustomNight.adj('jomar',1)">+</button></div></div>
-        <!-- RICHARD Y GOLDEN -->
-        <div class="cn-char"><img src="richard.png" class="cn-img"><span style="color:#f00;">RICHARD</span><div class="cn-controls"><button class="cn-btn" onclick="CustomNight.adj('richard',-1)">-</button><div id="val-richard" class="cn-val">0</div><button class="cn-btn" onclick="CustomNight.adj('richard',1)">+</button></div></div>
-        <div class="cn-char" style="border-color: gold;"><img src="golden_maifer.png" class="cn-img"><span style="color:gold;">G. MAIFER</span><div class="cn-controls"><button class="cn-btn" onclick="CustomNight.adj('golden',-1)">-</button><div id="val-golden" class="cn-val">0</div><button class="cn-btn" onclick="CustomNight.adj('golden',1)">+</button></div></div>
+        <div class="cn-char"><img src="maifer.png" class="cn-img"><span id="lbl-cn-maifer" style="color:#fff;">MAIFER</span><div class="cn-controls"><button class="cn-btn" onclick="CustomNight.adj('maifer',-1)">-</button><div id="val-maifer" class="cn-val">0</div><button class="cn-btn" onclick="CustomNight.adj('maifer',1)">+</button></div></div>
+        <div class="cn-char"><img src="isaac.png" class="cn-img"><span id="lbl-cn-isaac" style="color:#fff;">ISAAC</span><div class="cn-controls"><button class="cn-btn" onclick="CustomNight.adj('isaac',-1)">-</button><div id="val-isaac" class="cn-val">0</div><button class="cn-btn" onclick="CustomNight.adj('isaac',1)">+</button></div></div>
+        <div class="cn-char"><img src="jomar.png" class="cn-img"><span id="lbl-cn-jomar" style="color:#fff;">JOMAR</span><div class="cn-controls"><button class="cn-btn" onclick="CustomNight.adj('jomar',-1)">-</button><div id="val-jomar" class="cn-val">0</div><button class="cn-btn" onclick="CustomNight.adj('jomar',1)">+</button></div></div>
+        <div class="cn-char"><img src="richard.png" class="cn-img"><span id="lbl-cn-richard" style="color:#f00;">RICHARD</span><div class="cn-controls"><button class="cn-btn" onclick="CustomNight.adj('richard',-1)">-</button><div id="val-richard" class="cn-val">0</div><button class="cn-btn" onclick="CustomNight.adj('richard',1)">+</button></div></div>
+        <div class="cn-char" style="border-color: gold;"><img src="golden_maifer.png" class="cn-img"><span id="lbl-cn-golden" style="color:gold;">G. MAIFER</span><div class="cn-controls"><button class="cn-btn" onclick="CustomNight.adj('golden',-1)">-</button><div id="val-golden" class="cn-val">0</div><button class="cn-btn" onclick="CustomNight.adj('golden',1)">+</button></div></div>
     </div>
     <button id="btn-cn-start" class="menu-btn" onclick="CustomNight.start()">INICIAR</button>
-    <button class="menu-btn" style="border-color:red;" onclick="UI.showScreen('screen-menu')">ATRAS</button>
+    <button id="btn-cn-back" class="menu-btn" style="border-color:red;" onclick="UI.showScreen('screen-menu')">ATRAS</button>
 </div>
 
 <!-- JUEGO -->
@@ -1208,24 +443,17 @@
         </div>
     </div>
     <div id="hud-toxic"><div id="toxic-bar"></div></div>
-    <button id="btn-mute" onclick="Mechanics.muteCall()">MUTE 📞</button>
+    <button id="btn-mute">MUTE 📞</button>
 
     <div id="view-office">
         <div id="layer-flicker"></div>
-        
-        <!-- VENTANA DE RICHARD (DERECHA) -->
         <div id="curtain-window">
             <img id="vis-richard-win" src="richard.png">
             <div id="curtain-fabric"></div>
             <button id="curtain-btn" onclick="Mechanics.toggleCurtain()">CLOSE</button>
         </div>
-        
         <div id="vent-system"><img id="vent-img" src=""><div id="vent-grill"></div><div id="vent-door"></div><button id="vent-btn" onclick="Mechanics.toggleVent()">CLOSE</button></div>
-        
-        <div id="hallway">
-            <img id="vis-jomar" class="anim-img" src="jomar.png">
-        </div>
-        
+        <div id="hallway"><img id="vis-jomar" class="anim-img" src="jomar.png"></div>
         <img id="vis-isaac" class="anim-img" src="isaac.png">
         <img id="vis-maifer" class="anim-img" src="maifer.png">
         <div id="gen-panel"><div id="gen-fan"></div><button id="gen-btn" onclick="Mechanics.chargeGen()"></button></div>
@@ -1245,7 +473,6 @@
         </div>
     </div>
 
-    <!-- MOBILE CONTROLS -->
     <div id="mobile-controls">
         <button class="mob-btn" onclick="Mechanics.toggleMask()">MASK</button>
         <button class="mob-btn" onclick="Mechanics.toggleFlashlight()">LITE</button>
@@ -1255,18 +482,14 @@
     </div>
 </div>
 
-<div id="screen-win" class="screen" style="background-color:#000;">
+<div id="screen-win" class="screen">
     <h1 style="font-family:'VT323'; font-size:6rem; color:#00aaff;">YOU WIN</h1>
     <div id="win-stars" style="display:flex; gap:10px;"></div>
-    <p id="win-msg" style="color:#fff; font-family:'Share Tech Mono'; margin:20px; text-align:center; font-size: 1.5rem;"></p>
-    <div id="win-rank-input" style="display:none; text-align:center;">
-        <input type="text" id="win-name" placeholder="YOUR NAME" style="font-family:'VT323'; font-size:1.5rem; width:200px;">
-        <button class="menu-btn" style="width:auto;" onclick="Leaderboard.addFromWin()">ADD RANK</button>
-    </div>
+    <p id="win-msg"></p>
     <button class="menu-btn" onclick="location.reload()">MENU</button>
 </div>
 
-<div id="screen-8am" class="screen" style="background-color:#000;"><h1 style="font-family:'VT323'; font-size:8rem; color:#0f0;">8:00 AM</h1><p id="lbl-win" style="color:#fff; font-size: 2rem;">TURNO FINALIZADO.</p></div>
+<div id="screen-8am" class="screen"><h1 style="font-family:'VT323'; font-size:8rem; color:#0f0;">8:00 AM</h1><p id="lbl-win" style="color:#fff; font-size: 2rem;">TURNO FINALIZADO.</p></div>
 
 <div id="screen-minigame" class="screen">
     <div id="mg-info">MINIJUEGO</div>
@@ -1276,258 +499,195 @@
 
 <div id="screen-gameover" class="screen">
     <div id="death-card">
-        <h1 style="color:red; font-family:'Nosifer';">GAME OVER</h1>
-        <img id="death-img" src="screen_death.png" style="width:100%; border:1px solid #333;">
+        <h1 id="go-title" style="color:red; font-family:'Nosifer';">GAME OVER</h1>
+        <img id="death-img" src="screen_death.png">
         <p id="death-reason" style="color:#fff;">...</p>
     </div>
     <div style="display:flex; gap:10px;">
-        <button class="menu-btn" onclick="Game.initNight()">RETRY</button>
-        <button class="menu-btn" onclick="location.reload()">MENU</button>
+        <button id="btn-retry" class="menu-btn" onclick="Game.initNight()">RETRY</button>
+        <button id="btn-go-menu" class="menu-btn" onclick="location.reload()">MENU</button>
     </div>
 </div>
 
 <div id="screen-jumpscare" class="screen"><img id="jump-img" src=""></div>
 
+<div id="screen-warning" class="modal-overlay" style="display:none; z-index:9999; background:black;">
+    <div class="modal-box" style="text-align:center; border-color:yellow;">
+        <h1 id="warn-title" style="color:yellow; font-family:'VT323'; font-size:3rem;">⚠ AUDIO WARNING ⚠</h1>
+        <p id="warn-txt" style="font-family:'Share Tech Mono'; font-size:1.2rem; margin:20px;">
+            Este juego usa señales de audio 3D y sonidos fuertes.<br>Se recomienda jugar con AUDÍFONOS.
+        </p>
+        <button id="btn-warn-ok" class="menu-btn" onclick="UI.closeWarning(false)">ACEPTAR</button>
+        <button id="btn-warn-stop" class="menu-btn" style="border-color:#555; color:#888;" onclick="UI.closeWarning(true)">NO MOSTRAR MAS</button>
+    </div>
+</div>
+
 <script>
 // ============================================================================
-// VARIABLES GLOBALES (DEFINIR ANTES DE TODO)
+// VARIABLES & FIREBASE (VERSION v46 PARA ASEGURAR CUENTAS)
 // ============================================================================
-// FIX: Definir isMobile antes que cualquier función lo use
 const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+const firebaseConfig = { apiKey: "AIzaSyC6whCq_9B-yeqzHvLWbswadJwCXRnqmt0", authDomain: "maifer-factory.firebaseapp.com", databaseURL: "https://maifer-factory-default-rtdb.firebaseio.com", projectId: "maifer-factory", storageBucket: "maifer-factory.firebasestorage.app", messagingSenderId: "700963667348", appId: "1:700963667348:web:6fd8dba0bcb3ada7a2e381" };
+if(typeof firebase !== 'undefined') firebase.initializeApp(firebaseConfig);
 
-// --- CONFIGURACIÓN FIREBASE ---
-const firebaseConfig = {
-  apiKey: "AIzaSyC6whCq_9B-yeqzHvLWbswadJwCXRnqmt0",
-  authDomain: "maifer-factory.firebaseapp.com",
-  databaseURL: "https://maifer-factory-default-rtdb.firebaseio.com",
-  projectId: "maifer-factory",
-  storageBucket: "maifer-factory.firebasestorage.app",
-  messagingSenderId: "700963667348",
-  appId: "1:700963667348:web:6fd8dba0bcb3ada7a2e381"
-};
+// USAMOS "v46" PARA EMPEZAR DESDE CERO Y EVITAR CONFLICTOS
+const DB_PATH = { users: 'users_v46', rank: 'leaderboard_v46', comm: 'comments_v46' };
 
-if(typeof firebase !== 'undefined') {
-    firebase.initializeApp(firebaseConfig);
-}
+let SAVEDATA = { night: 1, stars: {}, binds: null, leaderboard: [], comments: [], user: null, lang: 'ES', audioWarn: false };
 
-// ============================================================================
-// SAVE MANAGER (NUEVO SISTEMA DE GUARDADO)
-// ============================================================================
-const SaveManager = {
-    save: () => {
-        // Guardar localmente
-        localStorage.setItem('mf_v39', JSON.stringify(SAVEDATA));
-        
-        // Guardar en cuenta de usuario si está logueado
-        if(SAVEDATA.user) {
-            // Recuperar contraseña almacenada temporalmente (esto es inseguro en prod, pero ok para este nivel)
-            // Como no tenemos backend real, usamos el localStorage user slot
-            const userSlot = localStorage.getItem('mf_user_' + SAVEDATA.user);
-            if(userSlot) {
-                const parsed = JSON.parse(userSlot);
-                parsed.data = SAVEDATA; // Actualizar datos
-                localStorage.setItem('mf_user_' + SAVEDATA.user, JSON.stringify(parsed));
-                console.log("User data synced");
-            }
-        }
-    }
-};
-
-// ============================================================================
-// TEXTOS Y LORE EXPANDIDO
-// ============================================================================
-const LORE_ES_FULL = `📖 MAIFER’S FACTORY — LORE OFICIAL\n\nMaifer’s Factory es una antigua fábrica industrial dedicada al desarrollo de robots de vigilancia y asistencia mecánica. El lugar pertenece a Michael Boyko.\n\n👤 EL PROTAGONISTA\nAceptas el trabajo por necesidad. Solo una advertencia: “No interfieras con los animatrónicos. Sigue los protocolos.”\n\n☎️ LA CHICA DEL TELÉFONO\nCada noche recibes una llamada de una mujer que trabaja en la fábrica. Nunca dice su nombre.\n\n🤖 LOS ROBOTS\n🟡 MAIFER: Agresivo con presencia humana. Escóndete debajo de la mesa.\n🎭 ISAAC: Responde a rostros. La máscara lo engaña.\n🔦 JOMAR: Odia la luz. Usa la linterna.\n🟥 RICHARD: Unidad de contención. Cierra la cortina si lo ves en el pasillo.\n\n🕰️ LAS NOCHES\nSobrevivir hasta las 8:00 AM no significa que ganaste. Significa que fuiste tolerado.`;
-const LORE_EN_FULL = `📖 MAIFER’S FACTORY — OFFICIAL LORE\n\nMaifer’s Factory is an old industrial factory owned by Michael Boyko.\n\n👤 THE PROTAGONIST\nYou accept the job out of necessity. Warning: "Do not interfere with the animatronics."\n\n☎️ PHONE GIRL\nEvery night you receive a call from a woman. She never says her name.\n\n🤖 THE ROBOTS\n🟡 MAIFER: Aggressive. Hide under the table.\n🎭 ISAAC: Responds to faces. Use the mask.\n🔦 JOMAR: Hates light. Use flashlight.\n🟥 RICHARD: Containment unit. Close curtain if seen.\n\n🕰️ THE NIGHTS\nSurviving until 8:00 AM doesn't mean you won. It means you were tolerated.`;
-const LORE_CN_FULL = `📖 MAIFER’S FACTORY — 官方传说\n\nMaifer工厂归Michael Boyko所有。\n\n👤 主角\n你接受了这份工作。警告：“不要干涉电子动画。”\n\n☎️ 电话女孩\n每晚你会接到一个女人的电话。\n\n🤖 机器人\n🟡 MAIFER：攻击性。躲在桌子底下。\n🎭 ISAAC：对面孔有反应。使用面具。\n🔦 JOMAR：讨厌光。使用手电筒。\n🟥 RICHARD：遏制装置。拉下窗帘。\n\n🕰️ 夜晚\n活到8:00并不意味着你赢了。`;
-
-const UPDATES_ES = ["✅ Sistema de Cuentas", "✅ Richard Re-agregado", "✅ Fix Minijuego N2", "✅ Fix Batería y Tiempo", "✅ Port Movil Mejorado"];
-
-const TEXTS = {
-    ES: {
-        play: "JUGAR (NOCHE", new: "NUEVA PARTIDA", lore: "DATOS / LORE", st: "AJUSTES", 
-        custom: "NOCHE PERSONALIZADA", night: "NOCHE", under: "DEBAJO DE LA MESA", win: "TURNO FINALIZADO",
-        g_over: "FIN DEL JUEGO", st_title: "AJUSTES", st_vol: "VOLUMEN", lore_txt: LORE_ES_FULL,
-        d_maifer: "Maifer te atrapó.", d_isaac: "Isaac no fue engañado.", d_jomar: "La oscuridad te consumió.", d_richard: "No cerraste la cortina.",
-        d_golden: "ERES DEMASIADO LENTO.",
-        mg5_hint: "PRESIONA ESPACIO RAPIDO", intro: "NOCHE ", am: " - 12:00 AM",
-        st_mask: "MÁSCARA", st_flash: "LINTERNA", st_mon: "MONITOR", st_vent: "CERRAR VENT.", st_hide: "ESCONDERSE", st_curt: "CORTINA",
-        st_static: "ESTÁTICA CÁMARA", st_3d: "PERSPECTIVA 3D", comm_ph: "Escribe algo...", comm_warn: "Sistema de moderación activo", comm_title: "COMUNIDAD ONLINE", st_ctrl: "CONTROLES (CLICK PARA CAMBIAR)"
-    },
-    EN: {
-        play: "PLAY (NIGHT", new: "NEW GAME", lore: "DATA / LORE", st: "SETTINGS",
-        custom: "CUSTOM NIGHT", night: "NIGHT", under: "UNDER THE DESK", win: "SHIFT COMPLETED",
-        g_over: "GAME OVER", st_title: "SETTINGS", st_vol: "VOLUME", lore_txt: LORE_EN_FULL,
-        d_maifer: "Maifer caught you.", d_isaac: "Isaac wasn't fooled.", d_jomar: "Darkness took you.", d_richard: "Curtain wasn't closed.",
-        d_golden: "YOU ARE TOO SLOW.",
-        mg5_hint: "MASH SPACE FAST", intro: "NIGHT ", am: " - 12:00 AM",
-        st_mask: "MASK", st_flash: "FLASHLIGHT", st_mon: "MONITOR", st_vent: "CLOSE VENT", st_hide: "HIDE", st_curt: "CURTAIN",
-        st_static: "CAMERA STATIC", st_3d: "3D PERSPECTIVE", comm_ph: "Type something...", comm_warn: "Moderation system active", comm_title: "ONLINE COMMUNITY", st_ctrl: "CONTROLS (CLICK TO CHANGE)"
-    },
-    CN: {
-        play: "开始游戏 (夜", new: "新游戏", lore: "数据 / 传说", st: "设置",
-        custom: "自定义夜", night: "夜", under: "桌子底下", win: "下班了",
-        g_over: "游戏结束", st_title: "设置", st_vol: "音量", lore_txt: LORE_CN_FULL,
-        d_maifer: "Maifer抓住了你。", d_isaac: "Isaac看到了你的脸。", d_jomar: "黑暗吞噬了你。", d_richard: "窗帘。",
-        d_golden: "你太慢了。",
-        mg5_hint: "快速按空格", intro: "夜 ", am: " - 12:00 AM",
-        st_mask: "面具", st_flash: "手电筒", st_mon: "监视器", st_vent: "关闭通风口", st_hide: "隐藏", st_curt: "窗帘",
-        st_static: "摄像机静电", st_3d: "3D 透视", comm_ph: "写点什么...", comm_warn: "审核系统处于活动状态", comm_title: "在线社区", st_ctrl: "控制（点击更改）"
-    }
-};
-
-let SAVEDATA = {
-    night: 1, 
-    stars: {}, 
-    binds: null, 
-    leaderboard: [], 
-    comments: [], 
-    user: null, 
-    lang: 'ES', 
-    deviceMode: null
-};
-
-try { 
-    let l = localStorage.getItem('mf_v39'); 
-    if(l) SAVEDATA = JSON.parse(l); 
-    if(!SAVEDATA.leaderboard) SAVEDATA.leaderboard = []; 
-    if(!SAVEDATA.comments) SAVEDATA.comments = [];
+try {
+    let l = localStorage.getItem('mf_v46');
+    if(l) SAVEDATA = JSON.parse(l);
 } catch(e) {}
 
-// --- AUTH SYSTEM ---
-const UserSys = {
-    activeUser: null,
-    openAuth: (type) => {
-        document.getElementById('modal-auth').style.display = 'flex';
-        document.getElementById('auth-title').innerText = type === 'login' ? "LOGIN" : "REGISTER";
-        document.getElementById('auth-title').setAttribute('data-mode', type);
-    },
-    submit: () => {
-        const u = document.getElementById('auth-user').value;
-        const p = document.getElementById('auth-pass').value;
-        const mode = document.getElementById('auth-title').getAttribute('data-mode');
-        
-        if(u.length < 3 || p.length < 3) { 
-            alert("INVALID INPUT (Min 3 characters)"); 
-            return; 
-        }
-        
-        if(mode === 'reg') {
-            if(localStorage.getItem('mf_user_'+u)) { 
-                alert("USER ALREADY EXISTS"); 
-                return; 
-            }
-            // Registrar cuenta localmente
-            localStorage.setItem('mf_user_'+u, JSON.stringify({pass:p, data: SAVEDATA}));
-            alert("ACCOUNT CREATED. PLEASE LOGIN.");
-            UserSys.openAuth('login');
-        } else {
-            const stored = localStorage.getItem('mf_user_'+u);
-            if(stored) {
-                const parsed = JSON.parse(stored);
-                if(parsed.pass === p) {
-                    SAVEDATA = parsed.data;
-                    SAVEDATA.user = u;
-                    UserSys.activeUser = u;
-                    SaveManager.save();
-                    UserSys.updateUI();
-                    UI.closeModals();
-                    Game.initMenu();
-                } else { 
-                    alert("WRONG PASSWORD"); 
-                }
-            } else { 
-                alert("USER NOT FOUND"); 
-            }
-        }
-    },
-    updateUI: () => {
-        if(SAVEDATA.user) {
-            document.querySelectorAll('.user-btn').forEach(b => b.style.display='none');
-            const d = document.getElementById('user-display');
-            d.style.display = 'block';
-            d.innerText = "AGENT: " + SAVEDATA.user;
+const SaveManager = {
+    save: () => {
+        // Guardar Localmente
+        try {
+            localStorage.setItem('mf_v46', JSON.stringify(SAVEDATA));
+        } catch(e) { console.error("Local Save Error:", e); }
+
+        // Guardar en la Nube (Si hay usuario)
+        if(SAVEDATA.user && typeof firebase !== 'undefined') {
+            const cleanUser = SAVEDATA.user.toLowerCase().replace('.', '_'); // Evitar caracteres ilegales
+            firebase.database().ref(DB_PATH.users + '/' + cleanUser + '/data').set(SAVEDATA)
+                .then(() => console.log("Cloud Save Success"))
+                .catch(err => console.error("Cloud Save Error:", err));
         }
     }
 };
 
 // ============================================================================
-// SISTEMA DE FIREBASE Y ONLINE
+// DICCIONARIO COMPLETO (STRICT TRANSLATION)
 // ============================================================================
-const FB = {
-    active: typeof firebase !== 'undefined',
-    getRank: () => {
-        if(!FB.active) {
-            const l = document.getElementById('lb-list'); 
-            l.innerHTML='<li style="color:red">OFFLINE MODE</li>';
-            (SAVEDATA.leaderboard || []).slice(-10).reverse().forEach(p => { 
-                let li = document.createElement('li'); 
-                li.style.display = 'flex'; 
-                li.style.justifyContent = 'space-between'; 
-                li.innerHTML = `<span style="color:#0f0">${p.n}</span> <span>${p.d}</span>`; 
-                l.appendChild(li); 
-            });
-            return;
-        }
-        firebase.database().ref('leaderboard').limitToLast(10).once('value', (s) => {
-            const l = document.getElementById('lb-list'); 
-            l.innerHTML=''; 
-            if(!s.exists()) return;
-            let arr=[]; 
-            s.forEach(c => arr.push(c.val())); 
-            arr.reverse().forEach(p => { 
-                let li = document.createElement('li'); 
-                li.style.display = 'flex'; 
-                li.style.justifyContent = 'space-between'; 
-                li.innerHTML = `<span style="color:#0f0">${p.n}</span> <span>${p.d}</span>`; 
-                l.appendChild(li); 
-            });
-        });
+const TEXTS = {
+    ES: {
+        play: "JUGAR (NOCHE", new: "NUEVA PARTIDA", lore: "DATOS / LORE", st: "AJUSTES", custom: "NOCHE PERSONALIZADA",
+        updates: "NOVEDADES", comm: "COMUNIDAD", rank: "CLASIFICACION", close: "CERRAR", created: "Creado por Jonlet Santos",
+        login: "INICIAR SESION", reg: "REGISTRARSE", agent: "AGENTE",
+        auth_user_ph: "USUARIO", auth_pass_ph: "CONTRASEÑA", auth_submit: "ENVIAR", auth_cancel: "CANCELAR",
+        auth_login_t: "INICIAR SESION", auth_reg_t: "REGISTRAR CUENTA",
+        
+        cn_title: "NOCHE PERSONALIZADA", cn_start: "INICIAR", cn_back: "ATRAS",
+        char_maifer: "MAIFER", char_isaac: "ISAAC", char_jomar: "JOMAR", char_richard: "RICHARD", char_golden: "G. MAIFER",
+        
+        night_p: "NOCHE", under: "DEBAJO DE LA MESA", win_turn: "TURNO FINALIZADO", g_over: "FIN DEL JUEGO", retry: "REINTENTAR",
+        pwr: "ENERGIA", use: "USO", sys: "SISTEMA", you: "TU", no_sig: "SIN SEÑAL", rec: "GRABANDO", cam_lbl: "CAMARA",
+        mon_idle: "INACTIVO", mon_detected: "DETECTADO", mon_near: "CERCA",
+        mute: "SILENCIAR LLAMADA",
+        
+        d_maifer: "Maifer te atrapó.", d_isaac: "Isaac no fue engañado.", d_jomar: "La oscuridad te consumió.",
+        d_richard: "No cerraste la cortina.", d_golden: "ERES DEMASIADO LENTO.", d_power: "SIN ENERGIA.", d_air: "SIN AIRE.",
+        
+        st_title: "AJUSTES", audio: "AUDIO", vol: "VOLUMEN", st_h_ctrl: "CONTROLES", gfx: "GRAFICOS Y JUEGO",
+        del_data: "BORRAR DATOS (RESET)", reset_btn: "REINICIAR TODO", glitch: "EFECTO GLITCH", toggle: "INTERCAMBIAR",
+        full: "PANTALLA COMPLETA", st_mask: "MÁSCARA", st_flash: "LINTERNA", st_mon: "MONITOR", st_vent: "CERRAR VENT.",
+        st_hide: "ESCONDERSE", st_curt: "CORTINA", st_sens: "SENSIBILIDAD", st_shake: "TEMBLOR PANTALLA", st_qual: "CALIDAD PARTICULAS",
+        st_qual_high: "ALTA", st_qual_low: "BAJA",
+        
+        comm_title: "COMUNIDAD ONLINE", comm_warn: "Reglas: Solo Bugs/Ideas. No Insultos.", comm_ph: "Escribe algo...", send: "ENVIAR",
+        lb_title: "MEJORES SUPERVIVIENTES",
+        warn_t: "⚠ ADVERTENCIA DE AUDIO ⚠", warn_d: "Juego con audio 3D y ruidos fuertes. Usa audífonos.", warn_ok: "ACEPTAR", warn_no: "NO MOSTRAR MAS",
+        
+        upd_title: "REGISTRO DE CAMBIOS",
+        updates_log: ["✅ FIX: Cuentas 100% Funcionales", "✅ NUEVO: Audio Noches 1-8 (Español/Inglés)", "✅ MECANICA: Juego pausado durante llamada", "✅ Traducción Custom Night", "✅ Moderación IA Mejorada"],
+        
+        mg_inst: "FLECHAS / MOUSE / ESPACIO",
+        mg1: "ESQUIVA LOS OBSTACULOS", mg2: "ENCUENTRA LA CAJA AZUL", mg3: "CLICK EN ORBES VERDES",
+        mg4: "EVITA LOS CUBOS ROJOS", mg5: "MANTEN LA CARGA (ESPACIO)", mg6: "DETENTE EN ROJO, AVANZA EN VERDE",
+        mg7: "LLEGA A LA META DORADA", mg8: "SOBREVIVE AL INFIERNO",
+        
+        lore_txt: "📖 MAIFER’S FACTORY — LORE OFICIAL\n\nMaifer’s Factory es una antigua fábrica industrial.\n\n👤 EL PROTAGONISTA\nAceptas el trabajo por necesidad.\n\n☎️ LA CHICA DEL TELÉFONO\nCada noche recibes una llamada.\n\n🤖 LOS ROBOTS\n🟡 MAIFER: Agresivo. Escóndete.\n🎭 ISAAC: Responde a rostros. Usa la máscara.\n🔦 JOMAR: Odia la luz.\n🟥 RICHARD: Cierra la cortina.",
+        
+        ng_warn: "¿Seguro? Esto reiniciará la noche actual.", del_warn: "¡ESTO BORRA TODO TU PROGRESO! ¿SEGURO?",
+        guest_err: "DEBES INICIAR SESION.", banned: "ESTAS BANEADO."
     },
-    addRank: (name) => {
-        if(!FB.active) { 
-            SAVEDATA.leaderboard.push({n:name, d:new Date().toLocaleDateString()}); 
-            SaveManager.save(); 
-            FB.getRank(); 
-            return; 
-        }
-        firebase.database().ref('leaderboard').push({n:name, d:new Date().toLocaleDateString()});
+    
+    EN: {
+        play: "PLAY (NIGHT", new: "NEW GAME", lore: "DATA / LORE", st: "SETTINGS", custom: "CUSTOM NIGHT",
+        updates: "UPDATES", comm: "COMMUNITY", rank: "LEADERBOARD", close: "CLOSE", created: "Created by Jonlet Santos",
+        login: "LOGIN", reg: "REGISTER", agent: "AGENT",
+        auth_user_ph: "USERNAME", auth_pass_ph: "PASSWORD", auth_submit: "SUBMIT", auth_cancel: "CANCEL",
+        auth_login_t: "LOGIN", auth_reg_t: "REGISTER ACCOUNT",
+        
+        cn_title: "CUSTOM NIGHT", cn_start: "START", cn_back: "BACK",
+        char_maifer: "MAIFER", char_isaac: "ISAAC", char_jomar: "JOMAR", char_richard: "RICHARD", char_golden: "G. MAIFER",
+        
+        night_p: "NIGHT", under: "UNDER THE DESK", win_turn: "SHIFT COMPLETED", g_over: "GAME OVER", retry: "RETRY",
+        pwr: "POWER", use: "USAGE", sys: "SYSTEM", you: "YOU", no_sig: "NO SIGNAL", rec: "REC", cam_lbl: "CAM",
+        mon_idle: "IDLE", mon_detected: "DETECTED", mon_near: "NEAR",
+        mute: "MUTE CALL",
+        
+        d_maifer: "Maifer caught you.", d_isaac: "Isaac wasn't fooled.", d_jomar: "Darkness took you.",
+        d_richard: "Curtain wasn't closed.", d_golden: "YOU ARE TOO SLOW.", d_power: "NO POWER.", d_air: "NO AIR.",
+        
+        st_title: "SETTINGS", audio: "AUDIO", vol: "VOLUME", st_h_ctrl: "CONTROLS", gfx: "GRAPHICS & GAMEPLAY",
+        del_data: "DELETE DATA (RESET)", reset_btn: "RESET ALL", glitch: "GLITCH EFFECT", toggle: "TOGGLE",
+        full: "FULLSCREEN", st_mask: "MASK", st_flash: "FLASHLIGHT", st_mon: "MONITOR", st_vent: "CLOSE VENT",
+        st_hide: "HIDE", st_curt: "CURTAIN", st_sens: "SENSITIVITY", st_shake: "SCREEN SHAKE", st_qual: "PARTICLE QUALITY",
+        st_qual_high: "HIGH", st_qual_low: "LOW",
+        
+        comm_title: "ONLINE COMMUNITY", comm_warn: "Rules: Bugs/Ideas Only. No Insults.", comm_ph: "Type something...", send: "SEND",
+        lb_title: "TOP SURVIVORS",
+        warn_t: "⚠ AUDIO WARNING ⚠", warn_d: "3D Audio & Loud Noises. Headphones recommended.", warn_ok: "ACCEPT", warn_no: "DON'T SHOW AGAIN",
+        
+        upd_title: "CHANGE LOG",
+        updates_log: ["✅ FIX: Accounts 100% Working (v46)", "✅ NEW: Audio Nights 1-8 (Spanish/English)", "✅ MECH: Game Paused during call", "✅ Custom Night Translation", "✅ AI Moderation Improved"],
+        
+        mg_inst: "ARROWS / MOUSE / SPACE",
+        mg1: "DODGE OBSTACLES", mg2: "FIND BLUE BOX", mg3: "CLICK GREEN ORBS",
+        mg4: "AVOID RED CUBES", mg5: "KEEP CHARGE (SPACE)", mg6: "STOP ON RED, GO ON GREEN",
+        mg7: "REACH GOLD GOAL", mg8: "SURVIVE HELL",
+        
+        lore_txt: "📖 MAIFER’S FACTORY — OFFICIAL LORE\n\nMaifer’s Factory is an old industrial factory.\n\n👤 THE PROTAGONIST\nYou need the job.\n\n☎️ PHONE GIRL\nMysterious caller every night.\n\n🤖 THE ROBOTS\n🟡 MAIFER: Aggressive. Hide.\n🎭 ISAAC: Use mask.\n🔦 JOMAR: Hates light.\n🟥 RICHARD: Close curtain.",
+        
+        ng_warn: "Sure? This resets current night.", del_warn: "THIS WIPES ALL DATA! SURE?",
+        guest_err: "LOGIN REQUIRED.", banned: "YOU ARE BANNED."
     },
-    getComm: () => { 
-        if(!FB.active) return; 
-        firebase.database().ref('comments').limitToLast(20).on('value', (s) => { 
-            const b = document.getElementById('comment-feed'); 
-            b.innerHTML=''; 
-            if(!s.exists()) return; 
-            s.forEach(c => { 
-                let v = c.val(); 
-                let d = document.createElement('div'); 
-                d.className='comment-box'; 
-                d.innerHTML = `<span class="comment-user">${v.u}:</span> <span class="comment-msg">${v.t}</span>`; 
-                b.appendChild(d); 
-            }); 
-            b.scrollTop = b.scrollHeight; 
-        }); 
-    },
-    postComm: (txt) => {
-        const bad = ['bad', 'sucks', 'stupid', 'hate', 'fart'];
-        if(bad.some(w => txt.toLowerCase().includes(w))) { 
-            alert("MODERATION: MESSAGE BLOCKED FOR INAPPROPRIATE CONTENT"); 
-            return; 
-        }
-        const u = SAVEDATA.user || "Guest";
-        if(FB.active) {
-            firebase.database().ref('comments').push({u:u, t:txt});
-        } else { 
-            SAVEDATA.comments.push({u:u, t:txt}); 
-            SaveManager.save(); 
-            FB.getComm(); 
-        }
+    
+    CN: {
+        play: "开始游戏 (夜", new: "新游戏", lore: "数据 / 传说", st: "设置", custom: "自定义夜",
+        updates: "更新", comm: "社区", rank: "排行榜", close: "关闭", created: "Jonlet Santos 制作",
+        login: "登录", reg: "注册", agent: "特工",
+        auth_user_ph: "用户名", auth_pass_ph: "密码", auth_submit: "提交", auth_cancel: "取消",
+        auth_login_t: "登录", auth_reg_t: "注册账户",
+        
+        cn_title: "自定义夜", cn_start: "开始", cn_back: "返回",
+        char_maifer: "MAIFER", char_isaac: "ISAAC", char_jomar: "JOMAR", char_richard: "RICHARD", char_golden: "G. MAIFER",
+        
+        night_p: "夜", under: "桌子底下", win_turn: "轮班结束", g_over: "游戏结束", retry: "重试",
+        pwr: "电力", use: "使用", sys: "系统", you: "你", no_sig: "无信号", rec: "录制", cam_lbl: "相机",
+        mon_idle: "闲置", mon_detected: "检测到", mon_near: "靠近",
+        mute: "静音通话",
+        
+        d_maifer: "Maifer 抓住了你。", d_isaac: "Isaac 没被骗过。", d_jomar: "黑暗吞噬了你。",
+        d_richard: "窗帘没关。", d_golden: "你太慢了。", d_power: "没电了。", d_air: "没空气。",
+        
+        st_title: "设置", audio: "音频", vol: "音量", st_h_ctrl: "控制", gfx: "图形和游戏",
+        del_data: "删除数据", reset_btn: "全部重置", glitch: "故障效果", toggle: "切换",
+        full: "全屏", st_mask: "面具", st_flash: "手电筒", st_mon: "监视器", st_vent: "关闭通风",
+        st_hide: "隐藏", st_curt: "窗帘", st_sens: "灵敏度", st_shake: "屏幕震动", st_qual: "粒子质量",
+        st_qual_high: "高", st_qual_low: "低",
+        
+        comm_title: "在线社区", comm_warn: "规则：禁止侮辱。报告错误。", comm_ph: "写点什么...", send: "发送",
+        lb_title: "最佳幸存者",
+        warn_t: "⚠ 音频警告 ⚠", warn_d: "3D 音频和巨响。推荐耳机。", warn_ok: "接受", warn_no: "不再显示",
+        
+        upd_title: "更新日志",
+        updates_log: ["✅ 修复：登录/注册 (v46)", "✅ 新增：音频 1-8 夜 (西班牙语/英语)", "✅ 机制：通话期间游戏暂停", "✅ 自定义夜翻译", "✅ AI 审核改进"],
+        
+        mg_inst: "箭头 / 鼠标 / 空格",
+        mg1: "躲避障碍", mg2: "找到蓝盒子", mg3: "点击绿色球",
+        mg4: "避开红方块", mg5: "保持充电 (空格)", mg6: "红灯停 绿灯行",
+        mg7: "到达金色目标", mg8: "在地狱中生存",
+        
+        lore_txt: "📖 MAIFER’S FACTORY — 官方传说\n\nMaifer 工厂是一家老工厂。\n\n👤 主角\n你需要这份工作。\n\n☎️ 电话女孩\n每晚神秘来电。\n\n🤖 机器人\n🟡 MAIFER: 躲藏。\n🎭 ISAAC: 用面具。\n🔦 JOMAR: 讨厌光。\n🟥 RICHARD: 关窗帘。",
+        
+        ng_warn: "确定？这将重置当前夜晚。", del_warn: "这将清除所有数据！确定？",
+        guest_err: "需要登录。", banned: "你已被封禁。"
     }
 };
 
-// ============================================================================
-// SISTEMA DE IDIOMAS Y CONFIGURACIÓN
-// ============================================================================
 const Lang = {
     current: SAVEDATA.lang || 'ES',
     toggle: () => { 
@@ -1538,472 +698,181 @@ const Lang = {
         SaveManager.save(); 
         Lang.apply(); 
     },
-    setText: (id, text) => { 
+    setText: (id, txt) => { 
         const el = document.getElementById(id); 
-        if (el) el.innerText = text; 
+        if (el && txt) el.innerText = txt; 
     },
     apply: () => {
         const t = TEXTS[Lang.current];
-        const n = document.getElementById('menu-night') ? document.getElementById('menu-night').innerText : SAVEDATA.night;
         
+        // MAIN MENU
         document.getElementById('lang-btn').innerText = Lang.current === 'CN' ? '中文' : (Lang.current === 'ES' ? 'ESPAÑOL' : 'ENGLISH');
+        let nDisplay = SAVEDATA.night > 8 ? 8 : SAVEDATA.night;
+        let nightStr = Lang.current === 'CN' ? (" " + nDisplay + " 夜") : (" " + nDisplay);
         
-        if(document.getElementById('btn-play')) document.getElementById('btn-play').innerHTML = `${t.play} <span id="menu-night">${n}</span>)`;
-        document.getElementById('btn-new').innerText = t.new; 
-        document.getElementById('btn-lore').innerText = t.lore; 
-        document.getElementById('btn-settings').innerText = t.st;
-        document.getElementById('lore-content').innerText = t.lore_txt;
-        document.getElementById('mg-controls-hint').innerText = t.mg5_hint;
+        document.getElementById('btn-play').innerHTML = `${t.play} <span id="menu-night">${nightStr}</span>)`;
+        Lang.setText('btn-new', t.new); Lang.setText('btn-lore', t.lore); Lang.setText('btn-updates', t.updates);
+        Lang.setText('btn-comm', t.comm); Lang.setText('btn-settings', t.st); Lang.setText('credits-text', t.created);
+        Lang.setText('btn-leaderboard', "🏆 " + t.rank); Lang.setText('btn-login', t.login); Lang.setText('btn-reg', t.reg);
         
-        Lang.setText('comm-warning', t.comm_warn); 
-        Lang.setText('comm-title', t.comm_title);
-        document.getElementById('comm-input').placeholder = t.comm_ph;
+        // AUTH MODAL
+        const authMode = document.getElementById('auth-title').getAttribute('data-mode');
+        Lang.setText('auth-title', authMode === 'login' ? t.auth_login_t : t.auth_reg_t);
+        document.getElementById('auth-user').placeholder = t.auth_user_ph; document.getElementById('auth-pass').placeholder = t.auth_pass_ph;
+        Lang.setText('auth-submit-btn', t.auth_submit); Lang.setText('auth-cancel-btn', t.auth_cancel);
         
-        Lang.setText('st-title', t.st_title); 
-        Lang.setText('st-h-ctrl', t.st_ctrl); 
-        Lang.setText('lbl-st-mask', t.st_mask); 
-        Lang.setText('lbl-st-flash', t.st_flash); 
-        Lang.setText('lbl-st-mon', t.st_mon);
-        Lang.setText('lbl-st-vent', t.st_vent); 
-        Lang.setText('lbl-st-hide', t.st_hide); 
-        Lang.setText('lbl-st-curt', t.st_curt);
-        Lang.setText('lbl-st-static', t.st_static); 
-        Lang.setText('lbl-st-3d', t.st_3d);
+        // CUSTOM NIGHT
+        Lang.setText('cn-title', t.cn_title); Lang.setText('lbl-cn-maifer', t.char_maifer); Lang.setText('lbl-cn-isaac', t.char_isaac);
+        Lang.setText('lbl-cn-jomar', t.char_jomar); Lang.setText('lbl-cn-richard', t.char_richard); Lang.setText('lbl-cn-golden', t.char_golden);
+        Lang.setText('btn-cn-start', t.cn_start); Lang.setText('btn-cn-back', t.cn_back);
         
-        const ul = document.getElementById('update-list'); 
-        if(ul) { 
-            ul.innerHTML=''; 
-            UPDATES_ES.forEach(item => { 
-                let li = document.createElement('li'); 
-                li.innerText = item; 
-                ul.appendChild(li); 
-            }); 
-        }
+        // SETTINGS
+        Lang.setText('st-title', t.st_title); Lang.setText('st-h-aud', t.audio); Lang.setText('st-vol', t.vol);
+        Lang.setText('st-h-ctrl', t.st_h_ctrl); Lang.setText('st-h-gfx', t.gfx); Lang.setText('st-full', t.full);
+        Lang.setText('st-gli', t.glitch); Lang.setText('st-del', t.del_data); Lang.setText('btn-fs-toggle', t.toggle);
+        Lang.setText('btn-del-data', t.reset_btn); Lang.setText('btn-save-st', t.close);
+        Lang.setText('lbl-st-mask', t.st_mask); Lang.setText('lbl-st-flash', t.st_flash); Lang.setText('lbl-st-mon', t.st_mon);
+        Lang.setText('lbl-st-vent', t.st_vent); Lang.setText('lbl-st-hide', t.st_hide); Lang.setText('lbl-st-curt', t.st_curt);
+        Lang.setText('lbl-st-sens', t.st_sens); Lang.setText('lbl-st-shake', t.st_shake); Lang.setText('lbl-st-qual', t.st_qual);
+        Lang.setText('btn-quality', Config.particlesHigh ? t.st_qual_high : t.st_qual_low);
+        
+        // UPDATES
+        Lang.setText('upd-title', t.upd_title); Lang.setText('btn-close-upd', t.close);
+        const ul = document.getElementById('update-list'); if(ul) ul.innerHTML = t.updates_log.map(u => `<li>${u}</li>`).join('');
+        
+        // MODALS
+        Lang.setText('btn-close-lore', t.close); Lang.setText('lore-content', t.lore_txt);
+        Lang.setText('comm-title', t.comm_title); Lang.setText('comm-warning', t.comm_warn); document.getElementById('comm-input').placeholder = t.comm_ph;
+        Lang.setText('btn-send-comm', t.send); Lang.setText('btn-close-comm', t.close); Lang.setText('lb-title', t.lb_title); Lang.setText('btn-close-lb', t.close);
+        
+        // WARNING
+        Lang.setText('warn-title', t.warn_t); Lang.setText('warn-txt', t.warn_d); Lang.setText('btn-warn-ok', t.warn_ok); Lang.setText('btn-warn-stop', t.warn_no);
+        
+        // IN GAME
+        Lang.setText('lbl-night', t.night_p); Lang.setText('lbl-pwr', t.pwr); Lang.setText('lbl-usage', t.use);
+        Lang.setText('lbl-sys', t.sys); Lang.setText('lbl-under', t.under); Lang.setText('lbl-win', t.win_turn);
+        Lang.setText('go-title', t.g_over); Lang.setText('btn-retry', t.retry); Lang.setText('btn-go-menu', t.close); 
+        Lang.setText('room-you', t.you); Lang.setText('rec-dot', "● " + t.rec); Lang.setText('btn-close-mon', t.close_x);
+        Lang.setText('btn-mute', t.mute + " 📞");
+        
+        // MINIGAME
+        Lang.setText('mg-info', t['mg'+MiniGames.night] || "MINIGAME"); Lang.setText('mg-controls-hint', t.mg_inst);
+        if(SAVEDATA.user) Lang.setText('user-display', t.agent + ": " + SAVEDATA.user);
     }
 };
-
-const BINDINGS = SAVEDATA.binds || { 
-    mask: 'Space', 
-    flash: 'KeyF', 
-    hide: 'ControlLeft', 
-    curtain: 'KeyS', 
-    monitor: 'Tab', 
-    vent: 'KeyV' 
-};
-
-const NIGHT_CONFIG = { 
-    1: { maifer: 2, isaac: 1, jomar: 1, richard: 0 }, 
-    2: { maifer: 4, isaac: 3, jomar: 2, richard: 1 }, 
-    3: { maifer: 6, isaac: 5, jomar: 5, richard: 3 }, 
-    4: { maifer: 8, isaac: 8, jomar: 7, richard: 5 }, 
-    5: { maifer: 10, isaac: 10, jomar: 10, richard: 7 }, 
-    6: { maifer: 12, isaac: 12, jomar: 12, richard: 10 }, 
-    7: { maifer: 15, isaac: 15, jomar: 15, richard: 15 }, 
-    8: { maifer: 20, isaac: 20, jomar: 20, richard: 20 }, 
-    9: { maifer: 20, isaac: 20, jomar: 20, richard: 20 } 
-};
-
-const Config = {
-    glitchEnabled: true,
-    toggleFullscreen: () => { 
-        if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{}); 
-        else if(document.exitFullscreen) document.exitFullscreen(); 
-    },
-    toggleGlitch: () => { 
-        Config.glitchEnabled = !Config.glitchEnabled; 
-        document.querySelectorAll('.active-anim').forEach(el => el.style.animation = Config.glitchEnabled ? 'glitch 1s infinite' : 'none'); 
-    },
-    toggleStatic: (checked) => { 
-        document.getElementById('cam-static').style.display = checked ? 'block' : 'none'; 
-    },
-    togglePerspective: (checked) => { 
-        document.getElementById('view-office').style.transform = checked ? 'perspective(1000px) rotateX(2deg)' : 'none'; 
-    }
-};
-
-const AudioSys = {
-    volume: 1.0,
-    setVolume: (val) => { 
-        AudioSys.volume = val / 100; 
-        document.querySelectorAll('audio').forEach(a => a.volume = AudioSys.volume); 
-    },
-    play: (id, loop=false, forceVol=null) => { 
-        try {
-            const s = document.getElementById(id); 
-            if(s){ 
-                s.loop = loop; 
-                s.volume = forceVol ? forceVol * AudioSys.volume : AudioSys.volume; 
-                s.currentTime = 0; 
-                s.play().catch(()=>{}); 
-            } 
-        } catch(e) {}
-    },
-    stop: (id) => { 
-        const s = document.getElementById(id); 
-        if(s) { s.pause(); s.currentTime = 0; } 
-    },
-    stopAll: () => document.querySelectorAll('audio').forEach(a => { a.pause(); a.currentTime=0; }),
-    stopLoops: () => { 
-        AudioSys.stop('sfx-maifer'); 
-        AudioSys.stop('sfx-isaac'); 
-        AudioSys.stop('sfx-jomar'); 
-    }
-};
-
-const Input = {
-    rebind: (action) => { 
-        const btn = document.getElementById('bind-'+action); 
-        btn.innerText = "..."; 
-        const h=(e)=>{ 
-            e.preventDefault(); 
-            BINDINGS[action]=e.code; 
-            btn.innerText=e.code; 
-            SAVEDATA.binds=BINDINGS; 
-            SaveManager.save(); 
-            document.removeEventListener('keydown',h); 
-        }; 
-        document.addEventListener('keydown',h); 
-    }
-};
-
-document.addEventListener('keydown', (e) => {
-    if (Game.state.over || UI.modalOpen || Game.state.inMinigame) return;
-    const k = e.code;
-    if (k === BINDINGS.mask) Mechanics.toggleMask();
-    if (k === BINDINGS.flash) Mechanics.toggleFlashlight();
-    if (k === BINDINGS.hide) Mechanics.toggleHide();
-    if (k === BINDINGS.curtain) Mechanics.toggleCurtain();
-    if (k === BINDINGS.monitor) Mechanics.toggleMonitor();
-    if (k === BINDINGS.vent) Mechanics.toggleVent();
-});
-
-// ============================================================================
-// APP & LOGICA DE DISPOSITIVO (REPARADA)
-// ============================================================================
-const App = {
-    selectMode: (mode) => {
-        const body = document.body;
-        
-        // INTERCAMBIO DE MODOS SOLICITADO
-        // PC Button -> Mobile Class (Scroll)
-        // Mobile Button -> PC Class (Grid, No Scroll)
-        
-        if(mode === 'MOBILE') {
-            body.classList.add('mode-mobile'); // Activa Scroll
-        } else {
-            body.classList.remove('mode-mobile'); // Activa Grid
-        }
-        
-        SAVEDATA.deviceMode = mode;
-        SaveManager.save();
-
-        document.querySelector('#screen-device h1').style.display = 'none';
-        document.querySelector('#screen-device div').style.display = 'none';
-        document.getElementById('loading-bar-container').style.display = 'block';
-        document.getElementById('loading-txt').style.display = 'block';
-        
-        let p = 0;
-        const int = setInterval(() => {
-            p += 2;
-            document.getElementById('loading-bar').style.width = p + '%';
-            if(p >= 100) {
-                clearInterval(int);
-                setTimeout(() => {
-                    UI.showScreen('screen-menu');
-                    Game.initMenu();
-                }, 500);
-            }
-        }, 30);
-    }
-};
-
-const CustomNight = {
-    levels: { maifer:0, isaac:0, jomar:0, richard:0, golden:0 },
-    adj: (char, amount) => {
-        CustomNight.levels[char] = Math.max(0, Math.min(20, CustomNight.levels[char] + amount));
-        const el = document.getElementById('val-'+char); 
-        if(el) el.innerText = CustomNight.levels[char];
-    },
-    start: () => {
-        const l = CustomNight.levels;
-        if(l.maifer===20 && l.isaac===20 && l.jomar===20 && l.richard===20) { 
-            Game.startSequence(9, l); 
-        } else { 
-            Game.startSequence('CUSTOM', l); 
-        }
-    }
-};
-
-const Leaderboard = {
-    add: () => { 
-        const name = SAVEDATA.user || document.getElementById('inp-name').value || "ANON"; 
-        FB.addRank(name); 
-        UI.openLeaderboard(); 
-    },
-    addFromWin: () => { 
-        const name = SAVEDATA.user || document.getElementById('win-name').value || "ANON"; 
-        if(FB.active) firebase.database().ref('leaderboard').push({n:name, d:new Date().toLocaleDateString()});
-        else { 
-            SAVEDATA.leaderboard.push({n:name, d:new Date().toLocaleDateString()}); 
-            SaveManager.save();
-        }
-        document.getElementById('win-rank-input').innerHTML = "<p>RANK SAVED!</p>"; 
-    },
-    show: () => { FB.getRank(); }
-};
-
-const CommentSystem = { 
-    post: () => { 
-        const t=document.getElementById('comm-input').value; 
-        if(t) { 
-            FB.postComm(t); 
-            document.getElementById('comm-input').value = ""; 
-        } 
-    }, 
-    render: () => { FB.getComm(); } 
-};
-
-let cheatCode = [];
-const secret = "BOYFRIENDISCOOL456";
-document.addEventListener('keydown', (e) => {
-    cheatCode.push(e.key.toUpperCase());
-    if (cheatCode.length > 20) cheatCode.shift();
-    const codeStr = cheatCode.join('');
-    
-    if (codeStr.includes(secret)) {
-        AudioSys.stopAll(); 
-        UI.showScreen('screen-win');
-        
-        // FIX: Si no hay usuario, pedir nombre
-        let name = SAVEDATA.user;
-        if(!name) {
-            name = prompt("ENTER RANK NAME:", "HACKER");
-        }
-        if(!name) name = "UNKNOWN";
-
-        if(FB.active) firebase.database().ref('leaderboard').push({n:name, d:"HACKED"});
-        else {
-             SAVEDATA.leaderboard.push({n:name, d:"HACKED"});
-             SaveManager.save();
-        }
-        
-        document.getElementById('win-msg').innerText = "CHEAT: RANK ADDED FOR " + name;
-        document.getElementById('win-rank-input').style.display = 'none';
-        cheatCode = [];
-    }
-    if (codeStr.includes("FNFLOVER")) {
-        alert("GOD MODE: FULL UNLOCK"); 
-        SAVEDATA.night = 9; 
-        SAVEDATA.stars = {6:true, 7:true, 8:true, 9:true, 'custom':true};
-        SaveManager.save();
-        location.reload();
-    }
-});
 
 const Game = {
-    state: {}, timers: {}, ai: {}, goldenState: { active: false, timer: null },
+    state: { frozen: false }, timers: {}, ai: {}, goldenState: { active: false, timer: null },
 
     initMenu: () => {
         UserSys.updateUI();
-        const menuNightEl = document.getElementById('menu-night');
-        const realNight = SAVEDATA.night > 8 ? 8 : SAVEDATA.night;
-        if(menuNightEl) menuNightEl.innerText = realNight;
-        
         const row = document.getElementById('star-row');
-        if(row) {
-            row.innerHTML = '';
-            if(SAVEDATA.night > 6) row.innerHTML += '<span class="star earned">★</span>';
-            if(SAVEDATA.night > 7) row.innerHTML += '<span class="star earned">★</span>';
-            if(SAVEDATA.night > 8) row.innerHTML += '<span class="star earned">★</span>';
-            if(SAVEDATA.night > 9) row.innerHTML += '<span class="star earned">★</span>';
-            
-            // Fix: Si se desbloqueó con el cheat, mostrar azules
-            if(SAVEDATA.stars['custom']) {
-                 row.innerHTML = '<span class="star earned blue">★</span><span class="star earned blue">★</span><span class="star earned blue">★</span><span class="star earned blue">★</span>';
-            }
-        }
+        row.innerHTML = '';
+        if(SAVEDATA.night > 6) row.innerHTML += '<span class="star earned">★</span>';
+        if(SAVEDATA.night > 7) row.innerHTML += '<span class="star earned">★</span>';
+        if(SAVEDATA.night > 8) row.innerHTML += '<span class="star earned">★</span>';
+        if(SAVEDATA.night > 9) row.innerHTML += '<span class="star earned">★</span>';
+        if(SAVEDATA.stars['custom']) row.innerHTML = '<span class="star earned blue">★</span><span class="star earned blue">★</span><span class="star earned blue">★</span><span class="star earned blue">★</span>';
         
-        const cnBtn = document.getElementById('btn-custom');
-        if(SAVEDATA.night > 8 && cnBtn) { 
-            cnBtn.disabled = false; 
-            cnBtn.classList.remove('locked'); 
-            const lockIcon = cnBtn.querySelector('.icon-lock');
-            if(lockIcon) lockIcon.style.display = 'none'; 
-        }
-        
-        for(let k in BINDINGS) { 
-            const el = document.getElementById('bind-'+k); 
-            if(el) el.innerText = BINDINGS[k]; 
-        }
-        Lang.apply(); 
-        AudioSys.play('bgm-menu', true);
+        if(SAVEDATA.night > 8) document.getElementById('btn-custom').classList.remove('locked');
+        document.getElementById('btn-custom').disabled = SAVEDATA.night <= 8;
+        Lang.apply(); AudioSys.play('bgm-menu', true);
     },
 
-    newGame: () => { 
-        if(confirm("DELETE DATA?")) { 
-            localStorage.removeItem('mf_v39'); 
-            location.reload(); 
-        } 
-    },
+    newGame: () => { if(confirm(TEXTS[Lang.current].ng_warn)) { SAVEDATA.night = 1; SaveManager.save(); location.reload(); } },
+    hardReset: () => { if(confirm(TEXTS[Lang.current].del_warn)) { localStorage.clear(); location.reload(); } },
 
-    initNight: () => { 
-        let n = parseInt(SAVEDATA.night);
-        if(n > 8) n = 8;
-        Game.startSequence(n); 
-    },
-    
+    initNight: () => { let n = parseInt(SAVEDATA.night); if(n > 8) n = 8; Game.startSequence(n); },
     initCustomSetup: () => { UI.showScreen('screen-custom'); },
 
-    // NUEVA FUNCION: SECUENCIA DE INICIO (AUDIO + PANTALLA NEGRA)
     startSequence: (n, customAI=null) => {
-        AudioSys.stopAll();
-        UI.showScreen('screen-intro');
-        
+        AudioSys.stopAll(); UI.showScreen('screen-intro');
         const t = TEXTS[Lang.current];
-        const displayN = n === 'CUSTOM' ? 'CUSTOM' : n;
-        document.getElementById('intro-msg').innerText = t.intro + displayN + t.am;
-
-        const isNight9 = (n === 9);
-        const introAudio = isNight9 ? 'bgm-night9' : 'sfx-night-start'; // Usar night_9 como intro si es la noche 9
-        
-        // Reproducir audio intro
+        let nightTxt = Lang.current === 'CN' ? (t.night_p + " " + (n==='CUSTOM'?'?':n)) : (t.night_p + " " + (n==='CUSTOM'?'CUSTOM':n));
+        document.getElementById('intro-msg').innerText = nightTxt + " - 12:00 AM";
+        const introAudio = (n === 9) ? 'bgm-night9' : 'sfx-night-start';
         AudioSys.play(introAudio);
         
-        // Configurar evento para cuando termine el audio
-        const audioEl = document.getElementById(introAudio);
-        
         let started = false;
-        const doStart = () => {
-            if(started) return;
-            started = true;
-            Game.startLevel(n, customAI);
-        };
-        
-        if(audioEl) audioEl.onended = doStart;
-        
-        // Fallback por si el audio falla
-        setTimeout(doStart, isNight9 ? 8000 : 5000); // Forzar inicio si el evento no dispara
+        const doStart = () => { if(started) return; started = true; Game.startLevel(n, customAI); };
+        setTimeout(doStart, n===9 ? 8000 : 5000);
     },
 
     startLevel: (n, customAI=null) => {
-        Game.state = { night: n, power: 100, time: 0, batteryTimer: 0, over: false, view: 'office', mask: false, hidden: false, curtain: false, flash: false, toxic: 0, vent: false, inMinigame: false };
-        if(n === 'CUSTOM') {
-            Game.ai = { ...customAI, pos: {maifer:0, isaac:0, jomar:0, vent:0, richard:0}, busy: false };
-            document.getElementById('game-night-num').innerText = "C";
-        } else if (n === 9) {
-            // Noche 9 via custom 20/20/20
-            Game.ai = { maifer:20, isaac:20, jomar:20, richard:20, golden: (customAI ? customAI.golden : 0), pos: {maifer:0, isaac:0, jomar:0, vent:0, richard:0}, busy: false };
-            document.getElementById('game-night-num').innerText = "9";
-        } else {
-            Game.ai = { ...NIGHT_CONFIG[n], pos: {maifer:0, isaac:0, jomar:0, vent:0, richard:0}, busy: false, golden: 0 };
-            document.getElementById('game-night-num').innerText = n;
+        Game.state = { night: n, power: 100, time: 0, batteryTimer: 0, over: false, view: 'office', mask: false, hidden: false, curtain: false, flash: false, toxic: 0, vent: false, inMinigame: false, frozen: false };
+        
+        if(n === 'CUSTOM') { Game.ai = { ...customAI, pos: {maifer:0, isaac:0, jomar:0, vent:0, richard:0}, busy: false }; }
+        else if (n === 9) { Game.ai = { maifer:20, isaac:20, jomar:20, richard:20, golden: (customAI?customAI.golden:0), pos: {maifer:0, isaac:0, jomar:0, vent:0, richard:0}, busy: false }; }
+        else { 
+            const diff = {1:{m:2,i:1,j:1,r:0}, 2:{m:4,i:3,j:2,r:1}, 3:{m:6,i:5,j:5,r:3}, 4:{m:8,i:8,j:7,r:5}, 5:{m:10,i:10,j:10,r:7}, 6:{m:12,i:12,j:12,r:10}, 7:{m:15,i:15,j:15,r:15}, 8:{m:20,i:20,j:20,r:20}};
+            const d = diff[n] || diff[8];
+            Game.ai = { maifer:d.m, isaac:d.i, jomar:d.j, richard:d.r, golden:0, pos: {maifer:0, isaac:0, jomar:0, vent:0, richard:0}, busy: false };
         }
         
-        // Golden Maifer Logic
-        if(customAI && customAI.golden) Game.ai.golden = customAI.golden;
+        let nStr = n === 'CUSTOM' ? 'C' : n; if(Lang.current === 'CN' && typeof n === 'number') nStr = n;
+        document.getElementById('game-night-num').innerText = nStr;
+        UI.showScreen('screen-game'); if(isMobile) document.getElementById('mobile-controls').style.display = 'flex';
         
-        UI.showScreen('screen-game');
+        Mechanics.resetVisuals();
         
-        if(isMobile) document.getElementById('mobile-controls').style.display = 'flex';
+        // --- LOGICA DE AUDIO DIFERIDO (PAUSA EL JUEGO HASTA QUE TERMINE) ---
+        let voiceID = null;
+        if(typeof n === 'number' && n >= 1 && n <= 8) {
+            if(Lang.current === 'ES') voiceID = 'voice-es-' + n;
+            else if(Lang.current === 'EN') voiceID = 'voice-en-' + n;
+        }
 
-        // Iniciar ambiente DESPUES de la intro
-        setTimeout(() => {
-            if(n === 9) {
-                // Si night_9 ya sonó en la intro, quizas poner ambiente genérico o nada
-                // O si night_9 ERA la musica de fondo.
-                AudioSys.play('bgm-game', true, 0.8); 
-            } else {
-                AudioSys.play('bgm-game', true, 0.6);
-            }
-            
-            if(n === 1) AudioSys.play('voice-1');
-            if(n === 2) AudioSys.play('voice-2');
+        if(voiceID) {
+            Game.state.frozen = true; // CONGELAR JUEGO
             document.getElementById('btn-mute').style.display = 'block';
-        }, 500);
+            AudioSys.play(voiceID);
+            
+            // Cuando termina el audio
+            document.getElementById(voiceID).onended = () => { 
+                Game.state.frozen = false; 
+                document.getElementById('btn-mute').style.display = 'none';
+                if(n!==9) AudioSys.play('bgm-game', true, 0.6); 
+            };
 
-        document.getElementById('vent-door').classList.remove('closed');
-        document.getElementById('curtain-fabric').classList.remove('closed');
-        document.getElementById('vis-richard-win').style.display = 'none';
-        document.getElementById('vent-img').style.display = 'none';
-        document.getElementById('layer-mask').style.display = 'none';
-        document.getElementById('layer-flashlight').style.display = 'none';
-        document.getElementById('layer-under-desk').style.display = 'none';
-        document.getElementById('toxic-bar').style.width = '0%';
-        document.querySelectorAll('.anim-img').forEach(i => i.style.display = 'none');
-        
-        Mechanics.moveGenButton();
-        
+            // Botón Mute
+            document.getElementById('btn-mute').onclick = () => {
+                AudioSys.stop(voiceID);
+                Game.state.frozen = false;
+                document.getElementById('btn-mute').style.display = 'none';
+                if(n!==9) AudioSys.play('bgm-game', true, 0.6);
+            };
+        } else {
+            // Sin audio (Chino o Custom) -> Iniciar ya
+            Game.state.frozen = false;
+            document.getElementById('btn-mute').style.display = 'none';
+            if(n!==9) AudioSys.play('bgm-game', true, 0.6); 
+        }
+
         if(Game.timers.main) clearInterval(Game.timers.main);
         if(Game.timers.ai) clearInterval(Game.timers.ai);
         if(Game.timers.golden) clearInterval(Game.timers.golden);
-
-        Game.timers.main = setInterval(Game.loop, 100);
-        Game.timers.ai = setInterval(Game.aiLoop, (n===8 || n===9) ? 1000 : 2000);
         
-        // --- IMPLEMENTACIÓN NUEVA: GOLDEN MAIFER TIMER ---
-        Game.goldenState.active = false;
-        if(n === 6 || n === 7 || n === 8 || n === 9 || Game.ai.golden > 0) {
-             Game.timers.golden = setInterval(Game.goldenLoop, 5000);
-        }
-
-        Lang.apply(); 
-    },
-
-    // --- IMPLEMENTACIÓN NUEVA: GOLDEN LOGIC ---
-    goldenLoop: () => {
-        if(Game.state.over || Game.goldenState.active) return;
-        // Probabilidad aleatoria
-        let chance = 0.3;
-        // Si es custom y tiene nivel
-        if(Game.ai.golden > 0) chance = Game.ai.golden * 0.05;
-
-        if(Math.random() < chance) { 
-             Game.goldenState.active = true;
-             AudioSys.play('sfx-oh'); // oh_oh.mp3
-             // 3 segundos para morir
-             Game.goldenState.timer = setTimeout(() => {
-                 if(Game.goldenState.active) {
-                     // Jumpscare usando golden_maifer.png
-                     Game.die('golden');
-                 }
-             }, 3000);
-        }
+        Game.timers.main = setInterval(Game.loop, 100);
+        Game.timers.ai = setInterval(Game.aiLoop, (n>=8)?1000:2000);
+        if(n>=6 || Game.ai.golden > 0) Game.timers.golden = setInterval(Game.goldenLoop, 5000);
+        
+        Lang.apply();
     },
 
     loop: () => {
-        if(Game.state.over || Game.state.inMinigame) return;
-        
+        if(Game.state.over || Game.state.inMinigame || Game.state.frozen) return;
         Game.state.time += 0.048; 
-        let hour = 12 + Math.floor(Game.state.time / 16.6); 
-        if(hour > 12) hour -= 12;
+        let hour = 12 + Math.floor(Game.state.time / 16.6); if(hour > 12) hour -= 12;
         document.getElementById('hud-time').innerText = (hour === 0 ? 12 : hour) + " AM";
         if(Game.state.time >= 100) { Game.reach8AM(); return; }
         
-        // BATTERY
-        let drainMultiplier = 1; 
-        if(Game.state.flash) drainMultiplier += 2;
-        if(Game.state.vent) drainMultiplier += 1;
-        if(Game.state.view === 'monitor') drainMultiplier += 1;
-        if(Game.state.curtain) drainMultiplier += 1;
-        
-        Game.state.batteryTimer += drainMultiplier; 
-        
-        if(Game.state.batteryTimer >= 50) {
-            Game.state.power--;
-            Game.state.batteryTimer = 0;
-            document.getElementById('pwr-val').innerText = Math.floor(Game.state.power);
-        }
-
+        let drain = 1 + (Game.state.flash?2:0) + (Game.state.vent?1:0) + (Game.state.view==='monitor'?1:0) + (Game.state.curtain?1:0);
+        Game.state.batteryTimer += drain;
+        if(Game.state.batteryTimer >= 50) { Game.state.power--; Game.state.batteryTimer = 0; document.getElementById('pwr-val').innerText = Math.floor(Game.state.power); }
         if(Game.state.power <= 0) { Game.die('power'); return; }
 
-        if(Game.state.mask) { 
-            let toxicRate = 0.2 + (typeof Game.state.night === 'number' ? Game.state.night * 0.05 : 0.5);
-            Game.state.toxic += toxicRate; 
-            document.getElementById('hud-toxic').style.display = 'block'; 
-        } else { 
-            Game.state.toxic = Math.max(0, Game.state.toxic - 0.2); 
-            if(Game.state.toxic <= 0) document.getElementById('hud-toxic').style.display = 'none'; 
-        }
+        if(Game.state.mask) { Game.state.toxic += 0.25; document.getElementById('hud-toxic').style.display='block'; }
+        else { Game.state.toxic = Math.max(0, Game.state.toxic - 0.2); if(Game.state.toxic<=0) document.getElementById('hud-toxic').style.display='none'; }
         document.getElementById('toxic-bar').style.width = Game.state.toxic + "%";
         if(Game.state.toxic >= 100) { Game.die('air'); return; }
         
@@ -2011,424 +880,402 @@ const Game = {
     },
 
     aiLoop: () => {
-        if(Game.state.over) return;
-        
+        if(Game.state.over || Game.state.frozen) return;
         if(Game.ai.pos.jomar === 1) { Game.die('jomar'); return; }
-        
         if(Game.ai.busy && Game.state.night < 8) return;
-
+        
         const rng = (lvl) => (Math.random() * 20) < lvl;
-        let killTime = 4000; 
-        if(Game.state.night >= 5) killTime = 3000;
-
-        // MAIFER
+        
         if(rng(Game.ai.maifer) && Game.ai.pos.maifer < 5 && Game.ai.pos.vent !== 'maifer') {
             Game.ai.pos.maifer++;
             if(Game.ai.pos.maifer === 5) {
                 Game.ai.busy = true; UI.flicker();
                 setTimeout(() => {
-                    AudioSys.play('sfx-maifer', true, 0.3); 
-                    document.getElementById('vis-maifer').style.display = 'block';
+                    AudioSys.play('sfx-maifer', true, 0.3); document.getElementById('vis-maifer').style.display = 'block';
                     setTimeout(() => {
                         if(!Game.state.hidden) Game.die('maifer');
-                        else { 
-                            AudioSys.stopLoops(); 
-                            AudioSys.play('sfx-leave', false, 1.0); 
-                            document.getElementById('vis-maifer').style.display = 'none'; 
-                            Game.ai.pos.maifer = 0; 
-                            Game.ai.busy = false; 
-                        }
-                    }, killTime);
+                        else { AudioSys.stopLoops(); AudioSys.play('sfx-leave'); document.getElementById('vis-maifer').style.display = 'none'; Game.ai.pos.maifer = 0; Game.ai.busy = false; }
+                    }, 3500);
                 }, 1000);
             }
         }
-
-        // RICHARD (WINDOW)
-        if(rng(Game.ai.richard) && Game.ai.pos.richard < 1) {
-            Game.ai.pos.richard = 1;
-            // Go to window directly
-            document.getElementById('vis-richard-win').style.display = 'block'; 
-            setTimeout(() => {
-                if(Game.state.curtain) {
-                    AudioSys.play('sfx-leave');
-                    document.getElementById('vis-richard-win').style.display = 'none';
-                    Game.ai.pos.richard = 0;
-                } else {
-                    Game.die('richard');
-                }
-            }, 5000);
-        }
         
-        // VENTILACION
-        if(Game.ai.pos.vent === 0) {
-             let chance = (typeof Game.state.night === 'number' ? Game.state.night : 10) * 0.05;
-             if(Math.random() < chance) {
-                 if(Math.random() > 0.5 && Game.ai.pos.maifer < 3) {
-                     Game.ai.pos.vent = 'maifer'; 
-                     document.getElementById('vent-img').src = 'maifer.png'; 
-                     document.getElementById('vent-img').style.display = 'block';
-                 } else if (Game.ai.pos.isaac < 3) {
-                     Game.ai.pos.vent = 'isaac'; 
-                     document.getElementById('vent-img').src = 'isaac.png'; 
-                     document.getElementById('vent-img').style.display = 'block';
-                 }
-             }
-        } else {
-             if(Game.state.vent) { 
-                 AudioSys.play('sfx-leave', false, 1.0); 
-                 Game.ai.pos.vent = 0; 
-                 document.getElementById('vent-img').style.display = 'none'; 
-             } 
-             else { 
-                 if(Math.random() > 0.6) Game.die(Game.ai.pos.vent === 'maifer' ? 'maifer' : 'isaac'); 
-             }
-        }
-
-        // ISAAC
         if(rng(Game.ai.isaac) && Game.ai.pos.isaac < 5 && Game.ai.pos.vent !== 'isaac') {
             Game.ai.pos.isaac++;
             if(Game.ai.pos.isaac === 5) {
                 Game.ai.busy = true; UI.flicker();
                 setTimeout(() => {
-                    AudioSys.play('sfx-isaac', true, 0.3); 
-                    document.getElementById('vis-isaac').style.display = 'block';
+                    AudioSys.play('sfx-isaac', true, 0.3); document.getElementById('vis-isaac').style.display = 'block';
                     setTimeout(() => {
                         if(!Game.state.mask) Game.die('isaac');
-                        else { 
-                            AudioSys.stopLoops(); 
-                            AudioSys.play('sfx-leave', false, 1.0); 
-                            document.getElementById('vis-isaac').style.display = 'none'; 
-                            Game.ai.pos.isaac = 0; 
-                            Game.ai.busy = false; 
-                        }
-                    }, killTime + 500); 
+                        else { AudioSys.stopLoops(); AudioSys.play('sfx-leave'); document.getElementById('vis-isaac').style.display = 'none'; Game.ai.pos.isaac = 0; Game.ai.busy = false; }
+                    }, 3500);
                 }, 1000);
             }
         }
-
-        // JOMAR
-        if(Game.ai.pos.jomar === 0 && rng(Game.ai.jomar)) {
-            Game.ai.busy = true; UI.flicker(); Game.ai.pos.jomar = 1; 
-            setTimeout(() => { 
-                if(Game.ai.pos.jomar === 1) { 
-                    document.getElementById('vis-jomar').style.display = 'block'; 
-                    AudioSys.play('sfx-jomar', true, 0.3); 
-                } 
-            }, 500);
+        
+        if(Game.ai.pos.jomar === 0 && rng(Game.ai.jomar)) { Game.ai.busy=true; UI.flicker(); Game.ai.pos.jomar=1; setTimeout(()=>{ if(Game.ai.pos.jomar===1) { document.getElementById('vis-jomar').style.display='block'; AudioSys.play('sfx-jomar', true, 0.3); } }, 500); }
+        if(rng(Game.ai.richard) && Game.ai.pos.richard < 1) { Game.ai.pos.richard = 1; document.getElementById('vis-richard-win').style.display='block'; setTimeout(()=>{ if(Game.state.curtain) { AudioSys.play('sfx-leave'); document.getElementById('vis-richard-win').style.display='none'; Game.ai.pos.richard=0; } else { Game.die('richard'); } }, 5000); }
+        
+        if(Game.ai.pos.vent === 0) {
+            if(Math.random() < 0.3) {
+                 if(Math.random()>0.5 && Game.ai.pos.maifer<3) { Game.ai.pos.vent='maifer'; document.getElementById('vent-img').src='maifer.png'; document.getElementById('vent-img').style.display='block'; }
+                 else if(Game.ai.pos.isaac<3) { Game.ai.pos.vent='isaac'; document.getElementById('vent-img').src='isaac.png'; document.getElementById('vent-img').style.display='block'; }
+            }
+        } else {
+            if(Game.state.vent) { AudioSys.play('sfx-leave'); Game.ai.pos.vent=0; document.getElementById('vent-img').style.display='none'; }
+            else if(Math.random()>0.6) Game.die(Game.ai.pos.vent==='maifer'?'maifer':'isaac');
+        }
+    },
+    
+    goldenLoop: () => {
+        if(Game.state.over || Game.state.frozen || Game.goldenState.active) return;
+        let chance = (Game.ai.golden > 0) ? Game.ai.golden * 0.05 : 0.2;
+        if(Math.random() < chance) {
+            Game.goldenState.active = true; AudioSys.play('sfx-oh');
+            Game.goldenState.timer = setTimeout(() => { if(Game.goldenState.active) Game.die('golden'); }, 3000);
         }
     },
 
-    die: (causeKey) => {
+    die: (cause) => {
         if(Game.state.over) return;
-        Game.state.over = true;
-        clearInterval(Game.timers.main); clearInterval(Game.timers.ai); 
-        if(Game.timers.golden) clearInterval(Game.timers.golden);
-        AudioSys.stopAll();
+        Game.state.over = true; AudioSys.stopAll();
+        clearInterval(Game.timers.main); clearInterval(Game.timers.ai); if(Game.timers.golden) clearInterval(Game.timers.golden);
         
-        const js = document.getElementById('screen-jumpscare'); 
-        const img = document.getElementById('jump-img');
+        document.getElementById('screen-jumpscare').style.display='flex';
+        let img = "maifer.png", snd = "jump-maifer";
+        if(cause==='isaac') { img="isaac.png"; snd="jump-isaac"; }
+        if(cause==='jomar') { img="jomar.png"; snd="jump-jomar"; }
+        if(cause==='richard') { img="richard.png"; snd="jump-richard"; }
+        if(cause==='golden') { img="golden_maifer.png"; snd="jump-golden"; }
+        document.getElementById('jump-img').src = img; AudioSys.play(snd);
         
-        js.style.display = 'flex'; 
-        img.style.display = 'block';
-
-        let src="maifer.png", snd="jump-maifer";
-        if(causeKey === 'maifer' || causeKey === 'vent') { src="maifer.png"; snd="jump-maifer"; }
-        else if(causeKey === 'isaac') { src="isaac.png"; snd="jump-isaac"; }
-        else if(causeKey === 'jomar') { src="jomar.png"; snd="jump-jomar"; }
-        else if(causeKey === 'richard') { src="richard.png"; snd="jump-richard"; }
-        else if(causeKey === 'golden') { src="golden_maifer.png"; snd="jump-golden"; }
-        
-        img.src = src; 
-        AudioSys.play(snd);
-        
-        setTimeout(() => { 
-            js.style.display = 'none'; 
-            UI.showScreen('screen-gameover'); 
-            document.getElementById('death-reason').innerText = TEXTS[Lang.current]['d_'+causeKey] || "GAME OVER"; 
-            AudioSys.play('sfx-gameover', false, 1.0); 
+        setTimeout(() => {
+            document.getElementById('screen-jumpscare').style.display='none';
+            UI.showScreen('screen-gameover');
+            document.getElementById('death-reason').innerText = TEXTS[Lang.current]['d_'+cause] || "GAME OVER";
+            AudioSys.play('sfx-gameover');
         }, 2000);
     },
 
     reach8AM: () => {
-        Game.state.over = true; 
-        clearInterval(Game.timers.main); clearInterval(Game.timers.ai); 
-        if(Game.timers.golden) clearInterval(Game.timers.golden); 
-        AudioSys.stopAll();
+        Game.state.over = true; AudioSys.stopAll(); clearInterval(Game.timers.main); clearInterval(Game.timers.ai); if(Game.timers.golden) clearInterval(Game.timers.golden);
+        UI.showScreen('screen-8am'); AudioSys.play('sfx-win');
         
-        UI.showScreen('screen-8am'); 
-        AudioSys.play('sfx-win');
-        
-        setTimeout(() => { 
-            if(typeof Game.state.night === 'number' && Game.state.night < 9) { 
-                MiniGames.start(Game.state.night); 
-            } else if (Game.state.night === 9) { 
-                SAVEDATA.night = 10; 
-                SAVEDATA.stars[9]=true; 
-                SaveManager.save(); // Save 
-                UI.showScreen('screen-win'); 
-                document.getElementById('win-stars').innerHTML = '<span class="star earned blue">★</span><span class="star earned blue">★</span><span class="star earned blue">★</span><span class="star earned blue">★</span>'; 
-            } else { location.reload(); }
+        // Guardado de emergencia al ganar
+        setTimeout(() => {
+            if(typeof Game.state.night==='number' && Game.state.night<9) MiniGames.start(Game.state.night);
+            else if(Game.state.night===9) { SAVEDATA.night=10; SAVEDATA.stars[9]=true; SaveManager.save(); UI.showScreen('screen-win'); }
+            else location.reload();
         }, 4000);
     }
 };
 
 const Mechanics = {
-    canAct: (isTurningOff) => { 
-        if(isTurningOff) return true; 
-        let count = 0; 
-        if(Game.state.mask) count++; 
-        if(Game.state.view === 'monitor') count++; 
-        if(Game.state.flash) count++; 
-        if(Game.state.hidden) count++; 
-        if(Game.state.vent) count++; 
-        if(Game.state.curtain) count++;
-        return count < 4; 
+    resetVisuals: () => {
+        document.getElementById('vent-door').classList.remove('closed');
+        document.getElementById('curtain-fabric').classList.remove('closed');
+        document.querySelectorAll('.anim-img').forEach(i=>i.style.display='none');
+        document.getElementById('vis-richard-win').style.display='none';
+        document.getElementById('vent-img').style.display='none';
+        document.getElementById('layer-mask').style.display='none';
+        document.getElementById('layer-flashlight').style.display='none';
+        document.getElementById('layer-under-desk').style.display='none';
+        Mechanics.moveGenButton();
     },
-    toggleMonitor: () => { 
-        if(Game.state.over || Game.state.hidden || Game.state.mask) return; 
-        const m = document.getElementById('screen-monitor'); 
-        if(Game.state.view==='monitor') { 
-            m.style.display='none'; 
-            Game.state.view='office'; 
-        } else { 
-            if(!Mechanics.canAct(false)) return; 
-            m.style.display='flex'; 
-            Game.state.view='monitor'; 
-            AudioSys.play('sfx-monitor'); 
-        } 
+    toggleMask: () => {
+        if(Game.state.view!=='office') return;
+        Game.state.mask = !Game.state.mask;
+        document.getElementById('layer-mask').style.display = Game.state.mask ? 'block' : 'none';
+        if(Game.state.mask) { AudioSys.play('sfx-mask', true); if(Game.goldenState.active) { clearTimeout(Game.goldenState.timer); Game.goldenState.active=false; AudioSys.stop('sfx-oh'); } }
+        else AudioSys.stop('sfx-mask');
     },
-    toggleMask: () => { 
-        if(Game.state.view !== 'office') return; 
-        
-        if(!Game.state.mask) { 
-            if(Game.goldenState.active) { 
-                clearTimeout(Game.goldenState.timer); 
-                Game.goldenState.active = false; 
-                AudioSys.stop('sfx-oh'); 
-            } 
-        }
-
-        if(Game.state.mask) { 
-            Game.state.mask = false; 
-            document.getElementById('layer-mask').style.display = 'none'; 
-            AudioSys.stop('sfx-mask'); 
-        } else { 
-            if(!Mechanics.canAct(false)) return; 
-            Game.state.mask = true; 
-            document.getElementById('layer-mask').style.display = 'block'; 
-            AudioSys.play('sfx-mask', true); 
-        } 
+    toggleMonitor: () => {
+        if(Game.state.over || Game.state.mask || Game.state.hidden) return;
+        const m = document.getElementById('screen-monitor');
+        Game.state.view = (Game.state.view==='monitor') ? 'office' : 'monitor';
+        m.style.display = (Game.state.view==='monitor') ? 'flex' : 'none';
+        AudioSys.play('sfx-monitor');
     },
-    toggleFlashlight: () => { 
-        if(Game.state.view !== 'office') return; 
-        
-        if(Game.state.flash) { 
-            Game.state.flash = false; 
-            document.getElementById('layer-flashlight').style.display = 'none'; 
-        } else { 
-            if(!Mechanics.canAct(false)) return; 
-            Game.state.flash = true; 
-            document.getElementById('layer-flashlight').style.display = 'block'; 
-            AudioSys.play('sfx-flash'); 
-            
-            if(Game.ai.pos.jomar === 1) { 
-                Game.ai.pos.jomar = 0; 
-                document.getElementById('vis-jomar').style.display = 'none'; 
-                AudioSys.stopLoops(); 
-                AudioSys.play('sfx-leave', false, 1.0); 
-                Game.ai.busy = false; 
-            } 
-        } 
+    toggleFlashlight: () => {
+        if(Game.state.view!=='office') return;
+        Game.state.flash = !Game.state.flash;
+        document.getElementById('layer-flashlight').style.display = Game.state.flash ? 'block' : 'none';
+        if(Game.state.flash) { AudioSys.play('sfx-flash'); if(Game.ai.pos.jomar===1) { Game.ai.pos.jomar=0; document.getElementById('vis-jomar').style.display='none'; AudioSys.stopLoops(); AudioSys.play('sfx-leave'); Game.ai.busy=false; } }
     },
-    toggleHide: () => { 
-        if(Game.state.view !== 'office') return; 
-        if(Game.state.hidden) { 
-            Game.state.hidden = false; 
-            document.getElementById('layer-under-desk').style.display = 'none'; 
-        } else { 
-            if(!Mechanics.canAct(false)) return; 
-            Game.state.hidden = true; 
-            document.getElementById('layer-under-desk').style.display = 'flex'; 
-            AudioSys.play('sfx-hide'); 
-        } 
+    toggleHide: () => {
+        if(Game.state.view!=='office') return;
+        Game.state.hidden = !Game.state.hidden;
+        document.getElementById('layer-under-desk').style.display = Game.state.hidden ? 'flex' : 'none';
+        if(Game.state.hidden) AudioSys.play('sfx-hide');
     },
-    toggleVent: () => { 
-        if(Game.state.view !== 'office') return; 
-        
-        if(Game.state.vent) { 
-            Game.state.vent = false; 
-            AudioSys.play('sfx-vent-close'); 
-        } else { 
-            if(!Mechanics.canAct(false)) return; 
-            Game.state.vent = true; 
-            AudioSys.play('sfx-vent-close'); 
-        } 
-        document.getElementById('vent-door').classList.toggle('closed', Game.state.vent); 
-        document.getElementById('vent-btn').classList.toggle('active', Game.state.vent); 
+    toggleVent: () => {
+        if(Game.state.view!=='office') return;
+        Game.state.vent = !Game.state.vent;
+        document.getElementById('vent-door').classList.toggle('closed', Game.state.vent);
+        AudioSys.play('sfx-vent-close');
     },
-    toggleCurtain: () => { 
-        if(Game.state.view !== 'office') return;
+    toggleCurtain: () => {
+        if(Game.state.view!=='office') return;
         Game.state.curtain = !Game.state.curtain;
-        const fabric = document.getElementById('curtain-fabric');
-        
-        if(Game.state.curtain) { 
-            fabric.classList.add('closed'); 
-            AudioSys.play('sfx-curtain'); 
-        } else { 
-            fabric.classList.remove('closed'); 
-            AudioSys.play('sfx-curtain'); 
-        }
+        document.getElementById('curtain-fabric').classList.toggle('closed', Game.state.curtain);
+        AudioSys.play('sfx-curtain');
     },
-    muteCall: () => { 
-        AudioSys.stop('voice-1'); 
-        AudioSys.stop('voice-2'); 
-        document.getElementById('btn-mute').style.display = 'none'; 
-    },
-    moveGenButton: () => { 
-        const btn = document.getElementById('gen-btn'); 
-        btn.style.left = Math.random()*90 + 'px'; 
-        btn.style.top = Math.random()*140 + 'px'; 
-        btn.style.display = 'block'; 
-    },
-    chargeGen: () => { 
-        if(Game.state.over) return; 
-        Game.state.power = Math.min(100, Game.state.power + 2); 
-        document.getElementById('pwr-val').innerText = Math.floor(Game.state.power); 
-        AudioSys.play('sfx-gen'); 
-        document.getElementById('gen-btn').style.display = 'none'; 
-        setTimeout(Mechanics.moveGenButton, 3000 + Math.random()*5000); 
-    }
+    muteCall: () => { /* Manejado en startLevel dinámicamente */ },
+    chargeGen: () => { Game.state.power=Math.min(100, Game.state.power+2); AudioSys.play('sfx-gen'); document.getElementById('gen-btn').style.display='none'; setTimeout(Mechanics.moveGenButton, 3000+Math.random()*5000); },
+    moveGenButton: () => { const b=document.getElementById('gen-btn'); b.style.left=Math.random()*90+'px'; b.style.top=Math.random()*140+'px'; b.style.display='block'; }
 };
 
 const Monitor = {
-    current: 6, 
-    setCam: (id) => { 
-        Monitor.current = id; 
-        document.getElementById('cam-id').innerText = "0"+id; 
-        document.querySelectorAll('.cam-btn').forEach(b => b.classList.remove('active')); 
-        document.getElementById('btn-c'+id).classList.add('active'); 
-        AudioSys.play('sfx-cam'); 
-        Monitor.update(); 
+    current: 6,
+    setCam: (id) => {
+        Monitor.current = id;
+        document.getElementById('cam-id').innerText = "0"+id;
+        document.querySelectorAll('.cam-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('btn-c'+id).classList.add('active');
+        AudioSys.play('sfx-cam'); Monitor.update();
     },
     update: () => {
         if(Game.state.view !== 'monitor') return;
+        const div = document.getElementById('cam-content'); div.innerHTML = '';
+        const c = Monitor.current, p = Game.ai.pos, t = TEXTS[Lang.current];
+        let h = '';
         
-        const div = document.getElementById('cam-content'); 
-        div.innerHTML = ''; 
-        const c = Monitor.current; 
-        const p = Game.ai.pos; 
-        let html = '';
+        const s_idle = `(${t.mon_idle})`;
+        const s_det = `(${t.mon_detected})`;
+        const s_near = `(${t.mon_near})`;
 
-        if(c===6) { if(p.maifer === 0) html += '<div class="cam-spot">MAIFER (IDLE)</div>'; if(p.isaac === 0) html += '<div class="cam-spot">ISAAC (IDLE)</div>'; }
-        if(c===5 && p.maifer === 1) html += '<div class="cam-spot active-anim">MAIFER DETECTED</div>';
-        if(c===4 && p.isaac === 1) html += '<div class="cam-spot active-anim">ISAAC DETECTED</div>';
-        if(c===3) { if(p.maifer === 2) html += '<div class="cam-spot active-anim">MAIFER DETECTED</div>'; if(p.isaac === 2) html += '<div class="cam-spot active-anim">ISAAC DETECTED</div>'; }
-        if(c===2) { if(p.maifer === 3) html += '<div class="cam-spot active-anim">MAIFER DETECTED</div>'; if(p.isaac === 4) html += '<div class="cam-spot active-anim">ISAAC (NEAR)</div>'; }
-        if(c===1) { if(p.maifer === 4) html += '<div class="cam-spot active-anim">MAIFER (NEAR)</div>'; if(p.isaac === 3) html += '<div class="cam-spot active-anim">ISAAC DETECTED</div>'; }
-        
-        if(html === '') html = '<h1 style="color:#333;">NO SIGNAL</h1>'; 
-        div.innerHTML = html;
+        if(c===6) { if(p.maifer===0) h+=`<div class="cam-spot">${t.char_maifer} ${s_idle}</div>`; if(p.isaac===0) h+=`<div class="cam-spot">${t.char_isaac} ${s_idle}</div>`; }
+        if(c===5 && p.maifer===1) h+=`<div class="cam-spot active-anim">${t.char_maifer} ${s_det}</div>`;
+        if(c===4 && p.isaac===1) h+=`<div class="cam-spot active-anim">${t.char_isaac} ${s_det}</div>`;
+        if(c===3) { if(p.maifer===2) h+=`<div class="cam-spot active-anim">${t.char_maifer} ${s_det}</div>`; if(p.isaac===2) h+=`<div class="cam-spot active-anim">${t.char_isaac} ${s_det}</div>`; }
+        if(c===2) { if(p.maifer===3) h+=`<div class="cam-spot active-anim">${t.char_maifer} ${s_det}</div>`; if(p.isaac===4) h+=`<div class="cam-spot active-anim">${t.char_isaac} ${s_near}</div>`; }
+        if(c===1) { if(p.maifer===4) h+=`<div class="cam-spot active-anim">${t.char_maifer} ${s_near}</div>`; if(p.isaac===3) h+=`<div class="cam-spot active-anim">${t.char_isaac} ${s_det}</div>`; }
+
+        if(h==='') h=`<h1 style="color:#333;">${t.no_sig}</h1>`;
+        div.innerHTML = h;
     }
 };
 
 const UI = {
-    modalOpen: false,
-    showScreen: (id) => { 
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
-        document.getElementById(id).classList.add('active'); 
+    showScreen: (id) => { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); },
+    openLore: () => document.getElementById('modal-lore').style.display='flex',
+    openUpdates: () => document.getElementById('modal-updates').style.display='flex',
+    openSettings: () => document.getElementById('modal-settings').style.display='flex',
+    openLeaderboard: () => { document.getElementById('modal-leaderboard').style.display='flex'; FB.getRank(); },
+    openComments: () => { document.getElementById('modal-comments').style.display='flex'; FB.getComm(); },
+    closeModals: () => document.querySelectorAll('.modal-overlay').forEach(m=>m.style.display='none'),
+    
+    checkWarning: () => {
+        if(!SAVEDATA.audioWarn) {
+            document.getElementById('screen-warning').style.display='flex';
+        }
     },
-    openLore: () => { document.getElementById('modal-lore').style.display = 'flex'; },
-    openUpdates: () => { document.getElementById('modal-updates').style.display = 'flex'; },
-    openSettings: () => { document.getElementById('modal-settings').style.display = 'flex'; },
-    openLeaderboard: () => { document.getElementById('modal-leaderboard').style.display = 'flex'; Leaderboard.show(); },
-    openComments: () => { document.getElementById('modal-comments').style.display = 'flex'; CommentSystem.render(); },
-    closeModals: () => { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); },
+    closeWarning: (dontShow) => {
+        document.getElementById('screen-warning').style.display='none';
+        if(dontShow) {
+            SAVEDATA.audioWarn = true;
+            SaveManager.save();
+        }
+        AudioSys.play('bgm-menu', true);
+    },
     flicker: () => { 
-        if(!Config.glitchEnabled) return; 
-        const el = document.getElementById('layer-flicker'); 
-        el.classList.remove('flickering'); 
-        void el.offsetWidth; 
-        el.classList.add('flickering'); 
+        if(Config.glitchEnabled) { const e=document.getElementById('layer-flicker'); e.classList.remove('flickering'); void e.offsetWidth; e.classList.add('flickering'); } 
     }
 };
 
-// --- MINIGAMES FIXED & BALANCED ---
+// ============================================================================
+// SISTEMA DE CUENTAS (REPARADO Y NORMALIZADO)
+// ============================================================================
+const UserSys = {
+    openAuth: (type) => {
+        document.getElementById('modal-auth').style.display = 'flex';
+        document.getElementById('auth-title').setAttribute('data-mode', type);
+        Lang.apply();
+    },
+    submit: () => {
+        const u = document.getElementById('auth-user').value.trim().toLowerCase(); // NORMALIZAR PARA EVITAR DUPLICADOS "Admin" vs "admin"
+        const p = document.getElementById('auth-pass').value.trim();
+        const mode = document.getElementById('auth-title').getAttribute('data-mode');
+        
+        if(u.length < 3) return alert("User too short / Usuario muy corto (Min 3)");
+        
+        const ref = firebase.database().ref(DB_PATH.users + '/' + u.replace('.', '_')); // SANITIZAR KEY
+        
+        ref.once('value').then(s => {
+            if(mode === 'reg') {
+                if(s.exists()) {
+                    alert("USER ALREADY EXISTS / USUARIO YA EXISTE");
+                } else {
+                    ref.set({pass:p, data: SAVEDATA}) // Guardar datos actuales al registrar
+                    .then(() => {
+                        alert("REGISTERED. PLEASE LOGIN."); 
+                        UserSys.openAuth('login');
+                    });
+                }
+            } else {
+                if(s.exists()) {
+                    if(s.val().pass === p) {
+                        // EXITO LOGIN
+                        if(s.val().data) SAVEDATA = s.val().data;
+                        SAVEDATA.user = u;
+                        SaveManager.save(); // Sincronizar Inmediatamente
+                        UserSys.updateUI();
+                        UI.closeModals();
+                        Game.initMenu();
+                        alert("LOGIN SUCCESS / SESION INICIADA");
+                    } else {
+                        alert("WRONG PASSWORD / CONTRASEÑA INCORRECTA");
+                    }
+                } else {
+                    alert("USER NOT FOUND / USUARIO NO ENCONTRADO");
+                }
+            }
+        }).catch(err => alert("DB ERROR: " + err.message));
+    },
+    updateUI: () => {
+        if(SAVEDATA.user) {
+            document.getElementById('btn-login').style.display='none';
+            document.getElementById('btn-reg').style.display='none';
+            document.getElementById('user-display').style.display='block';
+        }
+    }
+};
+
+const CustomNight = {
+    levels: { maifer:0, isaac:0, jomar:0, richard:0, golden:0 },
+    adj: (c,v) => {
+        CustomNight.levels[c] = Math.max(0, Math.min(20, CustomNight.levels[c]+v));
+        document.getElementById('val-'+c).innerText = CustomNight.levels[c];
+    },
+    start: () => {
+        const l = CustomNight.levels;
+        if(l.maifer===20 && l.isaac===20 && l.jomar===20 && l.richard===20) Game.startSequence(9, l);
+        else Game.startSequence('CUSTOM', l);
+    }
+};
+
+const Config = {
+    glitchEnabled: true,
+    shakeEnabled: true,
+    particlesHigh: true,
+    sensitivity: 5,
+    toggleFullscreen: () => { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{}); else if(document.exitFullscreen) document.exitFullscreen(); },
+    toggleGlitch: () => { Config.glitchEnabled = !Config.glitchEnabled; },
+    toggleStatic: (c) => document.getElementById('cam-static').style.display = c ? 'block' : 'none',
+    togglePerspective: (c) => document.getElementById('view-office').style.transform = c ? 'perspective(1000px) rotateX(2deg)' : 'none',
+    toggleQuality: () => { Config.particlesHigh = !Config.particlesHigh; Lang.apply(); },
+    toggleShake: (c) => { Config.shakeEnabled = c; },
+    setSens: (v) => { Config.sensitivity = v; }
+};
+
+const AudioSys = {
+    volume: 1.0,
+    setVolume: (v) => { AudioSys.volume = v/100; document.querySelectorAll('audio').forEach(a=>a.volume=AudioSys.volume); },
+    play: (id, loop=false, vol=1.0) => { try { const s=document.getElementById(id); if(s) { s.loop=loop; s.volume=vol*AudioSys.volume; s.currentTime=0; s.play().catch(()=>{}); } } catch(e){} },
+    stop: (id) => { const s=document.getElementById(id); if(s) { s.pause(); s.currentTime=0; } },
+    stopAll: () => document.querySelectorAll('audio').forEach(a=>{a.pause();a.currentTime=0;}),
+    stopLoops: () => { AudioSys.stop('sfx-maifer'); AudioSys.stop('sfx-isaac'); AudioSys.stop('sfx-jomar'); }
+};
+
+const App = {
+    selectMode: (m) => {
+        if(m==='MOBILE') document.body.classList.add('mode-mobile');
+        else document.body.classList.remove('mode-mobile');
+        
+        document.querySelector('#screen-device h1').style.display='none';
+        document.querySelector('#screen-device div').style.display='none';
+        document.getElementById('loading-bar-container').style.display='block';
+        
+        let p=0; const i=setInterval(()=>{
+            p+=2; document.getElementById('loading-bar').style.width=p+'%';
+            if(p>=100) { clearInterval(i); UI.showScreen('screen-menu'); Game.initMenu(); UI.checkWarning(); }
+        },30);
+    }
+};
+
+const FB = {
+    getRank: () => {
+        firebase.database().ref(DB_PATH.rank).limitToLast(10).once('value', s => {
+            const l=document.getElementById('lb-list'); l.innerHTML='';
+            if(s.exists()) { let a=[]; s.forEach(c=>a.push(c.val())); a.reverse().forEach(p=>{ l.innerHTML += `<li><span style="color:#0f0">${p.n}</span> <span>${p.d}</span></li>`; }); }
+        });
+    },
+    getComm: () => {
+        firebase.database().ref(DB_PATH.comm).limitToLast(20).on('value', s => {
+            const b=document.getElementById('comment-feed'); b.innerHTML='';
+            if(s.exists()) s.forEach(c => { let v=c.val(); b.innerHTML += `<div class="comment-box"><span class="comment-user" style="color:${v.u===SAVEDATA.user?'gold':'#0088ff'}">${v.u}:</span> <span class="comment-msg">${v.t}</span></div>`; });
+        });
+    }
+};
+
+// ============================================================================
+// IA DE MODERACIÓN MEJORADA (FILTRO POSITIVO)
+// ============================================================================
+const ModSystem = {
+    // Palabras prohibidas
+    badWords: ['idiot','stupid','tonto','mierda','puto','fck','shit','ass','bitch','crap','noob','manco','basura','fuck','pene','sex','tonta'],
+    // Palabras REQUERIDAS (El mensaje DEBE tener al menos una para ser considerado relevante al juego)
+    requiredContext: ['bug','error','glitch','idea','add','game','juego','noche','night','maifer','isaac','jomar','richard','buen','good','cool','ayuda','help','fix','pantalla','screen','audio','sound'],
+    
+    check: (txt) => {
+        const lower = txt.toLowerCase();
+        // 1. Check Bad Words
+        if(ModSystem.badWords.some(w => lower.includes(w))) return false;
+        // 2. Check Context (Must contain game terms)
+        if(!ModSystem.requiredContext.some(w => lower.includes(w))) return false;
+        
+        return true;
+    }
+};
+
+const CommentSystem = {
+    post: () => {
+        if(!SAVEDATA.user) return alert(TEXTS[Lang.current].guest_err);
+        const t = document.getElementById('comm-input').value;
+        if(!t) return;
+        
+        if(!ModSystem.check(t)) {
+            alert("⚠️ SYSTEM: Message Rejected.\nREASON: Insult detected OR Message not related to game feedback (Bugs/Ideas).\nRAZON: Insulto O Mensaje sin relación al juego (Bugs/Ideas).");
+            return;
+        }
+
+        firebase.database().ref(DB_PATH.comm).push({u:SAVEDATA.user, t:t}); 
+        document.getElementById('comm-input').value="";
+    }
+};
+
 const MiniGames = {
     active: false, night: 0, ctx: null, player: {}, enemies: [], target: {}, state: {}, frame: 0,
     start: (n) => { 
-        Game.state.inMinigame = true; 
-        MiniGames.night = n; 
-        MiniGames.active = true; 
-        MiniGames.frame = 0; 
-        UI.showScreen('screen-minigame'); 
-        AudioSys.play('bgm-minigame', true); 
-        
-        const c = document.getElementById('mg-canvas'); 
-        MiniGames.ctx = c.getContext('2d'); 
-        
-        const t = TEXTS[Lang.current]; 
-        document.getElementById('mg-info').innerText = t['mg_'+n] || "MINIGAME "+n; 
-        document.getElementById('mg-controls-hint').innerText = "ARROWS / MOUSE / SPACE"; 
-        
-        MiniGames.initLogic(n); 
-        requestAnimationFrame(MiniGames.loop); 
-        
-        document.onkeydown = MiniGames.handleInput; 
-        c.onmousedown = MiniGames.handleClick; 
-        c.onmousemove = MiniGames.handleMove; 
+        Game.state.inMinigame = true; MiniGames.night = n; MiniGames.active = true; MiniGames.frame = 0; UI.showScreen('screen-minigame'); AudioSys.play('bgm-minigame', true); 
+        const c = document.getElementById('mg-canvas'); MiniGames.ctx = c.getContext('2d'); 
+        Lang.apply(); 
+        MiniGames.initLogic(n); requestAnimationFrame(MiniGames.loop); 
+        document.onkeydown = MiniGames.handleInput; c.onmousedown = MiniGames.handleClick; c.onmousemove = MiniGames.handleMove; 
     },
     initLogic: (n) => {
-        const w=600, h=400; 
-        MiniGames.enemies = []; 
-        // N1: Dodge
-        if(n===1) { 
-            MiniGames.player = {x:50, y:300, w:30, h:30, duck:false}; 
-            MiniGames.enemies = [{x:600, y:280, w:40, h:60, spd:4}]; 
-        } 
-        // N2: Find Mask
-        else if(n===2) { 
-            document.getElementById('mg-controls-hint').innerText = "GET THE BLUE BOX. AVOID GREY.";
-            MiniGames.player = {x:20, y:20, w:20, h:20}; 
-            MiniGames.target = {x:550, y:350, w:30, h:30, active:true}; 
-            MiniGames.enemies = [
-                {x:150,y:0,h:300,dir:1,spd:2}, 
-                {x:300,y:100,h:300,dir:-1,spd:2}, 
-                {x:450,y:0,h:300,dir:1,spd:2}
-            ]; 
-        } 
+        const w=600; MiniGames.enemies = []; 
+        if(n===1) { MiniGames.player = {x:50, y:300, w:30, h:30, duck:false}; MiniGames.enemies = [{x:600, y:280, w:40, h:60, spd:4}]; } 
+        else if(n===2) { MiniGames.player = {x:20, y:20, w:20, h:20}; MiniGames.target = {x:550, y:350, w:30, h:30, active:true}; MiniGames.enemies = [{x:150,y:0,h:300,dir:1,spd:2}, {x:300,y:100,h:300,dir:-1,spd:2}, {x:450,y:0,h:300,dir:1,spd:2}]; } 
         else if(n===3) { MiniGames.state = {score:0}; MiniGames.spawnClickTarget(); } 
         else if(n===4) { MiniGames.enemies = []; MiniGames.player = {x:300, y:300, w:10, h:10}; } 
-        else if(n===5) { MiniGames.state = {energy: 50, timer: 1000}; document.getElementById('mg-controls-hint').innerText = TEXTS[Lang.current].mg5_hint; } 
+        else if(n===5) { MiniGames.state = {energy: 50, timer: 1000}; } 
         else if(n===6) { MiniGames.state = {timer: Math.random()*200 + 100, color: 'red', waiting: true}; } 
         else if(n===7) { MiniGames.player = {x:20, y:20, w:20, h:20}; MiniGames.target = {x:560, y:360, w:20, h:20}; MiniGames.enemies = [{x:100,y:50,w:20,h:350}, {x:250,y:0,w:20,h:350}, {x:400,y:50,w:20,h:350}]; } 
         else if(n===8) { MiniGames.player = {x:300, y:200, w:20, h:20}; MiniGames.state = {timer: 1800}; }
     },
-    spawnClickTarget: () => { 
-        MiniGames.enemies.push({x:Math.random()*560+20, y:Math.random()*360+20, r:20, life:60}); 
-    },
+    spawnClickTarget: () => { MiniGames.enemies.push({x:Math.random()*560+20, y:Math.random()*360+20, r:20, life:60}); },
     loop: () => {
         if(!MiniGames.active) return; const ctx = MiniGames.ctx; const w=600, h=400; ctx.fillStyle = '#111'; ctx.fillRect(0,0,w,h); MiniGames.frame++; const n = MiniGames.night;
-        
         if(n===1) { ctx.fillStyle = MiniGames.player.duck ? '#050' : '#0f0'; ctx.fillRect(MiniGames.player.x, MiniGames.player.duck?320:300, 30, MiniGames.player.duck?15:30); MiniGames.enemies.forEach(e => { e.x -= e.spd; ctx.fillStyle = '#f00'; ctx.fillRect(e.x, e.y, e.w, e.h); if(e.x < -50) { e.x = 650; e.spd = 4+Math.random()*3; } if(MiniGames.col(MiniGames.player, e) && !MiniGames.player.duck) MiniGames.lose(); }); if(MiniGames.frame > 900) MiniGames.win(); } 
-        
-        else if(n===2) {
-            ctx.fillStyle = '#0f0'; ctx.fillRect(MiniGames.player.x, MiniGames.player.y, 20, 20);
-            ctx.fillStyle = '#00f'; ctx.fillRect(MiniGames.target.x, MiniGames.target.y, 30, 30);
-            MiniGames.enemies.forEach(e => { 
-                e.y += e.dir * e.spd;
-                if(e.y < 0 || e.y > 100) e.dir *= -1;
-                ctx.fillStyle = '#555'; ctx.fillRect(e.x, e.y, 20, e.h); 
-                if(MiniGames.col(MiniGames.player, {x:e.x, y:e.y, w:20, h:e.h})) MiniGames.lose(); 
-            });
-            if(MiniGames.col(MiniGames.player, MiniGames.target)) MiniGames.win();
-        } 
-        else if(n===3) { ctx.fillStyle = '#fff'; ctx.fillText("CLICK GREEN ORBS: "+MiniGames.state.score+"/10", 20, 30); MiniGames.enemies.forEach((e,i) => { e.life--; ctx.fillStyle='#0f0'; ctx.beginPath(); ctx.arc(e.x,e.y,e.r,0,6.28); ctx.fill(); if(e.life<=0) { MiniGames.enemies.splice(i,1); MiniGames.spawnClickTarget(); } }); if(MiniGames.state.score >= 10) MiniGames.win(); } 
+        else if(n===2) { ctx.fillStyle = '#0f0'; ctx.fillRect(MiniGames.player.x, MiniGames.player.y, 20, 20); ctx.fillStyle = '#00f'; ctx.fillRect(MiniGames.target.x, MiniGames.target.y, 30, 30); MiniGames.enemies.forEach(e => { e.y += e.dir * e.spd; if(e.y < 0 || e.y > 100) e.dir *= -1; ctx.fillStyle = '#555'; ctx.fillRect(e.x, e.y, 20, e.h); if(MiniGames.col(MiniGames.player, {x:e.x, y:e.y, w:20, h:e.h})) MiniGames.lose(); }); if(MiniGames.col(MiniGames.player, MiniGames.target)) MiniGames.win(); } 
+        else if(n===3) { ctx.fillStyle = '#fff'; ctx.fillText(MiniGames.state.score+"/10", 20, 30); MiniGames.enemies.forEach((e,i) => { e.life--; ctx.fillStyle='#0f0'; ctx.beginPath(); ctx.arc(e.x,e.y,e.r,0,6.28); ctx.fill(); if(e.life<=0) { MiniGames.enemies.splice(i,1); MiniGames.spawnClickTarget(); } }); if(MiniGames.state.score >= 10) MiniGames.win(); } 
         else if(n===4) { ctx.fillStyle = '#0f0'; ctx.beginPath(); ctx.arc(MiniGames.player.x, MiniGames.player.y, 10, 0, 6.28); ctx.fill(); if(MiniGames.frame % 10 === 0) { MiniGames.enemies.push({x:Math.random()*w, y:-20, w:20, h:20, vy:3+Math.random()*2}); } MiniGames.enemies.forEach(e => { e.y += e.vy; ctx.fillStyle='red'; ctx.fillRect(e.x, e.y, e.w, e.h); if(Math.abs(e.x - MiniGames.player.x) < 15 && Math.abs(e.y - MiniGames.player.y) < 15) MiniGames.lose(); }); if(MiniGames.frame > 1000) MiniGames.win(); } 
-        else if(n===5) { MiniGames.state.energy -= 0.5; MiniGames.state.timer--; ctx.fillStyle='#fff'; ctx.fillText("KEEP CHARGED! (SPACE)", 200, 50); ctx.fillStyle = '#333'; ctx.fillRect(150, 200, 300, 30); ctx.fillStyle = MiniGames.state.energy > 20 ? '#0f0' : '#f00'; ctx.fillRect(150, 200, (MiniGames.state.energy/100)*300, 30); if(MiniGames.state.energy <= 0) MiniGames.lose(); if(MiniGames.state.timer <= 0) MiniGames.win(); } 
+        else if(n===5) { MiniGames.state.energy -= 0.5; MiniGames.state.timer--; ctx.fillStyle = '#333'; ctx.fillRect(150, 200, 300, 30); ctx.fillStyle = MiniGames.state.energy > 20 ? '#0f0' : '#f00'; ctx.fillRect(150, 200, (MiniGames.state.energy/100)*300, 30); if(MiniGames.state.energy <= 0) MiniGames.lose(); if(MiniGames.state.timer <= 0) MiniGames.win(); } 
         else if(n===6) { if(MiniGames.state.waiting) { MiniGames.state.timer--; ctx.fillStyle = 'red'; ctx.fillRect(200,100,200,200); if(MiniGames.state.timer <= 0) { MiniGames.state.waiting = false; MiniGames.state.color = 'green'; MiniGames.state.timer = 60; } } else { ctx.fillStyle = 'green'; ctx.fillRect(200,100,200,200); MiniGames.state.timer--; if(MiniGames.state.timer <= 0) MiniGames.lose(); } } 
         else if(n===7) { ctx.fillStyle = '#0f0'; ctx.fillRect(MiniGames.player.x, MiniGames.player.y, 20, 20); ctx.fillStyle = 'gold'; ctx.fillRect(MiniGames.target.x, MiniGames.target.y, 20, 20); MiniGames.enemies.forEach(e => { ctx.fillStyle = '#555'; ctx.fillRect(e.x, e.y, e.w, e.h); if(MiniGames.col(MiniGames.player, e)) MiniGames.player = {x:20, y:20, w:20, h:20}; }); if(MiniGames.col(MiniGames.player, MiniGames.target)) MiniGames.win(); } 
         else if(n===8) { ctx.fillStyle = '#0f0'; ctx.fillRect(MiniGames.player.x, MiniGames.player.y, 20, 20); if(MiniGames.frame % 5 === 0) { let side = Math.floor(Math.random()*4); let e = {w:10,h:10}; if(side===0) { e.x=Math.random()*600; e.y=0; e.vx=(Math.random()-0.5)*2; e.vy=3; } if(side===1) { e.x=Math.random()*600; e.y=400; e.vx=(Math.random()-0.5)*2; e.vy=-3; } if(side===2) { e.x=0; e.y=Math.random()*400; e.vx=3; e.vy=(Math.random()-0.5)*2; } if(side===3) { e.x=600; e.y=Math.random()*400; e.vx=-3; e.vy=(Math.random()-0.5)*2; } MiniGames.enemies.push(e); } MiniGames.enemies.forEach(e => { e.x+=e.vx; e.y+=e.vy; ctx.fillStyle='red'; ctx.fillRect(e.x,e.y,e.w,e.h); if(MiniGames.col(MiniGames.player,e)) MiniGames.lose(); }); if(MiniGames.frame > 1200) MiniGames.win(); }
-        
         requestAnimationFrame(MiniGames.loop);
     },
     col: (r1,r2) => (r1.x < r2.x+r2.w && r1.x+r1.w > r2.x && r1.y < r2.y+r2.h && r1.y+r1.h > r2.y),
@@ -2436,29 +1283,25 @@ const MiniGames = {
     handleMove: (e) => { if(MiniGames.night === 4) { const r = document.getElementById('mg-canvas').getBoundingClientRect(); MiniGames.player.x = e.clientX - r.left; MiniGames.player.y = e.clientY - r.top; } },
     handleClick: (e) => { if(MiniGames.night===3) { const r = document.getElementById('mg-canvas').getBoundingClientRect(); const mx = e.clientX-r.left, my = e.clientY-r.top; MiniGames.enemies.forEach((t,i) => { if(Math.sqrt((mx-t.x)**2+(my-t.y)**2) < t.r) { MiniGames.state.score++; MiniGames.enemies.splice(i,1); MiniGames.spawnClickTarget(); } }); } if(MiniGames.night===6) { if(!MiniGames.state.waiting) MiniGames.win(); else MiniGames.lose(); } },
     win: () => { 
-        MiniGames.active=false; 
-        AudioSys.stop('bgm-minigame'); 
-        const n = MiniGames.night; 
-        SAVEDATA.night = parseInt(n)+1; 
-        SAVEDATA.stars[n]=true; 
-        
-        // --- GUARDADO FORZADO Y NOTIFICACION ---
-        SaveManager.save();
-        alert("NIGHT COMPLETED! PROGRESS SAVED.");
-        
-        location.reload(); 
+        MiniGames.active=false; AudioSys.stop('bgm-minigame'); const n = MiniGames.night; SAVEDATA.night = parseInt(n)+1; SAVEDATA.stars[n]=true; 
+        SaveManager.save(); // GUARDADO FORZADO
+        alert("COMPLETED! PROGRESS SAVED."); location.reload(); 
     },
-    lose: () => { 
-        MiniGames.active=false; 
-        AudioSys.stop('bgm-minigame'); 
-        alert("FAIL. TRY AGAIN."); 
-        location.reload(); 
-    }
+    lose: () => { MiniGames.active=false; AudioSys.stop('bgm-minigame'); alert("FAIL."); location.reload(); }
 };
 
-// AUTO-START LOGIC
-if(isMobile) document.getElementById('mobile-controls').style.display='flex';
-// No cargamos automaticamente la app para forzar el selector
+const Input={rebind:(a)=>{const b=document.getElementById('bind-'+a);b.innerText="...";const h=(e)=>{e.preventDefault();SAVEDATA.binds=SAVEDATA.binds||{};SAVEDATA.binds[a]=e.code;b.innerText=e.code;SaveManager.save();document.removeEventListener('keydown',h);};document.addEventListener('keydown',h);}};
+const BINDINGS={mask:'Space',flash:'KeyF',hide:'ControlLeft',curtain:'KeyS',monitor:'Tab',vent:'KeyV'};
+document.addEventListener('keydown', (e) => {
+    if(Game.state.over||UI.modalOpen||Game.state.inMinigame) return;
+    const b = SAVEDATA.binds || BINDINGS, k=e.code;
+    if(k===b.mask) Mechanics.toggleMask(); if(k===b.flash) Mechanics.toggleFlashlight();
+    if(k===b.hide) Mechanics.toggleHide(); if(k===b.curtain) Mechanics.toggleCurtain();
+    if(k===b.monitor) Mechanics.toggleMonitor(); if(k===b.vent) Mechanics.toggleVent();
+});
+
+let c=[]; document.addEventListener('keydown', e=>{c.push(e.key);if(c.length>20)c.shift();if(c.join('').includes("BOYFRIEND"))alert("CHEAT ACTIVATED");});
+
 </script>
 </body>
 </html>
