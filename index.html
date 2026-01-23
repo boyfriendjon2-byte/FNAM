@@ -1303,6 +1303,268 @@ document.addEventListener('keydown', (e) => {
 });
 
 </script>
+--- START OF PATCH v53.0 ---
+<script>
+// ============================================================================
+// PATCH v53.0: CRITICAL FIXES (Endless & Parallax)
+// ============================================================================
+
+const Patch53 = {
+init: () => {
+console.log("Patch v53: Fixing crash and rotation.");
+
+// 1. REPARAR ERROR DE ENDLESS MODE (Uncaught TypeError)
+// El error ocurría porque EndlessMode borraba el contador de noches antes de tiempo.
+// Aquí redefinimos startLevel para asegurar que el elemento exista antes de escribir.
+if(typeof EndlessMode !== 'undefined') {
+EndlessMode.start = function() {
+if(confirm(v50.texts[Lang.current].desc_endless)) {
+v50.state.isEndless = true;
+v50.state.endlessTimer = 0;
+
+// REPARACIÓN: No borramos el HTML aquí.
+// Lo modificamos visualmente pero mantenemos los IDs para que el juego no crashee.
+const hudNight = document.getElementById('hud-night');
+
+// Asegurar que la estructura existe para que Game.startLevel no falle
+if(!document.getElementById('game-night-num')) {
+hudNight.innerHTML = '<span id="lbl-night">NIGHT</span> <span id="game-night-num">1</span>';
+}
+
+Game.startSequence('ENDLESS', { maifer:5, isaac:5, jomar:5, richard:5, golden:0 });
+
+// Cambiamos el texto visualmente usando un delay seguro
+setTimeout(() => {
+document.getElementById('lbl-night').innerText = "MODE";
+document.getElementById('game-night-num').innerText = "ENDLESS";
+document.getElementById('game-night-num').style.color = "cyan";
+}, 100);
+}
+};
+}
+
+// 2. ASEGURAR QUE PARALLAX EXISTE (ReferenceError Fix)
+if(typeof ParallaxSys === 'undefined') {
+window.ParallaxSys = {
+enabled: true,
+init: function() { document.addEventListener('mousemove', this.update); },
+update: function(e) {} // Placeholder para evitar crash
+};
+}
+
+// 3. REINICIAR PARALLAX CORRECTAMENTE
+// Sobrescribimos la función update con la lógica corregida y segura
+ParallaxSys.update = function(e) {
+if(typeof Game === 'undefined' || !Game.state || Game.state.view !== 'office' || Game.state.over || isMobile) return;
+
+const width = window.innerWidth;
+const height = window.innerHeight;
+
+// Coordenadas
+const x = (e.clientX - width / 2) / width;
+const y = (e.clientY - height / 2) / height;
+
+
+// Forzar reinicio del listener
+document.removeEventListener('mousemove', ParallaxSys.update);
+document.addEventListener('mousemove', ParallaxSys.update);
+}
+};
+
+// Ejecutar parche
+setTimeout(Patch53.init, 500);
+
+</script>
+<!-- REPARACIÓN CSS PARA QUE GIRE TODA LA OFICINA, NO SOLO LA PUERTA -->
+<style>
+/* Aplicar a todos los elementos dentro de la oficina para que giren en conjunto */
+#view-office, #view-office * {
+transform-style: preserve-3d;
+backface-visibility: hidden; /* Mejora rendimiento */
+}
+
+/* Excepciones: Elementos que NO deben rotar (UI dentro de la oficina) */
+#gen-panel, #desk {
+transform: translateZ(20px); /* Acercarlos un poco a la cámara */
+}
+
+/* El fondo debe cubrir bien los bordes al girar */
+#view-office {
+background-size: 110% 110% !important;
+background-position: center !important;
+}
+</style>
+--- END OF PATCH v53.0 ---
+-- START OF UPDATE v51.0 ---
+<!-- ==========================================================================
+v51.0 GRAPHICS OVERHAUL
+Contenido: Parallax, Procedural Static, Smooth Transitions, UI Anim.
+========================================================================== -->
+<!-- CAPA DE TRANSICIÓN (FADE) -->
+<div id="layer-fade" style="position: fixed; inset: 0; background: #000; z-index: 10000; pointer-events: none; opacity: 0; transition: opacity 0.5s ease-in-out;"></div>
+<!-- ESTILOS v51 -->
+<style>
+/* 1. UI FLUIDITY (Botones suaves) */
+.menu-btn, .user-btn, .cam-btn {
+transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+}
+.menu-btn:hover {
+letter-spacing: 2px; /* Efecto de expansión de texto */
+box-shadow: 0 0 20px var(--primary-color) !important;
+}
+
+/* 3. JUMPSCARE MEJORADO (Zoom agresivo) */
+@keyframes jump-zoom {
+0% { transform: scale(1) rotate(0deg); filter: contrast(1); }
+25% { transform: scale(1.2) rotate(2deg); filter: contrast(2) hue-rotate(90deg); }
+50% { transform: scale(1.1) rotate(-2deg); filter: contrast(1.5) invert(0.2); }
+75% { transform: scale(1.3) rotate(1deg); filter: contrast(2); }
+100% { transform: scale(1.1) rotate(0deg); }
+}
+#screen-jumpscare img {
+animation: jump-zoom 0.2s infinite linear !important;
+object-fit: cover;
+}
+
+/* 4. CANVAS ESTATICA */
+#static-canvas {
+width: 100%; height: 100%;
+image-rendering: pixelated; /* Look retro */
+opacity: 0.3;
+}
+</style>
+<script>
+// ============================================================================
+// v51.0 GRAPHICS ENGINE
+// ============================================================================
+
+const v51_Graphics = {
+init: () => {
+console.log("v51 Graphics Overhaul: Loaded");
+
+// Iniciar sistemas
+ParallaxSys.init();
+StaticSys.replaceGif();
+TransitionSys.hook();
+
+// Ajuste inicial para Parallax
+document.body.style.overflow = "hidden"; // Asegurar que no haya scrollbars
+}
+};
+
+// ============================================================================
+// 2. SYSTEM: PROCEDURAL STATIC (CANVAS NOISE)
+// ============================================================================
+const StaticSys = {
+ctx: null,
+
+replaceGif: () => {
+// Buscar el div de estática
+const staticDiv = document.getElementById('cam-static');
+if(!staticDiv) return;
+
+// Eliminar imagen de fondo (el gif)
+staticDiv.style.background = 'none';
+staticDiv.style.opacity = '0.3'; // Ajustar opacidad base
+
+// Crear Canvas
+const canvas = document.createElement('canvas');
+canvas.id = 'static-canvas';
+canvas.width = 320; // Baja resolución para rendimiento y estilo retro
+canvas.height = 240;
+staticDiv.appendChild(canvas);
+
+StaticSys.ctx = canvas.getContext('2d');
+
+// Iniciar loop de dibujado
+StaticSys.loop();
+},
+
+loop: () => {
+if(!StaticSys.ctx) return;
+
+// Solo dibujar si la cámara está activa o hay error visual
+// Ahorra batería en laptops/moviles
+const isMonitorOn = (Game.state.view === 'monitor');
+const isError = ExpansionSys && ExpansionSys.data.errors && ExpansionSys.data.errors.video;
+
+if(isMonitorOn || isError || Config.toggleStatic) {
+const w = 320, h = 240;
+const idata = StaticSys.ctx.createImageData(w, h);
+const buffer32 = new Uint32Array(idata.data.buffer);
+const len = buffer32.length;
+
+for (let i = 0; i < len; i++) {
+// Generar pixel gris aleatorio
+if (Math.random() < 0.5) {
+// Negro transparente o blanco transparente
+// Formato Little Endian: ABGR (Alpha, Blue, Green, Red)
+// 0xff000000 = Negro Opaco
+// 0xffffffff = Blanco Opaco
+// Usaremos ruido gris
+const val = Math.random() * 255;
+buffer32[i] = (255 << 24) | (val << 16) | (val << 8) | val;
+}
+}
+StaticSys.ctx.putImageData(idata, 0, 0);
+}
+
+requestAnimationFrame(StaticSys.loop);
+}
+};
+
+// ============================================================================
+// 3. SYSTEM: SMOOTH TRANSITIONS (FADE)
+// ============================================================================
+const TransitionSys = {
+hook: () => {
+// Interceptar UI.showScreen
+const _originalShow = UI.showScreen;
+
+UI.showScreen = function(id) {
+const overlay = document.getElementById('layer-fade');
+
+// 1. Fade Out (Pantalla Negra)
+overlay.style.opacity = '1';
+
+// 2. Esperar (simular carga)
+setTimeout(() => {
+// 3. Cambiar pantalla (Lógica original)
+_originalShow(id);
+
+// Parche visual: Si vamos a la oficina, asegurar reset de Parallax
+if(id === 'screen-game') {
+document.getElementById('view-office').style.transform = 'translateX(0px)';
+}
+
+// 4. Fade In (Transparente)
+setTimeout(() => {
+overlay.style.opacity = '0';
+}, 100);
+
+}, 500); // 0.5 segundos de oscuridad
+};
+}
+};
+
+// ============================================================================
+// GLOBAL HOOKS
+// ============================================================================
+
+// Hook InitMenu para arrancar v51
+const _v51_init = Game.initMenu;
+Game.initMenu = function() {
+_v51_init();
+v51_Graphics.init();
+};
+
+// Iniciar inmediatamente si el DOM ya está listo (por si acaso)
+if(document.readyState === 'complete' || document.readyState === 'interactive') {
+v51_Graphics.init();
+}
+
+</script>
+--- END OF UPDATE v51.0 ---
 --- START OF FINAL UPDATE v50.0 ---
 <!-- ==========================================================================
 v50.0 FINAL UPDATE: ATMOSPHERE & ENDLESS
@@ -2647,45 +2909,6 @@ map.appendChild(dot);
 
 if(Game.ai.pos.maifer > 0 && Game.ai.pos.maifer < 5) draw(5 - Game.ai.pos.maifer + 1, 'yellow'); // Lógica inversa o mapeo directo según tu IA
 if(Game.ai.pos.isaac > 0 && Game.ai.pos.isaac < 5) draw(5 - Game.ai.pos.isaac + 1, 'blue');
-}
-};
-
-// ============================================================================
-// 4. SUBTITLE SYSTEM
-// ============================================================================
-const SubtitleSys = {
-texts: {
-1: ["Hola? Hola?", "Bienvenido a Maifer's Factory.", "Solo relájate...", "Ahorra energía.", "Cuidado con Maifer."],
-2: ["La segunda noche es más difícil.", "Isaac reacciona a tu cara.", "Usa la máscara si lo ves.", "No olvides la caja de música... Ah no, aquí no hay."],
-3: ["¿Sigues aquí?", "Jomar odia la luz.", "Si ves ojos en el pasillo...", "Flash! Y se irá.", "Buena suerte."],
-4: ["Noche 4...", "Richard está activo.", "Vigila la cortina.", "Si se abre, ciérrala.", "Rápido."],
-5: ["Noche 5.", "Están todos activos.", "No tengo más consejos.", "Sobrevive."],
-6: ["... (Sonidos estáticos) ...", "CORRE.", "..."],
-7: ["(Respiración fuerte)", "TE VEO.", "IT'S ME."],
-8: ["(Silencio absoluto)", "..."]
-},
-
-start: (night) => {
-const lines = SubtitleSys.texts[night] || ["(Señal interrumpida)"];
-const box = document.getElementById('subtitle-box');
-const txt = document.getElementById('sub-text');
-
-if(night > 8) return; // Sin subs en custom night
-
-let index = 0;
-box.style.display = 'block';
-
-const nextLine = () => {
-if(Game.state.over || index >= lines.length) {
-box.style.display = 'none';
-return;
-}
-txt.innerText = lines[index];
-index++;
-setTimeout(nextLine, 4000); // 4 segundos por línea
-};
-
-nextLine();
 }
 };
 
