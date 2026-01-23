@@ -1303,5 +1303,1430 @@ document.addEventListener('keydown', (e) => {
 });
 
 </script>
+--- START OF FINAL UPDATE v50.0 ---
+<!-- ==========================================================================
+v50.0 FINAL UPDATE: ATMOSPHERE & ENDLESS
+Contenido: VHS, Endless Mode, Weather, Achievements, Visual Overhauls.
+========================================================================== -->
+<!-- NUEVOS ASSETS DE AUDIO (Inyectados) -->
+<div id="v50-audio" style="display:none;">
+<audio id="sfx-thunder" src="https://freesound.org/data/previews/25/25032_30539-lq.mp3"></audio>
+<audio id="sfx-rain" src="https://freesound.org/data/previews/365/365659_6687256-lq.mp3" loop></audio>
+<audio id="sfx-achieve" src="https://freesound.org/data/previews/109/109662_1648170-lq.mp3"></audio>
+<audio id="sfx-monitor-slide" src="https://freesound.org/data/previews/140/140156_2437358-lq.mp3"></audio>
+</div>
+<!-- NUEVAS CAPAS VISUALES -->
+<div id="v50-layers" style="position:absolute; inset:0; pointer-events:none; z-index:9000;">
+code
+Code
+<!-- EFECTO VHS -->
+<div id="layer-vhs" class="vhs-overlay" style="display:none;">
+    <div class="scanlines"></div>
+    <div class="vhs-noise"></div>
+    <div class="vhs-text">REC ● <span id="vhs-date">NOV 14 1987</span></div>
+</div>
+
+<!-- PARTICULAS DE POLVO -->
+<div id="layer-dust" style="display:none;"></div>
+
+<!-- FLASH DE TORMENTA -->
+<div id="layer-storm" style="position:absolute; inset:0; background:white; opacity:0; mix-blend-mode:overlay;"></div>
+
+<!-- NOTIFICACIÓN DE LOGROS -->
+<div id="achievement-popup" style="position:absolute; top:-100px; right:20px; width:300px; background:#111; border:2px solid gold; color:#fff; padding:15px; display:flex; gap:10px; align-items:center; transition:top 0.5s;">
+    <div style="font-size:2rem;">🏆</div>
+    <div>
+        <div style="color:gold; font-family:'Nosifer'; font-size:0.8rem;">ACHIEVEMENT UNLOCKED</div>
+        <div id="ach-name" style="font-family:'VT323'; font-size:1.5rem;">...</div>
+    </div>
+</div>
+</div>
+<!-- ESTILOS v50 -->
+<style>
+/* Ocultar subtítulos viejos forzosamente */
+#subtitle-box { display: none !important; }
+
+/* VHS STYLES */
+.vhs-overlay { position: absolute; inset: 0; pointer-events: none; z-index: 9998; mix-blend-mode: overlay; background: rgba(0,0,0,0.1); }
+.scanlines { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2)); background-size: 100% 4px; animation: scrollScan 0.5s linear infinite; }
+.vhs-text { position: absolute; bottom: 20px; left: 20px; font-family: 'VT323'; font-size: 2rem; color: #fff; text-shadow: 2px 2px 0 #000; opacity: 0.7; }
+@keyframes scrollScan { 0% { transform: translateY(0); } 100% { transform: translateY(4px); } }
+
+/* CAMERA SWAY (RESPIRACIÓN) */
+.sway-anim { animation: cameraSway 8s ease-in-out infinite; }
+@keyframes cameraSway { 0% { transform: translate(0,0) rotate(0deg); } 25% { transform: translate(-5px, 3px) rotate(0.5deg); } 50% { transform: translate(0, 5px) rotate(0deg); } 75% { transform: translate(5px, 3px) rotate(-0.5deg); } 100% { transform: translate(0,0) rotate(0deg); } }
+
+/* MONITOR ANIMATION */
+#screen-monitor { transition: transform 0.3s ease-in-out; transform: translateY(100%); display: flex !important; visibility: hidden; }
+#screen-monitor.monitor-up { transform: translateY(0%); visibility: visible; }
+
+/* DUST */
+.dust-mote { position: absolute; background: rgba(255,255,255,0.3); border-radius: 50%; animation: floatDust 10s linear infinite; }
+@keyframes floatDust { 0% { transform: translateY(0) translateX(0); opacity:0; } 50% { opacity:0.8; } 100% { transform: translateY(-100vh) translateX(50px); opacity:0; } }
+
+/* VOLUMETRIC FLASHLIGHT */
+#layer-flashlight { background: radial-gradient(circle at 50% 50%, rgba(255,255,200,0.9) 0%, rgba(255,255,255,0.4) 40%, rgba(0,0,0,0.8) 70%, #000 100%) !important; mix-blend-mode: hard-light !important; }
+</style>
+<script>
+// ============================================================================
+// v50.0 CORE SYSTEM
+// ============================================================================
+
+const v50 = {
+texts: {
+ES: {
+endlessBtn: "SUPERVIVENCIA ∞", endlessTitle: "MODO INFINITO", survived: "SOBREVIVISTE: ",
+cheatsTitle: "TRUCOS / CHEATS", extrasTitle: "EXTRAS / GALERIA",
+ach_1: "PRIMERA SANGRE", ach_2: "ETERNO", ach_3: "INTOCABLE", ach_4: "CURIOSO",
+desc_endless: "Dificultad aumenta cada minuto. ¡No hay 6 AM!"
+},
+EN: {
+endlessBtn: "ENDLESS MODE ∞", endlessTitle: "ENDLESS SURVIVAL", survived: "SURVIVED: ",
+cheatsTitle: "CHEATS / HACKS", extrasTitle: "EXTRAS / GALLERY",
+ach_1: "FIRST BLOOD", ach_2: "ETERNAL", ach_3: "UNTOUCHABLE", ach_4: "CURIOUS",
+desc_endless: "Difficulty rises every minute. No 6 AM!"
+},
+CN: {
+endlessBtn: "无尽模式 ∞", endlessTitle: "无尽生存", survived: "存活时间: ",
+cheatsTitle: "作弊 / 外挂", extrasTitle: "附加内容 / 画廊",
+ach_1: "第一滴血", ach_2: "永恒", ach_3: "不可触碰", ach_4: "好奇",
+desc_endless: "难度每分钟增加。没有早上6点！"
+}
+},
+
+state: {
+isEndless: false,
+endlessTimer: 0,
+weatherTimer: 0
+},
+
+init: () => {
+console.log("v50 Gold Edition Loaded.");
+
+// 1. Quitar Subtítulos (Override agresivo)
+if(typeof SubtitleSys !== 'undefined') SubtitleSys.start = function(){ console.log("Subs disabled by v50"); };
+
+// 2. Inyectar botón Endless en el menú (Si pasó la noche 5)
+if(SAVEDATA.night > 5 || SAVEDATA.stars['custom']) {
+if(!document.getElementById('btn-endless')) {
+const btn = document.createElement('button');
+btn.id = 'btn-endless';
+btn.className = 'menu-btn';
+btn.innerText = "ENDLESS MODE";
+btn.style.borderColor = "cyan";
+btn.style.color = "cyan";
+btn.onclick = EndlessMode.start;
+// Insertar antes de Custom Night
+const cnBtn = document.getElementById('btn-custom');
+cnBtn.parentNode.insertBefore(btn, cnBtn);
+}
+}
+
+// 3. Iniciar sistemas visuales
+v50_Visuals.initDust();
+
+// 4. Parchear Monitor para animación
+v50_Visuals.patchMonitor();
+
+// 5. Aplicar traducciones iniciales
+v50.applyTranslations();
+},
+
+applyTranslations: () => {
+// Hook a Lang.apply para traducir nuevos elementos
+const t = v50.texts[Lang.current] || v50.texts['ES'];
+
+// Traducir botón Endless
+const btnEnd = document.getElementById('btn-endless');
+if(btnEnd) btnEnd.innerText = t.endlessBtn;
+
+// Traducir Títulos de Modales (Cheats y Extras)
+const cheatHeader = document.querySelector('#screen-cheats h2');
+if(cheatHeader) cheatHeader.innerText = t.cheatsTitle;
+
+const extraHeader = document.querySelector('#screen-extras h2');
+if(extraHeader) extraHeader.innerText = t.extrasTitle;
+
+// Traducir contenido de Cheats (Checkbox labels)
+// Esto es un poco hacky pero seguro
+const cheatRows = document.querySelectorAll('#screen-cheats .setting-row span');
+if(cheatRows.length > 0) {
+// Asumimos el orden: Radar, Power, Fast, NoTox
+const labels = Lang.current === 'ES' ?
+["RADAR MAPA", "ENERGIA INFINITA", "NOCHE RAPIDA", "NO TOXICIDAD"] :
+Lang.current === 'CN' ?
+["雷达地图", "无限能量", "快速夜晚", "无毒气"] :
+["MAP RADAR", "INFINITE POWER", "FAST NIGHT", "NO TOXICITY"];
+
+cheatRows.forEach((span, i) => { if(labels[i]) span.innerText = labels[i]; });
+}
+}
+};
+
+// ============================================================================
+// 1. ENDLESS MODE (SUPERVIVENCIA INFINITA)
+// ============================================================================
+const EndlessMode = {
+start: () => {
+if(confirm(v50.texts[Lang.current].desc_endless)) {
+v50.state.isEndless = true;
+v50.state.endlessTimer = 0;
+// Configurar juego base
+Game.startSequence('ENDLESS', { maifer:5, isaac:5, jomar:5, richard:5, golden:0 });
+
+// UI Tweaks
+document.getElementById('hud-night').innerHTML = "<span style='color:cyan'>ENDLESS</span>";
+}
+},
+
+loop: () => {
+if(!v50.state.isEndless || Game.state.over) return;
+
+v50.state.endlessTimer += 0.1; // Se llama cada 100ms
+
+// Actualizar HUD de tiempo
+const mins = Math.floor(v50.state.endlessTimer / 60);
+const secs = Math.floor(v50.state.endlessTimer % 60);
+const timeStr = `${mins}:${secs < 10 ? '0'+secs : secs}`;
+
+document.getElementById('hud-time').innerText = timeStr;
+document.getElementById('hud-time').style.color = "cyan";
+
+// Escalar dificultad cada 60 segundos
+if(v50.state.endlessTimer % 60 < 0.15) { // Aproximadamente cada minuto
+Game.ai.maifer++;
+Game.ai.isaac++;
+Game.ai.jomar++;
+Game.ai.richard++;
+Game.ai.golden++;
+Achievements.unlock('ach_2'); // Logro por sobrevivir un poco
+AudioSys.play('sfx-achieve'); // Sonido de subida de nivel
+}
+}
+};
+
+// ============================================================================
+// 2. WEATHER SYSTEM (TORMENTA)
+// ============================================================================
+const WeatherSys = {
+loop: () => {
+if(Game.state.over || Game.state.view !== 'office') return;
+
+// Sonido de lluvia constante
+const rain = document.getElementById('sfx-rain');
+if(rain.paused) { rain.volume = 0.3; rain.play().catch(()=>{}); }
+
+// Relámpagos aleatorios (1% chance por frame)
+if(Math.random() < 0.005) {
+WeatherSys.triggerLightning();
+}
+},
+
+triggerLightning: () => {
+// Visual flash
+const flash = document.getElementById('layer-storm');
+flash.style.opacity = 0.8;
+setTimeout(() => flash.style.opacity = 0, 100);
+setTimeout(() => { flash.style.opacity = 0.4; }, 150);
+setTimeout(() => { flash.style.opacity = 0; }, 250);
+
+// Sonido (con pequeño delay por distancia)
+setTimeout(() => {
+AudioSys.play('sfx-thunder', false, 0.8);
+}, 500);
+
+// MECÁNICA CLAVE: Ver sin linterna
+// Durante el flash, revelamos animatrónicos ocultos
+if(Game.ai.pos.jomar === 1) {
+document.getElementById('vis-jomar').style.display = 'block';
+setTimeout(() => { if(!Game.state.flash) document.getElementById('vis-jomar').style.display = 'none'; }, 200);
+}
+}
+};
+
+// ============================================================================
+// 3. VISUALS (VHS, SWAY, MONITOR, DUST)
+// ============================================================================
+const v50_Visuals = {
+initDust: () => {
+const c = document.getElementById('layer-dust');
+c.style.display = 'block';
+for(let i=0; i<20; i++) {
+const d = document.createElement('div');
+d.className = 'dust-mote';
+d.style.left = Math.random() * 100 + 'vw';
+d.style.top = Math.random() * 100 + 'vh';
+d.style.animationDuration = (5 + Math.random() * 10) + 's';
+d.style.width = (2 + Math.random() * 4) + 'px';
+d.style.height = d.style.width;
+c.appendChild(d);
+}
+},
+
+patchMonitor: () => {
+// Reemplazar la lógica de display:none por clases
+Mechanics.toggleMonitor = function() {
+if(Game.state.over || Game.state.mask || Game.state.hidden) return;
+
+const m = document.getElementById('screen-monitor');
+const isOpening = (Game.state.view === 'office');
+
+if(isOpening) {
+Game.state.view = 'monitor';
+m.classList.add('monitor-up');
+AudioSys.play('sfx-monitor-slide');
+Monitor.update(); // Actualizar cámaras al abrir
+SecretSys.roll(0.005); // Chance de secreto v48
+} else {
+Game.state.view = 'office';
+m.classList.remove('monitor-up');
+AudioSys.play('sfx-monitor-slide');
+}
+};
+},
+
+toggleVHS: () => {
+const v = document.getElementById('layer-vhs');
+v.style.display = (v.style.display === 'none') ? 'block' : 'none';
+
+// Agregar sway a la oficina
+const off = document.getElementById('view-office');
+if(v.style.display === 'block') off.classList.add('sway-anim');
+else off.classList.remove('sway-anim');
+}
+};
+
+// ============================================================================
+// 4. ACHIEVEMENTS
+// ============================================================================
+const Achievements = {
+list: ['ach_1', 'ach_2', 'ach_3', 'ach_4'],
+unlocked: [], // Se debería guardar en SAVEDATA
+
+unlock: (id) => {
+if(Achievements.unlocked.includes(id)) return;
+Achievements.unlocked.push(id);
+
+const t = v50.texts[Lang.current] || v50.texts['ES'];
+const name = t[id] || "UNKNOWN";
+
+const pop = document.getElementById('achievement-popup');
+document.getElementById('ach-name').innerText = name;
+
+pop.style.top = "20px"; // Bajar
+AudioSys.play('sfx-achieve');
+
+setTimeout(() => { pop.style.top = "-100px"; }, 4000);
+},
+
+check: () => {
+// Lógica simple de check
+if(Game.state.power < 5 && Game.state.night > 1) Achievements.unlock('ach_3'); // Intocable (casi)
+if(SAVEDATA.shop && SAVEDATA.shop.equipped.length > 0) Achievements.unlock('ach_4'); // Curioso
+}
+};
+
+// ============================================================================
+// GLOBAL HOOKS (Conectar v50 al juego base)
+// ============================================================================
+
+// 1. Hook Init (Cargar traducciones y botón Endless)
+const _v50_init = Game.initMenu;
+Game.initMenu = function() {
+_v50_init();
+v50.init();
+
+// Configuración Inicial de opciones visuales
+// Activar VHS y Sway por defecto para "Atmósfera"
+document.getElementById('layer-vhs').style.display = 'block';
+document.getElementById('view-office').classList.add('sway-anim');
+};
+
+// 2. Hook Loop (Weather, Endless, Achievements)
+const _v50_loop = Game.loop;
+Game.loop = function() {
+if(v50.state.isEndless) {
+// Bypass al loop original si es Endless para evitar llegar a las 8 AM
+// Copiamos lógica vital de drenaje pero no de tiempo
+if(Game.state.over || Game.state.frozen) return;
+
+// Drenaje de batería
+let drain = 1 + (Game.state.flash?2:0) + (Game.state.vent?1:0) + (Game.state.view==='monitor'?1:0) + (Game.state.curtain?1:0);
+Game.state.batteryTimer += drain;
+if(Game.state.batteryTimer >= 50 && !SAVEDATA.cheats.infPower) {
+Game.state.power--;
+Game.state.batteryTimer = 0;
+document.getElementById('pwr-val').innerText = Math.floor(Game.state.power);
+}
+if(Game.state.power <= 0) { Game.die('power'); return; }
+
+// Toxicidad
+if(Game.state.mask) { Game.state.toxic += 0.25; document.getElementById('hud-toxic').style.display='block'; }
+else { Game.state.toxic = Math.max(0, Game.state.toxic - 0.2); if(Game.state.toxic<=0) document.getElementById('hud-toxic').style.display='none'; }
+document.getElementById('toxic-bar').style.width = Game.state.toxic + "%";
+if(Game.state.toxic >= 100 && !SAVEDATA.cheats.noTox) { Game.die('air'); return; }
+
+Monitor.update();
+EndlessMode.loop(); // Lógica propia de tiempo endless
+} else {
+// Juego normal
+_v50_loop();
+}
+
+WeatherSys.loop();
+Achievements.check();
+
+// Traducir dinámicamente si cambia idioma
+if(Lang.current !== v50.lastLang) {
+v50.applyTranslations();
+v50.lastLang = Lang.current;
+}
+};
+
+// 3. Hook Die (Limpiar estados)
+const _v50_die = Game.die;
+Game.die = function(cause) {
+_v50_die(cause);
+document.getElementById('sfx-rain').pause();
+v50.state.isEndless = false;
+Achievements.unlock('ach_1'); // Morir por primera vez
+};
+
+// Iniciar v50 si el script carga tarde
+if(typeof Game !== 'undefined') v50.init();
+
+</script>
+--- END OF FINAL UPDATE v50.0 ---
 </body>
+--- START OF PATCH v49.5 ---
+<script>
+// ============================================================================
+// PATCH v49.5: FIXES & TRANSLATIONS
+// Autor: Asistente
+// Descripción: Corrección de UI, bug de mantenimiento y traducción de tienda.
+// ============================================================================
+
+const PatchSystem = {
+texts: {
+ES: { shopBtn: "TIENDA 🎁", shopTitle: "RINCÓN DE PREMIOS", buy: "COMPRAR", equip: "EQUIPAR", unequip: "QUITAR", yourStars: "TUS ESTRELLAS" },
+EN: { shopBtn: "SHOP 🎁", shopTitle: "PRIZE CORNER", buy: "BUY", equip: "EQUIP", unequip: "UNEQUIP", yourStars: "YOUR STARS" },
+CN: { shopBtn: "商店 🎁", shopTitle: "奖品角", buy: "购买", equip: "装备", unequip: "卸下", yourStars: "你的星星" }
+},
+
+init: () => {
+// 1. CORRECCIÓN DELAY DE ENERGÍA
+// Sobrescribimos la función para actualizar la UI inmediatamente
+const _oldCharge = Mechanics.chargeGen;
+Mechanics.chargeGen = function() {
+// Lógica original
+Game.state.power = Math.min(100, Game.state.power + 2); // Carga más rápido (2%)
+
+// ACTUALIZACIÓN UI INMEDIATA (Sin esperar al loop)
+document.getElementById('pwr-val').innerText = Math.floor(Game.state.power);
+
+// Feedback Visual Inmediato (Color Verde)
+const pwrText = document.getElementById('hud-power-text');
+pwrText.style.color = '#00ff00';
+pwrText.style.textShadow = '0 0 15px #00ff00';
+
+// Forzar actualización de "cuadrados" de uso si fuera necesario
+// (Aunque los cuadrados indican consumo, haremos que parpadeen verde para dar feedback)
+document.querySelectorAll('.usage-block').forEach(b => b.style.borderColor = '#0f0');
+
+AudioSys.play('sfx-gen');
+document.getElementById('gen-btn').style.display='none';
+
+// Resetear color después de 300ms
+setTimeout(() => {
+pwrText.style.color = '#eeffee';
+pwrText.style.textShadow = 'none';
+document.querySelectorAll('.usage-block').forEach(b => b.style.borderColor = '#444');
+Mechanics.moveGenButton();
+}, 300);
+};
+
+// 2. CORRECCIÓN BOTÓN REBOOT EN GAME OVER
+// Interceptamos la muerte para ocultar la UI de expansión
+const _oldDie = Game.die;
+Game.die = function(cause) {
+_oldDie(cause);
+// Ocultar elementos de la expansión v48
+document.getElementById('btn-open-maint').style.display = 'none';
+document.getElementById('panel-maint').style.display = 'none';
+document.getElementById('alert-overlay').style.display = 'none';
+};
+
+// 3. CORRECCIÓN VISUAL "SYSTEM ERROR" AL REINICIAR
+// Aseguramos que el texto se ponga verde forzosamente
+ExpansionSys.resolveReboot = function(btn, originalText) {
+ExpansionSys.data.rebooting = false;
+ExpansionSys.data.errors = { video: false, vent: false, audio: false };
+btn.innerText = originalText;
+
+// FORZAR ESTILOS VERDES (Sobrescribir cualquier clase CSS)
+const setGreen = (id) => {
+const el = document.getElementById(id);
+if(el) {
+el.innerText = "ONLINE";
+el.className = ""; // Quitar clase sys-error
+el.style.color = "#00ff00"; // Forzar verde inline
+el.style.textShadow = "0 0 5px #00ff00";
+}
+};
+
+setGreen('st-val-vid');
+setGreen('st-val-vent');
+setGreen('st-val-aud');
+
+// Ocultar alerta roja gigante
+document.getElementById('alert-overlay').style.display = 'none';
+
+// Restaurar estática cámara
+const staticEl = document.getElementById('cam-static');
+if(staticEl) {
+staticEl.style.opacity = "0.15";
+staticEl.style.display = Config.toggleStatic ? 'block' : 'none';
+}
+
+// Dar inmunidad de 5 segundos para que no salga error de nuevo inmediatamente
+ExpansionSys.data.immunity = true;
+setTimeout(() => { ExpansionSys.data.immunity = false; }, 5000);
+};
+
+// Parchear triggerError para respetar inmunidad
+const _oldErr = MaintenanceSys.triggerError;
+MaintenanceSys.triggerError = function(type) {
+if(ExpansionSys.data.immunity) return;
+_oldErr(type);
+};
+
+// 4. TRADUCCIÓN TIENDA Y BOTONES
+// Hook al cambio de idioma para actualizar botón del menú
+const _oldLang = Lang.apply;
+Lang.apply = function() {
+_oldLang();
+const l = Lang.current;
+const t = PatchSystem.texts[l] || PatchSystem.texts['ES'];
+
+// Traducir botón del menú principal
+const btnShop = document.getElementById('btn-shop');
+if(btnShop) btnShop.innerText = t.shopBtn;
+};
+
+// Sobrescribir apertura de tienda para traducir contenido interno
+ShopSys.open = function() {
+const l = Lang.current;
+const t = PatchSystem.texts[l] || PatchSystem.texts['ES'];
+
+// Contar estrellas (Lógica original)
+let stars = document.querySelectorAll('#star-row .star.earned').length;
+if(stars === 0 && SAVEDATA.night > 1) stars = SAVEDATA.night - 1; // Fallback
+
+document.getElementById('shop-stars').innerHTML = `${t.yourStars}: <span style="color: gold;">${stars}</span> ★`;
+document.querySelector('#screen-shop h2').innerText = t.shopTitle;
+
+const grid = document.getElementById('shop-grid');
+grid.innerHTML = '';
+
+ShopSys.items.forEach(item => {
+const owned = SAVEDATA.shop.bought.includes(item.id);
+const equipped = SAVEDATA.shop.equipped.includes(item.id);
+
+const div = document.createElement('div');
+div.style.cssText = "border: 1px solid #444; padding: 10px; width: 120px; background: #111;";
+div.innerHTML = `
+<img src="${item.img}" style="width: 50px; height: 50px; object-fit: contain;">
+<div style="font-family:'VT323'; color:#fff;">${item.name}</div>
+<div style="color: gold; margin-bottom: 5px;">${item.price} ★</div>
+`;
+
+const btn = document.createElement('button');
+btn.className = 'menu-btn';
+btn.style.fontSize = '0.8rem';
+btn.style.width = '100%';
+btn.style.margin = '0';
+
+if(!owned) {
+btn.innerText = t.buy;
+if(stars < item.price) { btn.disabled = true; btn.classList.add('locked'); }
+btn.onclick = () => ShopSys.buy(item.id, item.price, stars);
+} else {
+btn.innerText = equipped ? t.unequip : t.equip;
+btn.style.borderColor = equipped ? "red" : "#0f0";
+btn.onclick = () => ShopSys.toggle(item.id);
+}
+
+div.appendChild(btn);
+grid.appendChild(div);
+});
+
+document.getElementById('screen-shop').style.display = 'flex';
+};
+
+// Aplicar traducción inicial si ya estamos en menú
+if(document.getElementById('btn-shop')) Lang.apply();
+}
+};
+
+// Ejecutar Parche
+setTimeout(PatchSystem.init, 500); // Pequeño delay para asegurar que v48/v49 cargaron
+
+</script>
+--- END OF PATCH v49.5 ---
+--- START OF EXPANSION CODE ---
+<!-- ==========================================================================
+EXPANSION PACK v48.0: SYSTEMS, AGGRO & SECRETS
+Autor: Asistente (Bajo tus reglas estrictas)
+Contenido: Audio Lure, Mantenimiento, IA Progresiva, Secretos, Presets CN.
+========================================================================== -->
+<!-- 1. NUEVOS ELEMENTOS VISUALES (HTML INYECTADO) -->
+<div id="expansion-ui-layer" style="position: absolute; inset: 0; pointer-events: none; z-index: 9999;">
+code
+Code
+<!-- PANEL DE MANTENIMIENTO (SISTEMA 2) -->
+<div id="panel-maint" style="position: absolute; top: 10%; right: 10%; width: 300px; height: 400px; background: #111; border: 4px solid #555; display: none; pointer-events: auto; flex-direction: column; padding: 10px; font-family: 'VT323'; color: #fff;">
+    <h2 style="text-align: center; color: #fff; border-bottom: 2px solid #fff;">MAINTENANCE PANEL</h2>
+    
+    <div class="sys-status-row" id="st-row-vid" style="margin: 20px 0; display: flex; justify-content: space-between; align-items: center;">
+        <span>VIDEO SYSTEM:</span>
+        <span id="st-val-vid" style="color: #0f0;">ONLINE</span>
+    </div>
+    
+    <div class="sys-status-row" id="st-row-vent" style="margin: 20px 0; display: flex; justify-content: space-between; align-items: center;">
+        <span>VENTILATION:</span>
+        <span id="st-val-vent" style="color: #0f0;">ONLINE</span>
+    </div>
+    
+    <div class="sys-status-row" id="st-row-aud" style="margin: 20px 0; display: flex; justify-content: space-between; align-items: center;">
+        <span>AUDIO DEVICES:</span>
+        <span id="st-val-aud" style="color: #0f0;">ONLINE</span>
+    </div>
+
+    <button id="btn-reboot-all" class="menu-btn" style="margin-top: auto; border-color: orange; color: orange;" onclick="ExpansionSys.rebootSystem()">REBOOT ALL SYSTEMS (5s)</button>
+    <button class="menu-btn" style="height: 40px; font-size: 1rem;" onclick="document.getElementById('panel-maint').style.display='none'">CLOSE PANEL</button>
+</div>
+
+<!-- BOTÓN DE MANTENIMIENTO EN OFICINA -->
+<button id="btn-open-maint" style="position: absolute; bottom: 25%; left: 5%; width: 100px; height: 50px; background: #222; border: 2px solid #555; color: #aaa; font-family: 'Share Tech Mono'; cursor: pointer; pointer-events: auto; display: none;" onclick="document.getElementById('panel-maint').style.display='flex'">
+    REBOOT<br>SYSTEM
+</button>
+
+<!-- ALERTAS DE ERROR -->
+<div id="alert-overlay" style="position: absolute; top: 100px; left: 20px; color: red; font-family: 'VT323'; font-size: 2rem; display: none; animation: blink 0.5s infinite;">⚠ SYSTEM ERROR</div>
+
+<!-- CAPA DE EASTER EGGS (SISTEMA 4) -->
+<div id="layer-secret" style="position: fixed; inset: 0; background: black; z-index: 10000; display: none; align-items: center; justify-content: center; pointer-events: none;">
+    <img id="secret-img" src="" style="width: 80%; height: 80%; object-fit: contain; filter: contrast(1.5) grayscale(1);">
+</div>
+</div>
+<style>
+/* Estilos adicionales para la expansión */
+.sys-error { color: red !important; animation: glitch 0.5s infinite; }
+.sys-rebooting { color: yellow !important; }
+
+#btn-audio-lure {
+position: absolute; top: 10px; left: 10px;
+width: 150px; height: 40px;
+background: #000; border: 2px solid #00aaff; color: #00aaff;
+font-family: 'Share Tech Mono'; cursor: pointer; z-index: 500;
+display: none; /* Se activa con JS */
+}
+#btn-audio-lure:active { background: #0044aa; color: #fff; }
+#btn-audio-lure.disabled { opacity: 0.5; border-color: #555; color: #555; cursor: not-allowed; }
+
+/* Contenedor de Presets en Custom Night */
+#cn-presets {
+width: 100%; max-width: 900px; margin: 20px auto;
+display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+}
+.preset-btn {
+background: #220022; border: 1px solid #d0d; color: #d0d;
+padding: 5px 15px; font-family: 'VT323'; font-size: 1.2rem; cursor: pointer;
+}
+.preset-btn:hover { background: #440044; color: #fff; }
+
+@keyframes blink { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
+</style>
+<!-- 2. LÓGICA DE LA EXPANSIÓN (JAVASCRIPT) -->
+<script>
+// ============================================================================
+// EXPANSION CORE - v48.0
+// Conecta los nuevos sistemas sin borrar los antiguos.
+// ============================================================================
+
+const ExpansionSys = {
+// Estado interno de la expansión
+data: {
+audioCooldown: 0,
+errors: { video: false, vent: false, audio: false },
+rebooting: false,
+aggroLevel: 0,
+monitorInitialized: false,
+customUIInitialized: false
+},
+
+// Iniciar (Se llama automáticamente al cargar la noche)
+init: (nightNum) => {
+console.log("Expansion v48 Loaded: Systems Online");
+ExpansionSys.data = { audioCooldown: 0, errors: { video: false, vent: false, audio: false }, rebooting: false, aggroLevel: 0, monitorInitialized: false, customUIInitialized: false };
+
+// Mostrar botón de mantenimiento
+document.getElementById('btn-open-maint').style.display = 'block';
+document.getElementById('panel-maint').style.display = 'none';
+
+// Iniciar loops paralelos
+if(ExpansionSys.timers) { clearInterval(ExpansionSys.timers.maint); clearInterval(ExpansionSys.timers.aggro); }
+ExpansionSys.timers = {};
+
+// Loop de Mantenimiento (Cada 10s chequea fallos)
+ExpansionSys.timers.maint = setInterval(MaintenanceSys.loop, 10000);
+
+// Loop de Aggro (Cada 5s ajusta dificultad)
+ExpansionSys.timers.aggro = setInterval(AggroSys.check, 5000);
+
+// Inyectar botón de Audio en el Monitor si no existe
+MaintenanceSys.injectAudioBtn();
+
+// Chequear secreto de inicio
+SecretSys.roll(0.01); // 1% chance al iniciar noche
+},
+
+rebootSystem: () => {
+if(ExpansionSys.data.rebooting) return;
+ExpansionSys.data.rebooting = true;
+
+const btn = document.getElementById('btn-reboot-all');
+const originalText = btn.innerText;
+btn.innerText = "REBOOTING... (5)";
+
+let count = 5;
+const countdown = setInterval(() => {
+count--;
+btn.innerText = `REBOOTING... (${count})`;
+if(count <= 0) {
+clearInterval(countdown);
+ExpansionSys.resolveReboot(btn, originalText);
+}
+}, 1000);
+},
+
+resolveReboot: (btn, txt) => {
+ExpansionSys.data.rebooting = false;
+ExpansionSys.data.errors = { video: false, vent: false, audio: false };
+btn.innerText = txt;
+
+// Restaurar visuales
+document.getElementById('st-val-vid').innerText = "ONLINE"; document.getElementById('st-val-vid').className = "";
+document.getElementById('st-val-vent').innerText = "ONLINE"; document.getElementById('st-val-vent').className = "";
+document.getElementById('st-val-aud').innerText = "ONLINE"; document.getElementById('st-val-aud').className = "";
+document.getElementById('alert-overlay').style.display = 'none';
+
+// Restaurar efectos del juego base
+document.getElementById('cam-static').style.opacity = "0.15"; // Normal
+if(Config.toggleStatic) Config.toggleStatic(true); // Asegurar estática normal
+
+alert("SYSTEMS ONLINE.");
+}
+};
+
+// ============================================================================
+// 1. SYSTEM: AUDIO LURE (SEÑUELO DE AUDIO)
+// ============================================================================
+const AudioLure = {
+play: () => {
+// Verificar errores
+if(ExpansionSys.data.errors.audio) { AudioSys.play('sfx-oh'); return; }
+if(ExpansionSys.data.rebooting) return;
+
+// Verificar cooldown
+if(ExpansionSys.data.audioCooldown > 0) return;
+
+// Reproducir sonido (Simulado usando uno existente o genérico)
+AudioSys.play('sfx-night-start'); // Usamos este como placeholder de "Audio de niño"
+
+// Lógica de atracción
+const cam = Monitor.current;
+const roll = Math.random();
+
+// Intentar mover a Maifer o Isaac
+if(roll > 0.4) {
+// Si Maifer está avanzado, lo retrocedemos
+if(Game.ai.pos.maifer > 0 && Game.ai.pos.maifer < 5) {
+Game.ai.pos.maifer--;
+console.log("Audio Lure: Maifer moved back.");
+}
+} else {
+if(Game.ai.pos.isaac > 0 && Game.ai.pos.isaac < 5) {
+Game.ai.pos.isaac--;
+console.log("Audio Lure: Isaac moved back.");
+}
+}
+
+// Activar cooldown visual
+ExpansionSys.data.audioCooldown = 100; // Ciclos (aprox 5 segs)
+const btn = document.getElementById('btn-audio-lure');
+if(btn) {
+btn.classList.add('disabled');
+btn.innerText = "RECHARGING...";
+
+// Loop para restaurar botón
+const cdInt = setInterval(() => {
+ExpansionSys.data.audioCooldown -= 10;
+if(ExpansionSys.data.audioCooldown <= 0) {
+clearInterval(cdInt);
+btn.classList.remove('disabled');
+btn.innerText = "PLAY AUDIO";
+}
+}, 500);
+}
+}
+};
+
+// ============================================================================
+// 2. SYSTEM: MAINTENANCE (FALLOS)
+// ============================================================================
+const MaintenanceSys = {
+injectAudioBtn: () => {
+// Inyecta el botón de audio dentro del monitor si no existe
+const mon = document.getElementById('screen-monitor');
+if(!document.getElementById('btn-audio-lure')) {
+const btn = document.createElement('button');
+btn.id = 'btn-audio-lure';
+btn.innerText = "PLAY AUDIO";
+btn.onclick = AudioLure.play;
+mon.appendChild(btn);
+}
+// Asegurarse de que se vea cuando el monitor se abre
+const originalToggle = Mechanics.toggleMonitor;
+Mechanics.toggleMonitor = function() {
+originalToggle();
+const btn = document.getElementById('btn-audio-lure');
+if(Game.state.view === 'monitor') {
+btn.style.display = 'block';
+} else {
+btn.style.display = 'none';
+}
+};
+},
+
+loop: () => {
+if(Game.state.over || Game.state.frozen || ExpansionSys.data.rebooting) return;
+
+// 15% probabilidad de fallo cada 10s
+if(Math.random() < 0.15) {
+const type = Math.random() > 0.5 ? 'video' : 'vent';
+MaintenanceSys.triggerError(type);
+}
+},
+
+triggerError: (type) => {
+if(ExpansionSys.data.errors[type]) return; // Ya está roto
+
+ExpansionSys.data.errors[type] = true;
+document.getElementById('alert-overlay').style.display = 'block';
+AudioSys.play('sfx-oh'); // Sonido de error
+
+// Actualizar UI del panel
+const el = document.getElementById('st-val-' + type);
+el.innerText = "ERROR";
+el.className = "sys-error";
+
+// Efectos del fallo
+if(type === 'video') {
+// Pone la cámara llena de estática
+document.getElementById('cam-static').style.opacity = "0.9";
+document.getElementById('cam-static').style.display = "block";
+}
+
+// NOTA: El fallo de ventilación se maneja en el AggroSys hook o GameLoop hook
+}
+};
+
+// ============================================================================
+// 3. SYSTEM: PROGRESSIVE AGGRO (IA DINÁMICA)
+// ============================================================================
+const AggroSys = {
+check: () => {
+if(Game.state.over) return;
+
+// Si hay error de ventilación, sube la toxicidad automáticamente
+if(ExpansionSys.data.errors.vent) {
+Game.state.toxic += 5;
+document.getElementById('hud-toxic').style.display='block';
+if(Game.state.toxic > 100) Game.die('air');
+}
+
+// Si el jugador está muy pasivo (no usa cámaras ni linterna), subir Aggro
+// Esto hace que los animatrónicos se muevan más rápido simulando aburrimiento
+if(Game.state.view === 'office' && !Game.state.flash && !Game.state.mask) {
+ExpansionSys.data.aggroLevel++;
+} else {
+ExpansionSys.data.aggroLevel = Math.max(0, ExpansionSys.data.aggroLevel - 1);
+}
+
+// Si el Aggro es alto (mayor a 3), forzar un movimiento extra de la IA
+if(ExpansionSys.data.aggroLevel > 3) {
+console.log("Aggro High: Forcing AI Tick");
+// Llamamos a la función aiLoop original manualmente para simular doble velocidad
+Game.aiLoop();
+ExpansionSys.data.aggroLevel = 0; // Reset parcial
+}
+}
+};
+
+// ============================================================================
+// 4. SYSTEM: SECRETS & EASTER EGGS
+// ============================================================================
+const SecretSys = {
+images: [
+"golden_maifer.png",
+"screen_death.png",
+"richard.png" // Usamos assets existentes para no pedir nuevos
+],
+
+roll: (chance) => {
+if(Math.random() < chance) {
+SecretSys.trigger();
+}
+},
+
+trigger: () => {
+const layer = document.getElementById('layer-secret');
+const img = document.getElementById('secret-img');
+const src = SecretSys.images[Math.floor(Math.random() * SecretSys.images.length)];
+
+img.src = src;
+layer.style.display = 'flex';
+AudioSys.play('sfx-oh'); // Sonido sorpresa
+
+// Durar muy poco (0.2s)
+setTimeout(() => {
+layer.style.display = 'none';
+}, 200);
+}
+};
+
+// Hookear Secretos a eventos existentes
+// 1. Al bajar el monitor
+const _origMonToggle = Mechanics.toggleMonitor;
+Mechanics.toggleMonitor = function() {
+_origMonToggle();
+if(Game.state.view === 'office') { // Al bajarlo
+SecretSys.roll(0.005); // 0.5% chance
+}
+};
+
+// ============================================================================
+// 5. SYSTEM: CUSTOM NIGHT PRESETS (DESAFÍOS)
+// ============================================================================
+const Challenges = {
+initUI: () => {
+if(ExpansionSys.data.customUIInitialized) return;
+
+const container = document.querySelector('.cn-grid');
+// Insertar botones de presets debajo de la grid
+const presetDiv = document.createElement('div');
+presetDiv.id = 'cn-presets';
+presetDiv.innerHTML = `
+<button class="preset-btn" onclick="Challenges.set([20,20,20,20,0])">20/20/20/20</button>
+<button class="preset-btn" onclick="Challenges.set([10,10,10,10,0])">NEW & SHINY</button>
+<button class="preset-btn" onclick="Challenges.set([0,20,0,5,0])">MASQUERADE</button>
+<button class="preset-btn" onclick="Challenges.set([5,0,20,0,0])">CREEPY CRAWLIES</button>
+<button class="preset-btn" onclick="Challenges.set([20,20,20,20,20])">HELL MODE</button>
+`;
+
+// Insertar después de la grid, antes del botón start
+const screen = document.getElementById('screen-custom');
+screen.insertBefore(presetDiv, document.getElementById('btn-cn-start'));
+
+ExpansionSys.data.customUIInitialized = true;
+},
+
+set: (arr) => {
+// [maifer, isaac, jomar, richard, golden]
+CustomNight.levels.maifer = arr[0]; document.getElementById('val-maifer').innerText = arr[0];
+CustomNight.levels.isaac = arr[1]; document.getElementById('val-isaac').innerText = arr[1];
+CustomNight.levels.jomar = arr[2]; document.getElementById('val-jomar').innerText = arr[2];
+CustomNight.levels.richard = arr[3]; document.getElementById('val-richard').innerText = arr[3];
+CustomNight.levels.golden = arr[4]; document.getElementById('val-golden').innerText = arr[4];
+AudioSys.play('sfx-cam');
+}
+};
+
+// HOOK PRINCIPAL DEL JUEGO
+// Interceptamos Game.startLevel para iniciar nuestros sistemas
+const _originalStartLevel = Game.startLevel;
+Game.startLevel = function(n, customAI) {
+// 1. Ejecutar código original
+_originalStartLevel(n, customAI);
+
+// 2. Iniciar expansión
+ExpansionSys.init(n);
+};
+
+// Interceptamos Game.initCustomSetup para inyectar UI
+const _originalCustomSetup = Game.initCustomSetup;
+Game.initCustomSetup = function() {
+_originalCustomSetup();
+Challenges.initUI();
+};
+
+console.log("Expansion Scripts Ready.");
+</script>
+--- END OF EXPANSION CODE ---
+--- START OF EXPANSION v49 CODE ---
+<!-- ==========================================================================
+EXPANSION PACK v49.0: ULTIMATE COLLECTION
+Contenido: Tienda (Decor), Extras, Cheats, Subtítulos.
+========================================================================== -->
+<!-- UI NUEVA INYECTADA -->
+<div id="v49-ui-layer" style="position: absolute; inset: 0; pointer-events: none; z-index: 9995;">
+code
+Code
+<!-- TIENDA (SHOP) -->
+<div id="screen-shop" class="modal-overlay" style="pointer-events: auto;">
+    <div class="modal-box" style="text-align: center;">
+        <h2 class="lore-header" style="color: gold;">PRIZE CORNER (TIENDA)</h2>
+        <p style="font-family: 'VT323'; font-size: 1.5rem;">TUS ESTRELLAS: <span id="shop-stars" style="color: gold;">0</span> ★</p>
+        <div id="shop-grid" style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px;">
+            <!-- Items generados por JS -->
+        </div>
+        <button class="menu-btn" onclick="document.getElementById('screen-shop').style.display='none'">CERRAR</button>
+    </div>
+</div>
+
+<!-- EXTRAS MENU -->
+<div id="screen-extras" class="modal-overlay" style="pointer-events: auto;">
+    <div class="modal-box" style="width: 95%; height: 95%; max-width: 1000px; display: flex; flex-direction: column;">
+        <h2 class="lore-header" style="color: #00aaff;">EXTRAS</h2>
+        <div style="flex: 1; display: flex; gap: 10px;">
+            <div style="width: 30%; border-right: 1px solid #333; display: flex; flex-direction: column; gap: 10px;">
+                <button class="menu-btn" onclick="ExtrasSys.show('anim')">ANIMATRONICS</button>
+                <button class="menu-btn" onclick="ExtrasSys.show('jump')">JUMPSCARES</button>
+                <button class="menu-btn" onclick="document.getElementById('screen-extras').style.display='none'" style="margin-top: auto; border-color: red;">VOLVER</button>
+            </div>
+            <div id="extras-viewer" style="flex: 1; background: #050505; display: flex; align-items: center; justify-content: center; flex-direction: column; position: relative;">
+                <h3 id="ex-name" style="font-family: 'Nosifer'; color: #fff; margin-bottom: 20px;">SELECCIONA UNA OPCION</h3>
+                <img id="ex-img" src="" style="max-height: 60vh; max-width: 90%; display: none;">
+                <div id="ex-controls" style="display: none; gap: 20px;">
+                    <button class="menu-btn" onclick="ExtrasSys.prev()">&lt;</button>
+                    <button class="menu-btn" onclick="ExtrasSys.next()">&gt;</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CHEATS MENU -->
+<div id="screen-cheats" class="modal-overlay" style="pointer-events: auto;">
+    <div class="modal-box" style="text-align: center; border-color: #ff00ff;">
+        <h2 class="lore-header" style="color: #ff00ff;">CHEATS / TRUCOS</h2>
+        <div class="setting-row"><span style="color: #ff00ff;">RADAR MAPA</span><input type="checkbox" id="chk-radar" onchange="CheatsSys.toggle('radar')"></div>
+        <div class="setting-row"><span style="color: #ff00ff;">ENERGIA INFINITA</span><input type="checkbox" id="chk-power" onchange="CheatsSys.toggle('infPower')"></div>
+        <div class="setting-row"><span style="color: #ff00ff;">NOCHE RAPIDA (FAST NIGHT)</span><input type="checkbox" id="chk-fast" onchange="CheatsSys.toggle('fastNight')"></div>
+        <div class="setting-row"><span style="color: #ff00ff;">NO TOXICIDAD</span><input type="checkbox" id="chk-notox" onchange="CheatsSys.toggle('noTox')"></div>
+        <p style="color: #555; font-size: 0.8rem;">* Usar trucos desactiva ganar estrellas nuevas.</p>
+        <button class="menu-btn" onclick="document.getElementById('screen-cheats').style.display='none'">CERRAR</button>
+    </div>
+</div>
+
+<!-- SUBTÍTULOS -->
+<div id="subtitle-box" style="position: absolute; top: 10%; width: 100%; text-align: center; pointer-events: none; display: none; text-shadow: 2px 2px 0 #000;">
+    <span id="sub-text" style="background: rgba(0,0,0,0.7); color: #ffff00; padding: 5px 15px; font-family: 'VT323'; font-size: 1.5rem; border: 1px solid #555;">...</span>
+</div>
+</div>
+<!-- ELEMENTOS EN EL JUEGO (PLUSHIES) -->
+<style>
+.plushie {
+position: absolute; bottom: 15vh; width: 8vh; height: auto;
+z-index: 29; filter: brightness(0.8); pointer-events: auto;
+transition: transform 0.1s;
+}
+.plushie:hover { transform: scale(1.1) rotate(5deg); cursor: pointer; }
+/* Radar dots */
+.radar-dot {
+position: absolute; width: 10px; height: 10px; border-radius: 50%;
+background-color: #ff00ff; box-shadow: 0 0 5px #ff00ff;
+z-index: 20; pointer-events: none; display: none;
+}
+</style>
+<script>
+// ============================================================================
+// EXPANSION v49.0 - LOGIC
+// ============================================================================
+
+const Exp49 = {
+init: () => {
+// Inicializar datos si no existen
+if(!SAVEDATA.shop) SAVEDATA.shop = { bought: [], equipped: [] };
+if(!SAVEDATA.cheats) SAVEDATA.cheats = { radar: false, infPower: false, fastNight: false, noTox: false };
+
+// Inyectar botones en el menú principal
+Exp49.injectMenuButtons();
+
+// Aplicar estado de cheats visual
+document.getElementById('chk-radar').checked = SAVEDATA.cheats.radar;
+document.getElementById('chk-power').checked = SAVEDATA.cheats.infPower;
+document.getElementById('chk-fast').checked = SAVEDATA.cheats.fastNight;
+document.getElementById('chk-notox').checked = SAVEDATA.cheats.noTox;
+
+console.log("Exp49 Loaded: Shop, Extras, Cheats, Subs");
+},
+
+injectMenuButtons: () => {
+const container = document.querySelector('.menu-container');
+if(!document.getElementById('btn-shop')) {
+// Botón Shop
+const btnShop = document.createElement('button');
+btnShop.id = 'btn-shop'; btnShop.className = 'menu-btn'; btnShop.innerText = "TIENDA 🎁";
+btnShop.onclick = ShopSys.open;
+container.appendChild(btnShop);
+
+// Botón Extras (Solo si Noche > 5)
+if(SAVEDATA.night > 5 || SAVEDATA.night === 'CUSTOM' || SAVEDATA.stars[9]) {
+const btnExtras = document.createElement('button');
+btnExtras.id = 'btn-extras'; btnExtras.className = 'menu-btn'; btnExtras.innerText = "EXTRAS ★";
+btnExtras.onclick = ExtrasSys.open;
+container.appendChild(btnExtras);
+}
+
+// Botón Cheats (Solo si Noche > 8, es decir, juego pasado)
+if(SAVEDATA.night > 8 || SAVEDATA.stars[8]) {
+const btnCheats = document.createElement('button');
+btnCheats.id = 'btn-cheats'; btnCheats.className = 'menu-btn'; btnCheats.innerText = "CHEATS 🔓";
+btnCheats.style.borderColor = "#ff00ff"; btnCheats.style.color = "#ff00ff";
+btnCheats.onclick = CheatsSys.open;
+container.appendChild(btnCheats);
+}
+}
+}
+};
+
+// ============================================================================
+// 1. SHOP SYSTEM (TIENDA)
+// ============================================================================
+const ShopSys = {
+items: [
+{ id: 'p_maifer', name: 'Maifer Plush', price: 1, img: 'maifer.png' },
+{ id: 'p_isaac', name: 'Isaac Plush', price: 2, img: 'isaac.png' },
+{ id: 'p_jomar', name: 'Jomar Plush', price: 3, img: 'jomar.png' },
+{ id: 'p_richard', name: 'Richard Fig', price: 3, img: 'richard.png' }
+],
+
+open: () => {
+// Contar estrellas
+let stars = 0;
+// Estrellas de noches 1-8
+for(let i=1; i<=8; i++) if(SAVEDATA.night > i) stars++;
+// Estrellas extra (v47 logic)
+if(SAVEDATA.stars) Object.keys(SAVEDATA.stars).forEach(k => stars++); // Suma simple para aproximar
+
+// Fix duplicados visuales en conteo
+stars = document.querySelectorAll('#star-row .star.earned').length;
+
+document.getElementById('shop-stars').innerText = stars;
+
+const grid = document.getElementById('shop-grid');
+grid.innerHTML = '';
+
+ShopSys.items.forEach(item => {
+const owned = SAVEDATA.shop.bought.includes(item.id);
+const equipped = SAVEDATA.shop.equipped.includes(item.id);
+
+const div = document.createElement('div');
+div.style.cssText = "border: 1px solid #444; padding: 10px; width: 120px; background: #111;";
+div.innerHTML = `
+<img src="${item.img}" style="width: 50px; height: 50px; object-fit: contain;">
+<div style="font-family:'VT323'; color:#fff;">${item.name}</div>
+<div style="color: gold; margin-bottom: 5px;">${item.price} ★</div>
+`;
+
+const btn = document.createElement('button');
+btn.className = 'menu-btn';
+btn.style.fontSize = '0.8rem';
+btn.style.width = '100%';
+btn.style.margin = '0';
+
+if(!owned) {
+btn.innerText = "BUY";
+if(stars < item.price) { btn.disabled = true; btn.classList.add('locked'); }
+btn.onclick = () => ShopSys.buy(item.id, item.price, stars);
+} else {
+btn.innerText = equipped ? "UNEQUIP" : "EQUIP";
+btn.style.borderColor = equipped ? "red" : "#0f0";
+btn.onclick = () => ShopSys.toggle(item.id);
+}
+
+div.appendChild(btn);
+grid.appendChild(div);
+});
+
+document.getElementById('screen-shop').style.display = 'flex';
+},
+
+buy: (id, price, currentStars) => {
+if(currentStars >= price) {
+SAVEDATA.shop.bought.push(id);
+SaveManager.save();
+AudioSys.play('sfx-win'); // Sonido de compra
+ShopSys.open(); // Refrescar
+}
+},
+
+toggle: (id) => {
+if(SAVEDATA.shop.equipped.includes(id)) {
+SAVEDATA.shop.equipped = SAVEDATA.shop.equipped.filter(x => x !== id);
+} else {
+// Máximo 3 peluches
+if(SAVEDATA.shop.equipped.length >= 3) return alert("MAX 3 ITEMS EQUIPPED");
+SAVEDATA.shop.equipped.push(id);
+}
+SaveManager.save();
+ShopSys.open();
+},
+
+spawn: () => {
+// Eliminar previos
+document.querySelectorAll('.plushie').forEach(e => e.remove());
+
+if(!SAVEDATA.shop || !SAVEDATA.shop.equipped) return;
+
+SAVEDATA.shop.equipped.forEach((id, index) => {
+const item = ShopSys.items.find(x => x.id === id);
+if(item) {
+const img = document.createElement('img');
+img.src = item.img;
+img.className = 'plushie';
+// Posiciones fijas en el escritorio
+const positions = ['20%', '50%', '80%'];
+img.style.left = positions[index];
+
+// Click en peluche hace sonido
+img.onclick = () => {
+AudioSys.play('sfx-mask'); // Squeak sound (reutilizado)
+img.style.transform = "scale(1.2) translateY(-10px)";
+setTimeout(() => img.style.transform = "scale(1)", 200);
+};
+
+document.getElementById('view-office').appendChild(img);
+}
+});
+}
+};
+
+// ============================================================================
+// 2. EXTRAS MENU
+// ============================================================================
+const ExtrasSys = {
+mode: null, index: 0,
+list: [],
+
+data: {
+anim: [
+{ name: "MAIFER", img: "maifer.png" },
+{ name: "ISAAC", img: "isaac.png" },
+{ name: "JOMAR", img: "jomar.png" },
+{ name: "RICHARD", img: "richard.png" },
+{ name: "GOLDEN MAIFER", img: "golden_maifer.png" }
+],
+jump: [
+{ name: "MAIFER JUMPSCARE", img: "maifer.png", audio: "jump-maifer" },
+{ name: "ISAAC JUMPSCARE", img: "isaac.png", audio: "jump-isaac" },
+{ name: "JOMAR JUMPSCARE", img: "jomar.png", audio: "jump-jomar" },
+{ name: "RICHARD JUMPSCARE", img: "richard.png", audio: "jump-richard" }
+]
+},
+
+open: () => {
+document.getElementById('screen-extras').style.display = 'flex';
+document.getElementById('ex-controls').style.display = 'none';
+document.getElementById('ex-img').style.display = 'none';
+document.getElementById('ex-name').innerText = "SELECT CATEGORY";
+},
+
+show: (cat) => {
+ExtrasSys.mode = cat;
+ExtrasSys.index = 0;
+ExtrasSys.list = ExtrasSys.data[cat];
+document.getElementById('ex-controls').style.display = 'flex';
+ExtrasSys.render();
+},
+
+render: () => {
+const item = ExtrasSys.list[ExtrasSys.index];
+document.getElementById('ex-name').innerText = item.name;
+const img = document.getElementById('ex-img');
+img.src = item.img;
+img.style.display = 'block';
+
+// Si es jumpscare, hacer efecto
+if(ExtrasSys.mode === 'jump') {
+img.style.animation = "shake 0.1s infinite";
+AudioSys.play(item.audio);
+setTimeout(() => { img.style.animation = "none"; }, 1000);
+} else {
+img.style.animation = "none";
+}
+},
+
+next: () => {
+ExtrasSys.index = (ExtrasSys.index + 1) % ExtrasSys.list.length;
+ExtrasSys.render();
+},
+
+prev: () => {
+ExtrasSys.index = (ExtrasSys.index - 1 + ExtrasSys.list.length) % ExtrasSys.list.length;
+ExtrasSys.render();
+}
+};
+
+// ============================================================================
+// 3. CHEATS SYSTEM
+// ============================================================================
+const CheatsSys = {
+open: () => document.getElementById('screen-cheats').style.display = 'flex',
+
+toggle: (cheat) => {
+SAVEDATA.cheats[cheat] = !SAVEDATA.cheats[cheat];
+SaveManager.save();
+},
+
+// Loop de Cheats (se inyecta en el loop principal)
+loop: () => {
+if(!Game.state || Game.state.over) return;
+
+if(SAVEDATA.cheats.infPower) {
+Game.state.power = 100;
+document.getElementById('pwr-val').innerText = "100";
+}
+
+if(SAVEDATA.cheats.noTox) {
+Game.state.toxic = 0;
+document.getElementById('hud-toxic').style.display = 'none';
+}
+
+// Fast night logic: aumentar tiempo extra
+if(SAVEDATA.cheats.fastNight) {
+Game.state.time += 0.05; // Doble velocidad aprox
+}
+},
+
+// Radar Logic (se inyecta en Monitor update)
+updateRadar: () => {
+if(!SAVEDATA.cheats.radar) return;
+if(Game.state.view !== 'monitor') return;
+
+// Eliminar dots previos
+document.querySelectorAll('.radar-dot').forEach(d => d.remove());
+
+// Mapeo simple de posiciones a coordenadas en el mapa UI
+// room-06 (Cam 6) -> left:35%, top:5%
+const roomCoords = {
+0: null, // Oficina
+1: {t: '65%', l: '26%'}, // Cam 2 (Pasillo Izq)
+2: {t: '65%', l: '74%'}, // Cam 3 (Pasillo Der)
+3: {t: '30%', l: '10%'}, // Cam 4
+4: {t: '30%', l: '90%'}, // Cam 5
+5: {t: '5%', l: '50%'} // Cam 6
+};
+
+// Dibujar dots
+const draw = (pos, color) => {
+const coords = roomCoords[pos];
+if(coords) {
+const map = document.getElementById('map-layout');
+const dot = document.createElement('div');
+dot.className = 'radar-dot';
+dot.style.top = coords.t;
+dot.style.left = coords.l;
+dot.style.backgroundColor = color;
+dot.style.display = 'block';
+map.appendChild(dot);
+}
+};
+
+if(Game.ai.pos.maifer > 0 && Game.ai.pos.maifer < 5) draw(5 - Game.ai.pos.maifer + 1, 'yellow'); // Lógica inversa o mapeo directo según tu IA
+if(Game.ai.pos.isaac > 0 && Game.ai.pos.isaac < 5) draw(5 - Game.ai.pos.isaac + 1, 'blue');
+}
+};
+
+// ============================================================================
+// 4. SUBTITLE SYSTEM
+// ============================================================================
+const SubtitleSys = {
+texts: {
+1: ["Hola? Hola?", "Bienvenido a Maifer's Factory.", "Solo relájate...", "Ahorra energía.", "Cuidado con Maifer."],
+2: ["La segunda noche es más difícil.", "Isaac reacciona a tu cara.", "Usa la máscara si lo ves.", "No olvides la caja de música... Ah no, aquí no hay."],
+3: ["¿Sigues aquí?", "Jomar odia la luz.", "Si ves ojos en el pasillo...", "Flash! Y se irá.", "Buena suerte."],
+4: ["Noche 4...", "Richard está activo.", "Vigila la cortina.", "Si se abre, ciérrala.", "Rápido."],
+5: ["Noche 5.", "Están todos activos.", "No tengo más consejos.", "Sobrevive."],
+6: ["... (Sonidos estáticos) ...", "CORRE.", "..."],
+7: ["(Respiración fuerte)", "TE VEO.", "IT'S ME."],
+8: ["(Silencio absoluto)", "..."]
+},
+
+start: (night) => {
+const lines = SubtitleSys.texts[night] || ["(Señal interrumpida)"];
+const box = document.getElementById('subtitle-box');
+const txt = document.getElementById('sub-text');
+
+if(night > 8) return; // Sin subs en custom night
+
+let index = 0;
+box.style.display = 'block';
+
+const nextLine = () => {
+if(Game.state.over || index >= lines.length) {
+box.style.display = 'none';
+return;
+}
+txt.innerText = lines[index];
+index++;
+setTimeout(nextLine, 4000); // 4 segundos por línea
+};
+
+nextLine();
+}
+};
+
+// ============================================================================
+// GLOBAL HOOKS (INYECCIÓN EN EL JUEGO BASE)
+// ============================================================================
+
+// Hook Init Menu (Botones)
+const _v49_initMenu = Game.initMenu;
+Game.initMenu = function() {
+_v49_initMenu();
+Exp49.init(); // Iniciar sistema v49
+};
+
+// Hook Start Level (Tienda, Subtítulos)
+const _v49_startLevel = Game.startLevel;
+Game.startLevel = function(n, customAI) {
+_v49_startLevel(n, customAI);
+ShopSys.spawn(); // Poner peluches
+SubtitleSys.start(n); // Iniciar subs
+};
+
+// Hook Loop (Cheats)
+const _v49_loop = Game.loop;
+Game.loop = function() {
+_v49_loop();
+CheatsSys.loop();
+};
+
+// Hook Monitor (Radar Cheat)
+const _v49_monUpdate = Monitor.update;
+Monitor.update = function() {
+_v49_monUpdate();
+CheatsSys.updateRadar();
+};
+
+// Inicialización de emergencia si ya cargó el menú
+if(!document.getElementById('btn-shop') && document.getElementById('screen-menu').classList.contains('active')) {
+Exp49.init();
+}
+
+</script>
+--- END OF EXPANSION v49 CODE ---
 </html>
